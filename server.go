@@ -10,7 +10,7 @@ import (
     "os/exec"
     "bytes"
     "fmt"
-	"github.com/ethereum/eth-go/ethutil"
+	"github.com/project-douglas/eth-go/ethutil"
 	"github.com/ethereum/eth-go/ethcrypto"
 )
 

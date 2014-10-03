@@ -59,7 +59,11 @@ func Compile(filename string) ([]byte, error){
         return nil, err
     }
     b := r.Bytecode[0]
-    err = fmt.Errorf(r.Error[0])
+    if r.Error[0] != ""{
+        err = fmt.Errorf(r.Error[0])
+    } else {
+        err = nil
+    }
     return b, err
 }
 

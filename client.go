@@ -51,11 +51,22 @@ func CompileLLLClient(filenames []string) (*Response, error){
     return &respJ, nil
 }  
 
+// compile just one file
+func Compile(filename string) ([]byte, err){
+    r, err := CompileLLLClient([]string{filename})
+    if err != nil{
+        return nil, err
+    }
+    b := r.Bytecode[0]
+    err = r.Error[0]
+    return b, err
+}
+
 func RunClient(tocompile []string){
     r, _ := CompileLLLClient(tocompile) 
     for i, c := range r.Bytecode{
         if r.Error[i] != ""{
-            log.Println("script", i, "\tcompileated failed:", r.Error[i])
+            log.Println("script", i, "\tcompilation failed:", r.Error[i])
         } else{
             log.Println("script", i, "\tcompilation successful", c)
         }

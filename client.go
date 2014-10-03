@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
     "bytes"
+    "fmt"
 )
 
 var URL = "http://localhost:9999/compile"
@@ -52,13 +53,13 @@ func CompileLLLClient(filenames []string) (*Response, error){
 }  
 
 // compile just one file
-func Compile(filename string) ([]byte, err){
+func Compile(filename string) ([]byte, error){
     r, err := CompileLLLClient([]string{filename})
     if err != nil{
         return nil, err
     }
     b := r.Bytecode[0]
-    err = r.Error[0]
+    err = fmt.Errorf(r.Error[0])
     return b, err
 }
 

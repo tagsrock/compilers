@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"log"
 	"encoding/json"
+    "encoding/hex"
 	"io/ioutil"
     "path"
     "os"
     "os/exec"
     "bytes"
     "fmt"
-	"github.com/project-douglas/eth-go/ethutil"
-	"github.com/ethereum/eth-go/ethcrypto"
+    "crypto/sha256"
 )
 
 /*
@@ -61,7 +61,8 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
     // loop through the scripts, save each to drive, compile, return bytecode and error 
     for _, c := range req.Code{
         // take sha3 of request object to get tmp filename
-        filename := path.Join("tmp", ethutil.Bytes2Hex(ethcrypto.Sha3Bin([]byte(c))) + ".lll")
+        hash := sha256.Sum256([]byte(c))
+        filename := path.Join("tmp", hex.EncodeToString(hash[:]) + ".lll")
 
         // lllc requires a file to read
         // check if filename already exists
@@ -102,7 +103,11 @@ func CompileLLLWrapper(filename string) ([]byte, error){
         outstr = outstr[:l-1]
     }
     fmt.Println("script hex", outstr)
-    return ethutil.Hex2Bytes(outstr), nil
+    b, err := hex.DecodeString(outstr)
+    if err != nil{
+        return nil, err
+    }
+    return b, nil
 }
 
 func StartServer(){

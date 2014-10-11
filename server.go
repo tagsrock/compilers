@@ -9,6 +9,7 @@ import (
     "path"
     "os"
     "os/exec"
+	"os/user"
     "bytes"
     "fmt"
     "crypto/sha256"
@@ -22,7 +23,15 @@ import (
 */
 
 // must have LLL compiler installed!
-var PathToLLL = "/root/cpp-ethereum/build/lllc/lllc"
+func homeDir() string{
+	usr, err := user.Current()
+	if err != nil{
+		log.Fatal(err)
+	}
+	return usr.HomeDir
+}
+
+var PathToLLL = path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc")
 
 // request object
 type Request struct{

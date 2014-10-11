@@ -119,10 +119,10 @@ func CompileLLLWrapper(filename string) ([]byte, error){
     return b, nil
 }
 
-func StartServer(){
+func StartServer(addr string){
 	mux := http.NewServeMux()
 	mux.HandleFunc("/compile", CompileHandler)
-	err := http.ListenAndServe(":9999", mux)
+	err := http.ListenAndServe(addr, mux)
 	if err != nil{
 		log.Println("error starting server:", err)
 	}

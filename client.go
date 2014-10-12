@@ -16,6 +16,38 @@ import (
 
 var URL = "http://localhost:9999/compile"
 
+func replaceIncludes(code []byte, dir string, req Request, included map[string][]byte) []byte{
+    // find includes, load those as well
+    r, _ :=  regexp.Compile(`\(include "(.+?)"\)`)
+    // replace all includes with hash of included lll
+    ret := r.ReplaceAllFunc(code, func(s []byte)[]byte{
+        m := r.FindSubmatch(s)
+        match := m[1]
+        name := path.Base(string(match))
+        // if we've already loaded this, move on
+        if v, ok := included[name]; ok{
+            return v
+        }
+        // load the file
+        p := path.Join(dir, string(match))
+        incl_code, err  := ioutil.ReadFile(p) 
+        // TODO: how to make this return nil, err up a call
+        if err != nil{
+            log.Println("failed to read include file", err)
+            return nil
+        }
+        incl_code = replaceIncludes(incl_code, dir, req, included)
+        // compute hash
+        hash := sha256.Sum256(incl_code)
+        h := hex.EncodeToString(hash[:])
+        req.Includes[h] = incl_code
+        ret := []byte(`(include "`+h+`.lll")`)
+        included[name] = ret
+        return ret
+    })
+    return ret
+}
+
 // takes a list of lll scripts (source code, not filenames)
 // returns a response object (contains list of compiled bytecodes and errors if any)
 func CompileLLLClient(filenames []string) (*Response, error){
@@ -34,34 +66,8 @@ func CompileLLLClient(filenames []string) (*Response, error){
             return nil, err
         }
         dir := path.Dir(f)
-
-        // find includes, load those as well
-        r, _ :=  regexp.Compile(`\(include "(.+?)"\)`)
-        // replace all includes with hash of included lll
-        code = r.ReplaceAllFunc(code, func(s []byte)[]byte{
-            m := r.FindSubmatch(s)
-            match := m[1]
-            name := path.Base(string(match))
-            // if we've already loaded this, move on
-            if v, ok := included[name]; ok{
-                return v
-            }
-            // load the file
-            p := path.Join(dir, string(match))
-            code, err  := ioutil.ReadFile(p) 
-            // TODO: how to make this return nil, err up a call
-            if err != nil{
-                log.Println("failed to read include file", err)
-                return nil
-            }
-            // compute hash
-            hash := sha256.Sum256(code)
-            h := hex.EncodeToString(hash[:])
-            req.Includes[h] = code
-            ret := []byte(`(include "`+h+`.lll")`)
-            included[name] = ret
-            return ret
-        })
+        // replace includes with hash of included contents and add those contents to Includes (recursive)
+        code = replaceIncludes(code, dir, req, included)
         req.Scripts = append(req.Scripts, code)
     }
     reqJ, err := json.Marshal(req)

@@ -2,7 +2,7 @@ package main
 
 import (
     "flag"
-    "path"
+    "fmt"
     "strconv"
     "github.com/project-douglas/lllc-server"
 )
@@ -19,11 +19,13 @@ func main(){
     flag.Parse()
 
     if *host != ""{
-        lllcserver.URL = path.Join(*host, "compile")
+        lllcserver.URL = *host+"/"+"compile"
+        fmt.Println("url:", lllcserver.URL)
     }
 
     if *client{
         tocompile := flag.Args()
+        fmt.Println("to compile:", tocompile)
         lllcserver.RunClient(tocompile)
     }else {
         addr := ""

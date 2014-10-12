@@ -3,10 +3,12 @@ package lllcserver
 import (
 	"net/http"
 	"log"
+    "strings"
 	"encoding/json"
     "encoding/hex"
 	"io/ioutil"
     "path"
+    "path/filepath"
     "os"
     "os/exec"
 	"os/user"
@@ -66,6 +68,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
 	}
+    fmt.Println(req)
    
     resp := Response{[][]byte{}, []string{}}
 
@@ -84,7 +87,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
             ioutil.WriteFile(filename, c, 0644)
         }
     }
-
+    // loop through includes, also save to drive
     for k, v := range req.Includes{
         filename := path.Join("tmp", k+".lll")
         if _, err = os.Stat(filename); err != nil{
@@ -92,7 +95,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
         }
     }
 
-    //compile, return bytecode and error 
+    //compile scripts, return bytecode and error 
     for _, c := range names{
         compiled, err := CompileLLLWrapper(c)
         if err != nil{
@@ -112,19 +115,30 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
 
 // wrapper to lllc cli
 func CompileLLLWrapper(filename string) ([]byte, error){
+    // we need to be in the same dir as the files for sake of includes
+    cur, _ := os.Getwd()
+    dir := path.Dir(filename)
+    dir, _ = filepath.Abs(dir)
+    filename = path.Base(filename)
+
+    os.Chdir(dir)
     cmd := exec.Command(PathToLLL, filename)
     var out bytes.Buffer
     cmd.Stdout = &out
     err := cmd.Run()
     if err != nil {
         fmt.Println("Couldn't compile!!", err)
+        os.Chdir(cur)
         return nil, err
     }
+    os.Chdir(cur)
+
     outstr := out.String()
     // get rid of new lines at the end
-    for l:=len(outstr);outstr[l-1] == '\n';l--{
-        outstr = outstr[:l-1]
-    }
+    outstr = strings.TrimRight(outstr, "\n")
+    //for l:=len(outstr);outstr[l-1] == '\n';l--{
+        //outstr = outstr[:l-1]
+    //}
     fmt.Println("script hex", outstr)
     b, err := hex.DecodeString(outstr)
     if err != nil{

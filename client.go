@@ -3,6 +3,7 @@ package lllcserver
 import (
 	"net/http"
 	"log"
+    "os"
     "path"
     "regexp"
 	"encoding/json"
@@ -35,7 +36,7 @@ func CompileLLLClient(filenames []string) (*Response, error){
         dir := path.Dir(f)
 
         // find includes, load those as well
-        r, _ :=  regexp.Compile(`\(include (.+?)\)`)
+        r, _ :=  regexp.Compile(`\(include "(.+?)"\)`)
         // replace all includes with hash of included lll
         code = r.ReplaceAllFunc(code, func(s []byte)[]byte{
             m := r.FindSubmatch(s)
@@ -84,6 +85,7 @@ func CompileLLLClient(filenames []string) (*Response, error){
     var respJ Response
     err = json.Unmarshal(body, &respJ)                                    
     if err != nil{
+        fmt.Println("failed to unmarshal", err)
         return nil , err
     }   
 
@@ -107,7 +109,11 @@ func Compile(filename string) ([]byte, error){
 }
 
 func RunClient(tocompile []string){
-    r, _ := CompileLLLClient(tocompile) 
+    r, err := CompileLLLClient(tocompile) 
+    if err != nil{
+        fmt.Println("shucks", err)
+        os.Exit(0)
+    }
     for i, c := range r.Bytecode{
         if r.Error[i] != ""{
             log.Println("script", i, "\tcompilation failed:", r.Error[i])

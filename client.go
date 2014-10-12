@@ -3,7 +3,11 @@ package lllcserver
 import (
 	"net/http"
 	"log"
+    "path"
+    "regexp"
 	"encoding/json"
+	"encoding/hex"
+    "crypto/sha256"
 	"io/ioutil"
     "bytes"
     "fmt"
@@ -15,15 +19,49 @@ var URL = "http://localhost:9999/compile"
 // returns a response object (contains list of compiled bytecodes and errors if any)
 func CompileLLLClient(filenames []string) (*Response, error){
     // empty request obj
-    req := Request{[]string{}}
+    req := Request{
+        Scripts: [][]byte{},
+        Includes: make(map[string][]byte),
+    }
+   
+    included := make(map[string][]byte)
     
     for _, f := range filenames{
         code, err  := ioutil.ReadFile(f) 
-        if err != nil{                                                        
-            log.Println("failed to read file", err)                           
+        if err != nil{
+            log.Println("failed to read file", err)
             return nil, err
-        }                                                                     
-        req.Code = append(req.Code, string(code))
+        }
+        dir := path.Dir(f)
+
+        // find includes, load those as well
+        r, _ :=  regexp.Compile(`\(include (.+?)\)`)
+        // replace all includes with hash of included lll
+        code = r.ReplaceAllFunc(code, func(s []byte)[]byte{
+            m := r.FindSubmatch(s)
+            match := m[1]
+            name := path.Base(string(match))
+            // if we've already loaded this, move on
+            if v, ok := included[name]; ok{
+                return v
+            }
+            // load the file
+            p := path.Join(dir, string(match))
+            code, err  := ioutil.ReadFile(p) 
+            // TODO: how to make this return nil, err up a call
+            if err != nil{
+                log.Println("failed to read include file", err)
+                return nil
+            }
+            // compute hash
+            hash := sha256.Sum256(code)
+            h := hex.EncodeToString(hash[:])
+            req.Includes[h] = code
+            ret := []byte(`(include "`+h+`.lll")`)
+            included[name] = ret
+            return ret
+        })
+        req.Scripts = append(req.Scripts, code)
     }
     reqJ, err := json.Marshal(req)
     if err != nil{
@@ -53,6 +91,7 @@ func CompileLLLClient(filenames []string) (*Response, error){
 }  
 
 // compile just one file
+// but resolve "includes"
 func Compile(filename string) ([]byte, error){
     r, err := CompileLLLClient([]string{filename})
     if err != nil{

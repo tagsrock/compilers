@@ -34,8 +34,10 @@ func homeDir() string{
 var PathToLLL = path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc")
 
 // request object
+// includes are named but scripts are nameless
 type Request struct{
-	Code []string `json:"code"` // array of lll scripts to compile
+	Scripts [][]byte `json:"scripts"` // array of scripts (lll ascii bytes)
+    Includes map[string][]byte `json:"includes"` // filename => lll ascii bytes
 }
 
 // response object
@@ -66,20 +68,33 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
 	}
    
     resp := Response{[][]byte{}, []string{}}
+
+    names := []string{}
     
-    // loop through the scripts, save each to drive, compile, return bytecode and error 
-    for _, c := range req.Code{
-        // take sha3 of request object to get tmp filename
+    // loop through the scripts, save each to drive
+    for _, c := range req.Scripts{
+        // take sha2 of request object to get tmp filename
         hash := sha256.Sum256([]byte(c))
         filename := path.Join("tmp", hex.EncodeToString(hash[:]) + ".lll")
+        names = append(names, filename)
 
         // lllc requires a file to read
-        // check if filename already exists
+        // check if filename already exists. if not, write
         if _, err = os.Stat(filename); err != nil{
-            ioutil.WriteFile(filename, []byte(c),0644)
+            ioutil.WriteFile(filename, c, 0644)
         }
+    }
 
-        compiled, err := CompileLLLWrapper(filename)	
+    for k, v := range req.Includes{
+        filename := path.Join("tmp", k+".lll")
+        if _, err = os.Stat(filename); err != nil{
+            ioutil.WriteFile(filename, v, 0644)
+        }
+    }
+
+    //compile, return bytecode and error 
+    for _, c := range names{
+        compiled, err := CompileLLLWrapper(c)
         if err != nil{
            resp.Error = append(resp.Error, err.Error())
         } else{
@@ -87,7 +102,6 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
         }
         resp.Bytecode = append(resp.Bytecode, compiled)
     }
-
     respJ, err := json.Marshal(resp)
     if err != nil{
         fmt.Println("failed to marshal", err)

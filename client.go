@@ -75,7 +75,6 @@ func CompileLLLClient(filenames []string) (*Response, error){
         log.Println("failed to marshal req obj", err)
         return nil, err
     }
-    
     httpreq, err := http.NewRequest("POST", URL, bytes.NewBuffer(reqJ))       
     httpreq.Header.Set("Content-Type", "application/json")                    
     

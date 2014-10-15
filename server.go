@@ -48,16 +48,47 @@ type Response struct{
     Error []string    `json:"error"` // an error for each script
 }
 
+func FrontEnd(w http.ResponseWriter, r *http.Request){
+    if strings.Contains(r.URL.String(), "js"){
+        http.ServeFile(w, r, "script.js")
+    } else{
+        http.ServeFile(w, r, "index.html")
+    }
+}
+
+// convenience wrapper for javascript frontend
+func CompileHandler2(w http.ResponseWriter, r *http.Request){
+    resp := compileResponse(w, r)
+    if resp == nil{
+        return 
+    }
+    code := resp.Bytecode[0]
+    hexx := hex.EncodeToString(code)
+    w.Write([]byte(fmt.Sprintf(`{"bytecode": "%s"}`, hexx)))
+}
+
 // read in request body (should be pure lll code)
 // compile lll, build response object, write
 func CompileHandler(w http.ResponseWriter, r *http.Request){
+    resp := compileResponse(w, r)
+    if resp == nil{
+        return 
+    }
+    respJ, err := json.Marshal(resp)
+    if err != nil{
+        fmt.Println("failed to marshal", err)
+        return
+    }
+    w.Write(respJ)
+}
 
+func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
     // read the request body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil{
         log.Println("err on read http request body", err)
         http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
+        return nil
 	}
 
     // unmarshall body into req struct
@@ -66,9 +97,9 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
 	if err != nil{
 		log.Println("err on json unmarshal", err)
         http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
+        return nil
 	}
-    fmt.Println(req)
+    fmt.Println("request:", req)
    
     resp := Response{[][]byte{}, []string{}}
 
@@ -105,12 +136,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request){
         }
         resp.Bytecode = append(resp.Bytecode, compiled)
     }
-    respJ, err := json.Marshal(resp)
-    if err != nil{
-        fmt.Println("failed to marshal", err)
-        return
-    }
-    w.Write(respJ)
+    return &resp
 }
 
 // wrapper to lllc cli
@@ -149,7 +175,9 @@ func CompileLLLWrapper(filename string) ([]byte, error){
 
 func StartServer(addr string){
 	mux := http.NewServeMux()
+    mux.HandleFunc("/", FrontEnd)
 	mux.HandleFunc("/compile", CompileHandler)
+	mux.HandleFunc("/compile2", CompileHandler2)
 	err := http.ListenAndServe(addr, mux)
 	if err != nil{
 		log.Println("error starting server:", err)

@@ -1,6 +1,7 @@
 package lllcserver
 
 import (
+	"github.com/go-martini/martini"
 	"net/http"
 	"log"
     "strings"
@@ -46,14 +47,6 @@ type Request struct{
 type Response struct{
     Bytecode [][]byte `json:"bytecode"` // array of bytecode scripts to return
     Error []string    `json:"error"` // an error for each script
-}
-
-func FrontEnd(w http.ResponseWriter, r *http.Request){
-    if strings.Contains(r.URL.String(), "js"){
-        http.ServeFile(w, r, "script.js")
-    } else{
-        http.ServeFile(w, r, "index.html")
-    }
 }
 
 // convenience wrapper for javascript frontend
@@ -174,12 +167,14 @@ func CompileLLLWrapper(filename string) ([]byte, error){
 }
 
 func StartServer(addr string){
-	mux := http.NewServeMux()
-    mux.HandleFunc("/", FrontEnd)
-	mux.HandleFunc("/compile", CompileHandler)
-	mux.HandleFunc("/compile2", CompileHandler2)
-	err := http.ListenAndServe(addr, mux)
-	if err != nil{
-		log.Println("error starting server:", err)
-	}
+	//martini.Env = martini.Prod
+	srv := martini.Classic()
+	// Static files
+	srv.Use(martini.Static("./web"))
+	
+	srv.Post("/compile", CompileHandler)
+	srv.Post("/compile2", CompileHandler2)
+
+	srv.RunOnAddr(addr)
+	
 }

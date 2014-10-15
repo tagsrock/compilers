@@ -1,6 +1,7 @@
 package main
 
 import (
+    "os"
     "flag"
     "fmt"
     "strconv"
@@ -17,6 +18,8 @@ func main(){
     port := flag.Int("port", 9999, "listen port")
 
     flag.Parse()
+
+    CheckMakeTmp()
 
     if *host != ""{
         lllcserver.URL = *host+"/"+"compile"
@@ -35,4 +38,15 @@ func main(){
         addr += ":"+strconv.Itoa(*port)
         lllcserver.StartServer(addr)
     }
+}
+
+func CheckMakeTmp(){
+   _, err := os.Stat(".tmp")
+   if err != nil{
+       err := os.Mkdir(".tmp", 0777)  //wtf!
+       if err != nil{
+            fmt.Println("Could not make directory. Exiting", err)
+            os.Exit(0)
+       }
+   }
 }

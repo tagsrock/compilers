@@ -100,6 +100,10 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
     
     // loop through the scripts, save each to drive
     for _, c := range req.Scripts{
+        if c == nil || len(c) == 0{
+            names = append(names, "NULLCACHED")
+            continue
+        }
         // take sha2 of request object to get tmp filename
         hash := sha256.Sum256([]byte(c))
         filename := path.Join("tmp", hex.EncodeToString(hash[:]) + ".lll")
@@ -121,6 +125,12 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
 
     //compile scripts, return bytecode and error 
     for _, c := range names{
+        fmt.Println("name:", c)
+        if c == "NULLCACHED"{
+            resp.Error = append(resp.Error, "")
+            resp.Bytecode = append(resp.Bytecode, []byte("NULLCACHED"))
+            continue
+        }
         compiled, err := CompileLLLWrapper(c)
         if err != nil{
            resp.Error = append(resp.Error, err.Error())

@@ -15,6 +15,7 @@ import (
 )
 
 var URL = "http://localhost:9999/compile"
+var TMP = path.Join(homeDir(), ".lllc")
 
 func replaceIncludes(code []byte, dir string, req Request, included map[string][]byte) []byte{
     // find includes, load those as well
@@ -51,6 +52,9 @@ func replaceIncludes(code []byte, dir string, req Request, included map[string][
 // takes a list of lll scripts (source code, not filenames)
 // returns a response object (contains list of compiled bytecodes and errors if any)
 func CompileLLLClient(filenames []string) (*Response, error){
+    // cached bytecode
+    hashmap := make(map[int][]byte) // map indices to hashes
+
     // empty request obj
     req := Request{
         Scripts: [][]byte{},
@@ -59,7 +63,7 @@ func CompileLLLClient(filenames []string) (*Response, error){
    
     included := make(map[string][]byte)
     
-    for _, f := range filenames{
+    for i, f := range filenames{
         code, err  := ioutil.ReadFile(f) 
         if err != nil{
             log.Println("failed to read file", err)
@@ -68,8 +72,44 @@ func CompileLLLClient(filenames []string) (*Response, error){
         dir := path.Dir(f)
         // replace includes with hash of included contents and add those contents to Includes (recursive)
         code = replaceIncludes(code, dir, req, included)
-        req.Scripts = append(req.Scripts, code)
+
+        // if the file is cached, append nil
+        hash := sha256.Sum256(code)
+        hashmap[i] = hash[:]
+        filename := path.Join(TMP, hex.EncodeToString(hash[:])+".lll")
+        _, err = os.Stat(filename)
+        if err  != nil{
+            req.Scripts = append(req.Scripts, code)
+        } else{
+            req.Scripts = append(req.Scripts, nil)
+        }
     }
+
+
+    // response struct (returned)
+    var respJ Response
+
+    // if everything is cached, no need for request
+    if len(req.Scripts) == 0 || len(req.Scripts) == 1 && len(req.Scripts[0]) == 0{
+        fmt.Println("have all files locally")
+        respJ := Response{
+            Bytecode : make([][]byte, len(hashmap)),
+            Error : make([]string, len(hashmap)),
+        }
+        // fill in cached values,
+        for i, h := range hashmap{
+            f := path.Join(TMP, hex.EncodeToString(h)+".lll")
+            b, err := ioutil.ReadFile(f)
+            if err != nil{
+                fmt.Println("read fil:", err)
+                return nil, err
+            }
+            respJ.Bytecode[i] = b
+        }
+        return &respJ, nil
+    }
+
+    // make request
     reqJ, err := json.Marshal(req)
     if err != nil{
         log.Println("failed to marshal req obj", err)
@@ -87,12 +127,26 @@ func CompileLLLClient(filenames []string) (*Response, error){
     defer resp.Body.Close()                                               
     // read in response body
     body, err := ioutil.ReadAll(resp.Body)
-    var respJ Response
     err = json.Unmarshal(body, &respJ)                                    
     if err != nil{
         fmt.Println("failed to unmarshal", err)
         return nil , err
     }   
+
+    // fill in cached values, cache new values
+    for i, b := range respJ.Bytecode{
+        f := path.Join(TMP, hex.EncodeToString(hashmap[i])+".lll")
+        if string(b) == "NULLCACHED"{
+            respJ.Bytecode[i], err = ioutil.ReadFile(f)
+            if err != nil{
+                fmt.Println("read fil:", err)
+            }
+        } else {
+            fmt.Println("sacving byte code:", b)
+            ioutil.WriteFile(f, b, 0644)
+        }
+    }
+    //fmt.Println(respJ.Bytecode[0])
 
     return &respJ, nil
 }  
@@ -123,7 +177,7 @@ func RunClient(tocompile []string){
         if r.Error[i] != ""{
             log.Println("script", i, "\tcompilation failed:", r.Error[i])
         } else{
-            log.Println("script", i, "\tcompilation successful", c)
+            log.Println("script", i, "\tcompilation successful", hex.EncodeToString(c))
         }
     }
 }

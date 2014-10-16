@@ -19,7 +19,6 @@ func main(){
 
     flag.Parse()
 
-    CheckMakeTmp()
 
     if *host != ""{
         lllcserver.URL = *host+"/"+"compile"
@@ -27,10 +26,12 @@ func main(){
     }
 
     if *client{
+        CheckMakeDir(lllcserver.TMP)
         tocompile := flag.Args()
         fmt.Println("to compile:", tocompile)
         lllcserver.RunClient(tocompile)
     }else {
+        CheckMakeDir(".tmp")
         addr := ""
         if *localOnly{
             addr = "localhost"
@@ -40,10 +41,10 @@ func main(){
     }
 }
 
-func CheckMakeTmp(){
-   _, err := os.Stat(".tmp")
+func CheckMakeDir(dir string){
+   _, err := os.Stat(dir)
    if err != nil{
-       err := os.Mkdir(".tmp", 0777)  //wtf!
+       err := os.Mkdir(dir, 0777)  //wtf!
        if err != nil{
             fmt.Println("Could not make directory. Exiting", err)
             os.Exit(0)

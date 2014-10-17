@@ -62,7 +62,7 @@ func CompileLLLClient(filenames []string) (*Response, error){
     }
    
     included := make(map[string][]byte)
-    
+
     for i, f := range filenames{
         code, err  := ioutil.ReadFile(f) 
         if err != nil{
@@ -84,6 +84,13 @@ func CompileLLLClient(filenames []string) (*Response, error){
             req.Scripts = append(req.Scripts, nil)
         }
     }
+    /*
+    for _, v := range req.Scripts{
+        fmt.Println("code;", string(v))
+    }
+    for _, v := range req.Includes{
+        fmt.Println("req includes;", string(v))
+    }*/
 
 
     // response struct (returned)
@@ -147,7 +154,6 @@ func CompileLLLClient(filenames []string) (*Response, error){
                 fmt.Println("read fil:", err)
             }
         } else if b != nil{
-            fmt.Println("sacving byte code:", b)
             ioutil.WriteFile(f, b, 0644)
         }
     }
@@ -173,16 +179,17 @@ func Compile(filename string) ([]byte, error){
 }
 
 func RunClient(tocompile []string){
-    r, err := CompileLLLClient(tocompile) 
+    _,  err := CompileLLLClient(tocompile) 
     if err != nil{
         fmt.Println("shucks", err)
         os.Exit(0)
     }
+    /*
     for i, c := range r.Bytecode{
         if r.Error[i] != ""{
             log.Println("script", i, "\tcompilation failed:", r.Error[i])
         } else{
             log.Println("script", i, "\tcompilation successful", hex.EncodeToString(c))
         }
-    }
+    }*/
 }

@@ -92,7 +92,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return nil
 	}
-    fmt.Println("request:", req)
+    //fmt.Println("request:", req)
    
     resp := Response{[][]byte{}, []string{}}
 
@@ -168,7 +168,8 @@ func CompileLLLWrapper(filename string) ([]byte, error){
     //for l:=len(outstr);outstr[l-1] == '\n';l--{
         //outstr = outstr[:l-1]
     //}
-    fmt.Println("script hex", outstr)
+    //fmt.Println("script hex", outstr)
+
     b, err := hex.DecodeString(outstr)
     if err != nil{
         return nil, err

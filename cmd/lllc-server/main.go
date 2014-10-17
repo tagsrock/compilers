@@ -28,7 +28,7 @@ func main(){
     }
 
     if *client{
-        CheckMakeDir(lllcserver.TMP)
+        lllcserver.CheckMakeDir(lllcserver.TMP)
         tocompile := flag.Args()
         fmt.Println("to compile:", tocompile)
         if *nonet{
@@ -42,7 +42,7 @@ func main(){
             lllcserver.RunClient(tocompile)
         }
     }else {
-        CheckMakeDir(lllcserver.ServerTmp)
+        lllcserver.CheckMakeDir(lllcserver.ServerTmp)
         addr := ""
         if *localOnly{
             addr = "localhost"
@@ -50,15 +50,4 @@ func main(){
         addr += ":"+strconv.Itoa(*port)
         lllcserver.StartServer(addr)
     }
-}
-
-func CheckMakeDir(dir string){
-   _, err := os.Stat(dir)
-   if err != nil{
-       err := os.Mkdir(dir, 0777)  //wtf!
-       if err != nil{
-            fmt.Println("Could not make directory. Exiting", err)
-            os.Exit(0)
-       }
-   }
 }

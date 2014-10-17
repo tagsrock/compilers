@@ -16,6 +16,7 @@ import (
 
 var URL = "http://localhost:9999/compile"
 var TMP = path.Join(homeDir(), ".lllc")
+var null  = CheckMakeDir(TMP)
 
 func replaceIncludes(code []byte, dir string, req Request, included map[string][]byte) []byte{
     // find includes, load those as well
@@ -192,4 +193,17 @@ func RunClient(tocompile []string){
             log.Println("script", i, "\tcompilation successful", hex.EncodeToString(c))
         }
     }*/
+}
+
+
+func CheckMakeDir(dir string) int{
+   _, err := os.Stat(dir)
+   if err != nil{
+       err := os.Mkdir(dir, 0777)  //wtf!
+       if err != nil{
+            fmt.Println("Could not make directory. Exiting", err)
+            os.Exit(0)
+       }
+   }
+   return 0
 }

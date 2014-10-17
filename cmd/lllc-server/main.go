@@ -5,6 +5,7 @@ import (
     "flag"
     "fmt"
     "strconv"
+    "encoding/hex"
     "github.com/project-douglas/lllc-server"
 )
 
@@ -16,6 +17,7 @@ func main(){
     host := flag.String("h", "", "specify the host and port")
     localOnly := flag.Bool("local", false, "only listen internally")
     port := flag.Int("port", 9999, "listen port")
+    nonet := flag.Bool("no-net", false, "do you have lll locally?")
 
     flag.Parse()
 
@@ -29,7 +31,16 @@ func main(){
         CheckMakeDir(lllcserver.TMP)
         tocompile := flag.Args()
         fmt.Println("to compile:", tocompile)
-        lllcserver.RunClient(tocompile)
+        if *nonet{
+            b, err := lllcserver.CompileLLLWrapper(tocompile[0])
+            if err != nil{
+                fmt.Println("failed to compile!", err)
+                os.Exit(0)
+            }
+            fmt.Println("bytecode:", hex.EncodeToString(b))
+        } else{
+            lllcserver.RunClient(tocompile)
+        }
     }else {
         CheckMakeDir(".tmp")
         addr := ""

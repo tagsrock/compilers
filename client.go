@@ -125,6 +125,11 @@ func CompileLLLClient(filenames []string) (*Response, error){
         return nil, err
     }   
     defer resp.Body.Close()                                               
+
+    if resp.StatusCode > 300{
+        return nil, fmt.Errorf("HTTP error: %d", resp.StatusCode)
+    }
+
     // read in response body
     body, err := ioutil.ReadAll(resp.Body)
     err = json.Unmarshal(body, &respJ)                                    

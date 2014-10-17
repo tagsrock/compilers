@@ -35,6 +35,7 @@ func homeDir() string{
 }
 
 var PathToLLL = path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc")
+var ServerTmp = ".tmp"
 
 // request object
 // includes are named but scripts are nameless
@@ -106,7 +107,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
         }
         // take sha2 of request object to get tmp filename
         hash := sha256.Sum256([]byte(c))
-        filename := path.Join("tmp", hex.EncodeToString(hash[:]) + ".lll")
+        filename := path.Join(ServerTmp, hex.EncodeToString(hash[:]) + ".lll")
         names = append(names, filename)
 
         // lllc requires a file to read
@@ -117,7 +118,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
     }
     // loop through includes, also save to drive
     for k, v := range req.Includes{
-        filename := path.Join("tmp", k+".lll")
+        filename := path.Join(ServerTmp, k+".lll")
         if _, err = os.Stat(filename); err != nil{
             ioutil.WriteFile(filename, v, 0644)
         }
@@ -169,7 +170,10 @@ func CompileLLLWrapper(filename string) ([]byte, error){
         //outstr = outstr[:l-1]
     //}
     //fmt.Println("script hex", outstr)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0aa369b... tmp dir fix
     b, err := hex.DecodeString(outstr)
     if err != nil{
         return nil, err

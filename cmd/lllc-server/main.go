@@ -42,7 +42,7 @@ func main(){
             lllcserver.RunClient(tocompile)
         }
     }else {
-        CheckMakeDir(".tmp")
+        CheckMakeDir(lllcserver.ServerTmp)
         addr := ""
         if *localOnly{
             addr = "localhost"

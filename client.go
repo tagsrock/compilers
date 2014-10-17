@@ -141,7 +141,7 @@ func CompileLLLClient(filenames []string) (*Response, error){
             if err != nil{
                 fmt.Println("read fil:", err)
             }
-        } else {
+        } else if b != nil{
             fmt.Println("sacving byte code:", b)
             ioutil.WriteFile(f, b, 0644)
         }

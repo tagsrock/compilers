@@ -19,10 +19,12 @@ var URL = "http://localhost:9999/compile"
 var TMP = path.Join(homeDir(), ".lllc")
 var null  = CheckMakeDir(TMP)
 
-func replaceIncludes(code []byte, dir string, req Request, included map[string][]byte) []byte{
+func replaceIncludes(code []byte, dir string, req Request, included map[string][]byte) ([]byte, map[string]bool){
     // find includes, load those as well
     r, _ :=  regexp.Compile(`\(include "(.+?)"\)`)
     // replace all includes with hash of included lll
+    //  make sure to return hashes of includes so we can cache check them too
+    includeHashes := make(map[string]bool)
     // do it recursively
     ret := r.ReplaceAllFunc(code, func(s []byte)[]byte{
         m := r.FindSubmatch(s)
@@ -41,19 +43,23 @@ func replaceIncludes(code []byte, dir string, req Request, included map[string][
             return nil
         }
         this_dir := path.Dir(p)
-        incl_code = replaceIncludes(incl_code, this_dir, req, included)
+        incl_code, these_incl_hashes := replaceIncludes(incl_code, this_dir, req, included)
+        for ih, _ := range these_incl_hashes{
+            includeHashes[ih] = true
+        }
         // compute hash
         hash := sha256.Sum256(incl_code)
         h := hex.EncodeToString(hash[:])
+        includeHashes[h] = true
         req.Includes[h] = incl_code
         ret := []byte(`(include "`+h+`.lll")`)
         included[name] = ret
         return ret
     })
-    return ret
+    return ret, includeHashes
 }
 
-// takes a list of lll scripts (source code, not filenames)
+// takes a list of lll scripts 
 // returns a response object (contains list of compiled bytecodes and errors if any)
 func CompileLLLClient(filenames []string) (*Response, error){
     // cached bytecode
@@ -75,14 +81,29 @@ func CompileLLLClient(filenames []string) (*Response, error){
         }
         dir := path.Dir(f)
         // replace includes with hash of included contents and add those contents to Includes (recursive)
-        code = replaceIncludes(code, dir, req, included)
+        code, includes := replaceIncludes(code, dir, req, included)
 
-        // if the file is cached, append nil
+        // go through all includes, check if they have changed
+        cached := true
+        for k, _ := range includes{
+            f := path.Join(TMP, k+".lll")
+            if _, err := os.Stat(f); err != nil{
+                cached = false
+                // save empty file named hash of include so we can check
+                // whether includes have changed
+                ioutil.WriteFile(f, []byte{}, 0644)
+            }
+        }
+
+        // check if the main script has been cached
         hash := sha256.Sum256(code)
         hashmap[i] = hash[:]
         filename := path.Join(TMP, hex.EncodeToString(hash[:])+".lll")
-        _, err = os.Stat(filename)
-        if err  != nil{
+        _, scriptErr := os.Stat(filename)
+
+        // if an include has changed or the script has not been cached, append the code
+        // else, append nil
+        if !cached || scriptErr != nil{
             req.Scripts = append(req.Scripts, code)
         } else{
             req.Scripts = append(req.Scripts, nil)

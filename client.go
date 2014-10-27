@@ -40,9 +40,8 @@ func replaceIncludes(code []byte, dir string, req Request, included map[string][
             log.Println("failed to read include file", err)
             return nil
         }
-        //this_dir := path.Dir(p)
-       //w fmt.Println("include dir:", this_dir)
-        incl_code = replaceIncludes(incl_code, dir, req, included)
+        this_dir := path.Dir(p)
+        incl_code = replaceIncludes(incl_code, this_dir, req, included)
         // compute hash
         hash := sha256.Sum256(incl_code)
         h := hex.EncodeToString(hash[:])

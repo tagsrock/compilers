@@ -36,6 +36,7 @@ func homeDir() string{
 
 var PathToLLL = path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc")
 var ServerTmp = ".tmp"
+var null2 = CheckMakeDir(ServerTmp)
 
 // request object
 // includes are named but scripts are nameless
@@ -93,8 +94,13 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return nil
 	}
-    //fmt.Println("request:", req)
-   
+
+    resp := compileServerCore(req)    
+    return &resp
+}
+
+// core compile functionality. used by the server and locally to mimic the server
+func compileServerCore(req Request) Response{
     resp := Response{[][]byte{}, []string{}}
 
     names := []string{}
@@ -112,14 +118,14 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
 
         // lllc requires a file to read
         // check if filename already exists. if not, write
-        if _, err = os.Stat(filename); err != nil{
+        if _, err := os.Stat(filename); err != nil{
             ioutil.WriteFile(filename, c, 0644)
         }
     }
     // loop through includes, also save to drive
     for k, v := range req.Includes{
         filename := path.Join(ServerTmp, k+".lll")
-        if _, err = os.Stat(filename); err != nil{
+        if _, err := os.Stat(filename); err != nil{
             ioutil.WriteFile(filename, v, 0644)
         }
     }
@@ -140,7 +146,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
         }
         resp.Bytecode = append(resp.Bytecode, compiled)
     }
-    return &resp
+    return resp
 }
 
 // wrapper to lllc cli
@@ -170,10 +176,7 @@ func CompileLLLWrapper(filename string) ([]byte, error){
         //outstr = outstr[:l-1]
     //}
     //fmt.Println("script hex", outstr)
-<<<<<<< HEAD
 
-=======
->>>>>>> 0aa369b... tmp dir fix
     b, err := hex.DecodeString(outstr)
     if err != nil{
         return nil, err

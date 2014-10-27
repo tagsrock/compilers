@@ -6,6 +6,7 @@ import (
     "os"
     "path"
     "regexp"
+    "strings"
 	"encoding/json"
 	"encoding/hex"
     "crypto/sha256"
@@ -22,6 +23,7 @@ func replaceIncludes(code []byte, dir string, req Request, included map[string][
     // find includes, load those as well
     r, _ :=  regexp.Compile(`\(include "(.+?)"\)`)
     // replace all includes with hash of included lll
+    // do it recursively
     ret := r.ReplaceAllFunc(code, func(s []byte)[]byte{
         m := r.FindSubmatch(s)
         match := m[1]
@@ -38,6 +40,8 @@ func replaceIncludes(code []byte, dir string, req Request, included map[string][
             log.Println("failed to read include file", err)
             return nil
         }
+        //this_dir := path.Dir(p)
+       //w fmt.Println("include dir:", this_dir)
         incl_code = replaceIncludes(incl_code, dir, req, included)
         // compute hash
         hash := sha256.Sum256(incl_code)
@@ -93,7 +97,6 @@ func CompileLLLClient(filenames []string) (*Response, error){
         fmt.Println("req includes;", string(v))
     }*/
 
-
     // response struct (returned)
     var respJ Response
 
@@ -117,36 +120,43 @@ func CompileLLLClient(filenames []string) (*Response, error){
         return &respJ, nil
     }
 
-    // make request
-    reqJ, err := json.Marshal(req)
-    if err != nil{
-        log.Println("failed to marshal req obj", err)
-        return nil, err
-    }
-    httpreq, err := http.NewRequest("POST", URL, bytes.NewBuffer(reqJ))       
-    httpreq.Header.Set("Content-Type", "application/json")                    
-    
-    client := &http.Client{}                                              
-    resp, err := client.Do(httpreq)
-    if err != nil{
-        log.Println("failed!", err)                                       
-        return nil, err
-    }   
-    defer resp.Body.Close()                                               
+    // check if we should compile locally instead of firing off to server
+    if !strings.Contains(URL, "http://"){
+        respJ = compileServerCore(req)
+    } else {
 
-    if resp.StatusCode > 300{
-        return nil, fmt.Errorf("HTTP error: %d", resp.StatusCode)
-    }
+        // make request
+        reqJ, err := json.Marshal(req)
+        if err != nil{
+            log.Println("failed to marshal req obj", err)
+            return nil, err
+        }
+        httpreq, err := http.NewRequest("POST", URL, bytes.NewBuffer(reqJ))       
+        httpreq.Header.Set("Content-Type", "application/json")                    
+        
+        client := &http.Client{}                                              
+        resp, err := client.Do(httpreq)
+        if err != nil{
+            log.Println("failed!", err)                                       
+            return nil, err
+        }   
+        defer resp.Body.Close()                                               
 
-    // read in response body
-    body, err := ioutil.ReadAll(resp.Body)
-    err = json.Unmarshal(body, &respJ)                                    
-    if err != nil{
-        fmt.Println("failed to unmarshal", err)
-        return nil , err
-    }   
+        if resp.StatusCode > 300{
+            return nil, fmt.Errorf("HTTP error: %d", resp.StatusCode)
+        }
+
+        // read in response body
+        body, err := ioutil.ReadAll(resp.Body)
+        err = json.Unmarshal(body, &respJ)                                    
+        if err != nil{
+            fmt.Println("failed to unmarshal", err)
+            return nil , err
+        }   
+    }
 
     // fill in cached values, cache new values
+    var err error
     for i, b := range respJ.Bytecode{
         f := path.Join(TMP, hex.EncodeToString(hashmap[i])+".lll")
         if string(b) == "NULLCACHED"{

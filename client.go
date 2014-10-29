@@ -141,9 +141,14 @@ func CompileLLLClient(filenames []string) (*Response, error){
     }
 
     // check if we should compile locally instead of firing off to server
-    if !strings.Contains(URL, "http://"){
+    if !strings.Contains(URL, "http://") && !strings.Contains(URL, "NETCALL"){
+        fmt.Println("compiling locally...")
         respJ = compileServerCore(req)
     } else {
+        fmt.Println("compiling remotely...")
+        if strings.Contains(URL, "NETCALL"){
+            URL = "http://lllc.projectdouglas.org/compile"
+        }
 
         // make request
         reqJ, err := json.Marshal(req)

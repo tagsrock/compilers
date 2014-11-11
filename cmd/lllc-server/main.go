@@ -39,7 +39,7 @@ func main(){
             }
             fmt.Println("bytecode:", hex.EncodeToString(b))
         } else{
-            lllcserver.RunClient(tocompile)
+            lllcserver.RunClient(tocompile, false) // these are all files (literal is false)
         }
     }else {
         lllcserver.CheckMakeDir(lllcserver.ServerTmp)

@@ -61,7 +61,7 @@ func replaceIncludes(code []byte, dir string, req Request, included map[string][
 
 // takes a list of lll scripts 
 // returns a response object (contains list of compiled bytecodes and errors if any)
-func CompileLLLClient(filenames []string) (*Response, error){
+func CompileLLLClient(filenames []string, literal bool) (*Response, error){
     // cached bytecode
     hashmap := make(map[int][]byte) // map indices to hashes
 
@@ -73,11 +73,17 @@ func CompileLLLClient(filenames []string) (*Response, error){
    
     included := make(map[string][]byte)
 
+    var err error
     for i, f := range filenames{
-        code, err  := ioutil.ReadFile(f) 
-        if err != nil{
-            log.Println("failed to read file", err)
-            return nil, err
+        var code []byte
+        if !literal{
+            code, err = ioutil.ReadFile(f) 
+            if err != nil{
+                log.Println("failed to read file", err)
+                return nil, err
+            }
+        } else{
+            code = []byte(f)
         }
         dir := path.Dir(f)
         // replace includes with hash of included contents and add those contents to Includes (recursive)
@@ -181,7 +187,6 @@ func CompileLLLClient(filenames []string) (*Response, error){
     }
 
     // fill in cached values, cache new values
-    var err error
     for i, b := range respJ.Bytecode{
         f := path.Join(TMP, hex.EncodeToString(hashmap[i])+".lll")
         if string(b) == "NULLCACHED"{
@@ -200,8 +205,8 @@ func CompileLLLClient(filenames []string) (*Response, error){
 
 // compile just one file
 // but resolve "includes"
-func Compile(filename string) ([]byte, error){
-    r, err := CompileLLLClient([]string{filename})
+func Compile(filename string, literal bool) ([]byte, error){
+    r, err := CompileLLLClient([]string{filename}, literal)
     if err != nil{
         return nil, err
     }
@@ -214,8 +219,8 @@ func Compile(filename string) ([]byte, error){
     return b, err
 }
 
-func RunClient(tocompile []string){
-    _,  err := CompileLLLClient(tocompile) 
+func RunClient(tocompile []string, literal bool){
+    _,  err := CompileLLLClient(tocompile, literal) 
     if err != nil{
         fmt.Println("shucks", err)
         os.Exit(0)

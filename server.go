@@ -129,7 +129,6 @@ func compileServerCore(req *Request) *Response {
 	}
 	var resp *Response
 	//compile scripts, return bytecode and error
-	fmt.Println("name:", name)
 	if name == "NULLCACHED" {
 
 		resp = NewResponse([]byte("NULLCACHED"), "")

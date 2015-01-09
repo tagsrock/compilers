@@ -255,19 +255,12 @@ func Compile(filename string, literal bool) ([]byte, error) {
 }
 
 func RunClient(tocompile string, literal bool) {
-	_, err := CompileLLLClient(tocompile, literal)
+	r, err := CompileLLLClient(tocompile, literal)
 	if err != nil {
 		fmt.Println("shucks", err)
 		os.Exit(0)
 	}
-	/*
-	   for i, c := range r.Bytecode{
-	       if r.Error[i] != ""{
-	           log.Println("script", i, "\tcompilation failed:", r.Error[i])
-	       } else{
-	           log.Println("script", i, "\tcompilation successful", hex.EncodeToString(c))
-	       }
-	   }*/
+	fmt.Println(hex.EncodeToString(r.Bytecode))
 }
 
 func CheckMakeDir(dir string) int {

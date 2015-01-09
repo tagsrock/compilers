@@ -18,14 +18,7 @@ import (
 	"strings"
 )
 
-/*
-   To use:
-       HTTP json post to /compile with {"code":"(lll ... )"}
-       response is simply the compiled byte code
-       uses arrays so we can pass multiple scripts at once
-*/
-
-// must have LLL compiler installed!
+// must have compiler installed!
 func homeDir() string {
 	usr, err := user.Current()
 	if err != nil {
@@ -34,13 +27,13 @@ func homeDir() string {
 	return usr.HomeDir
 }
 
-var PathToLLL = path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc")
 var ServerTmp = ".tmp"
 var null2 = CheckMakeDir(ServerTmp)
 
 // compile request object
 type Request struct {
 	ScriptName string            `json:name"`
+	Language   string            `json:"language"`
 	Script     []byte            `json:"script"`   // source code file bytes
 	Includes   map[string][]byte `json:"includes"` // filename => source code file bytes
 }
@@ -49,17 +42,6 @@ type Request struct {
 type Response struct {
 	Bytecode []byte `json:"bytecode"`
 	Error    string `json:"error"`
-}
-
-// convenience wrapper for javascript frontend
-func CompileHandlerJs(w http.ResponseWriter, r *http.Request) {
-	resp := compileResponse(w, r)
-	if resp == nil {
-		return
-	}
-	code := resp.Bytecode
-	hexx := hex.EncodeToString(code)
-	w.Write([]byte(fmt.Sprintf(`{"bytecode": "%s"}`, hexx)))
 }
 
 // read in request body (should be pure lll code)
@@ -75,6 +57,17 @@ func CompileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(respJ)
+}
+
+// convenience wrapper for javascript frontend
+func CompileHandlerJs(w http.ResponseWriter, r *http.Request) {
+	resp := compileResponse(w, r)
+	if resp == nil {
+		return
+	}
+	code := resp.Bytecode
+	hexx := hex.EncodeToString(code)
+	w.Write([]byte(fmt.Sprintf(`{"bytecode": "%s"}`, hexx)))
 }
 
 func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
@@ -103,6 +96,8 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 func compileServerCore(req *Request) *Response {
 
 	var name string
+	lang := req.Language
+	compiler := Compilers[lang]
 
 	c := req.Script
 	if c == nil || len(c) == 0 {
@@ -110,7 +105,7 @@ func compileServerCore(req *Request) *Response {
 	} else {
 		// take sha2 of request object to get tmp filename
 		hash := sha256.Sum256([]byte(c))
-		filename := path.Join(ServerTmp, hex.EncodeToString(hash[:])+".lll")
+		filename := path.Join(ServerTmp, compiler.Ext(hex.EncodeToString(hash[:])))
 		name = filename
 
 		// lllc requires a file to read
@@ -122,7 +117,7 @@ func compileServerCore(req *Request) *Response {
 
 	// loop through includes, also save to drive
 	for k, v := range req.Includes {
-		filename := path.Join(ServerTmp, k+".lll")
+		filename := path.Join(ServerTmp, compiler.Ext(k))
 		if _, err := os.Stat(filename); err != nil {
 			ioutil.WriteFile(filename, v, 0644)
 		}
@@ -134,7 +129,7 @@ func compileServerCore(req *Request) *Response {
 		resp = NewResponse([]byte("NULLCACHED"), "")
 	} else {
 		var e string
-		compiled, err := CompileLLLWrapper(name)
+		compiled, err := CompileWrapper(name, lang)
 		if err != nil {
 			e = err.Error()
 		} else {
@@ -146,8 +141,8 @@ func compileServerCore(req *Request) *Response {
 	return resp
 }
 
-// wrapper to lllc cli
-func CompileLLLWrapper(filename string) ([]byte, error) {
+// wrapper to cli
+func CompileWrapper(filename string, lang string) ([]byte, error) {
 	// we need to be in the same dir as the files for sake of includes
 	cur, _ := os.Getwd()
 	dir := path.Dir(filename)
@@ -155,7 +150,7 @@ func CompileLLLWrapper(filename string) ([]byte, error) {
 	filename = path.Base(filename)
 
 	os.Chdir(dir)
-	cmd := exec.Command(PathToLLL, filename)
+	cmd := exec.Command(Languages[lang].Path, filename)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()

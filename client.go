@@ -1,127 +1,16 @@
 package lllcserver
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
-	"net/http"
-	"os"
 	"path"
-	"regexp"
 	"strings"
 )
 
-var URL = "http://localhost:9999/compile"
 var TMP = path.Join(homeDir(), ".lllc")
 var null = CheckMakeDir(TMP)
 
-func replaceIncludes(code []byte, dir string, includes map[string][]byte) ([]byte, error) {
-	// find includes, load those as well
-	r, _ := regexp.Compile(`\(include "(.+?)"\)`)
-	// replace all includes with hash of included lll
-	//  make sure to return hashes of includes so we can cache check them too
-	// do it recursively
-	ret := r.ReplaceAllFunc(code, func(s []byte) []byte {
-		s, err := includeReplacer(r, s, dir, includes)
-		if err != nil {
-			// panic (catch)
-		}
-		return s
-	})
-	return ret, nil
-}
-
-func includeReplacer(r *regexp.Regexp, s []byte, dir string, included map[string][]byte) ([]byte, error) {
-	m := r.FindSubmatch(s)
-	match := m[1]
-	name := path.Base(string(match))
-	// if we've already loaded this, move on
-	if v, ok := included[name]; ok {
-		return v, nil
-	}
-	// load the file
-	p := path.Join(dir, string(match))
-	incl_code, err := ioutil.ReadFile(p)
-	if err != nil {
-		log.Println("failed to read include file", err)
-		return nil, fmt.Errorf("Failed to read include file: %s", err.Error())
-	}
-	this_dir := path.Dir(p)
-	incl_code, err = replaceIncludes(incl_code, this_dir, included)
-	if err != nil {
-		return nil, err
-	}
-	// compute hash
-	hash := sha256.Sum256(incl_code)
-	h := hex.EncodeToString(hash[:])
-	included[h] = incl_code
-	ret := []byte(`(include "` + h + `.lll")`)
-	return ret, nil
-}
-
-func checkCacheIncludes(includes map[string][]byte) bool {
-	cached := true
-	for k, _ := range includes {
-		f := path.Join(TMP, k+".lll")
-		if _, err := os.Stat(f); err != nil {
-			cached = false
-			// save empty file named hash of include so we can check
-			// whether includes have changed
-			ioutil.WriteFile(f, []byte{}, 0644)
-		}
-	}
-	return cached
-}
-
-func checkCached(code []byte, includes map[string][]byte) (string, bool) {
-	cachedIncludes := checkCacheIncludes(includes)
-
-	// check if the main script has been cached
-	hash := sha256.Sum256(code)
-	hexHash := hex.EncodeToString(hash[:])
-	fname := path.Join(TMP, hexHash+".lll")
-	_, scriptErr := os.Stat(fname)
-
-	// if an include has changed or the script has not been cached, append the code
-	// else, append nil
-	if !cachedIncludes || scriptErr != nil {
-		return hexHash, false
-	}
-	return hexHash, true
-}
-
-func NewRequest(script []byte, includes map[string][]byte) *Request {
-	if includes == nil {
-		includes = make(map[string][]byte)
-	}
-	req := &Request{
-		Script:   script,
-		Includes: includes,
-	}
-	return req
-}
-
-func cachedResponse(hash string) (*Response, error) {
-	// fill in cached values,
-	f := path.Join(TMP, hash+".lll")
-	b, err := ioutil.ReadFile(f)
-	if err != nil {
-		return nil, err
-	}
-	return NewResponse(b, ""), nil
-}
-
-func NewResponse(bytecode []byte, err string) *Response {
-	return &Response{
-		Bytecode: bytecode,
-		Error:    err,
-	}
-}
-
+// filename is either a filename or literal code
 func resolveCode(filename string, literal bool) (code []byte, err error) {
 	if !literal {
 		code, err = ioutil.ReadFile(filename)
@@ -131,117 +20,57 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 	return
 }
 
-func requestResponse(req *Request) (*Response, error) {
-	if strings.Contains(URL, "NETCALL") {
-		URL = "http://lllc.projectdouglas.org/compile"
+//
+func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error) {
+	if c.net {
+		fmt.Println("compiling remotely...")
+		respJ, err = requestResponse(req)
+	} else {
+		fmt.Println("compiling locally...")
+		respJ = compileServerCore(req)
 	}
-
-	// make request
-	reqJ, err := json.Marshal(req)
-	if err != nil {
-		log.Println("failed to marshal req obj", err)
-		return nil, err
-	}
-	httpreq, err := http.NewRequest("POST", URL, bytes.NewBuffer(reqJ))
-	httpreq.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(httpreq)
-	if err != nil {
-		log.Println("failed!", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode > 300 {
-		return nil, fmt.Errorf("HTTP error: %d", resp.StatusCode)
-	}
-
-	respJ := new(Response)
-	// read in response body
-	body, err := ioutil.ReadAll(resp.Body)
-	err = json.Unmarshal(body, respJ)
-	if err != nil {
-		fmt.Println("failed to unmarshal", err)
-		return nil, err
-	}
-	return respJ, nil
+	return
 }
 
-// takes a list of lll scripts
-// returns a response object (contains list of compiled bytecodes and errors if any)
-func CompileLLLClient(filename string, literal bool) (*Response, error) {
-	code, err := resolveCode(filename, literal)
-	if err != nil {
-		return nil, err
-
-	}
-	dir := path.Dir(filename)
+// Takes a dir and some code, replaces all includes, checks cache, compiles, caches
+func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
 	// replace includes with hash of included contents and add those contents to Includes (recursive)
 	var includes = make(map[string][]byte)
-	code, err = replaceIncludes(code, dir, includes)
+	var err error
+	code, err = c.replaceIncludes(code, dir, includes)
 	if err != nil {
 		return nil, err
 	}
 
 	// go through all includes, check if they have changed
-	hash, cached := checkCached(code, includes)
+	hash, cached := c.checkCached(code, includes)
 
 	// if everything is cached, no need for request
 	if cached {
-		return cachedResponse(hash)
+		return c.cachedResponse(hash)
 	}
-	req := NewRequest(code, includes)
+	req := NewRequest(code, includes, c.Lang())
 
 	// response struct (returned)
-	respJ, err := compileRequest(req)
+	respJ, err := c.compileRequest(req)
 	if err != nil {
 		return nil, err
 	}
 	// fill in cached values, cache new values
-	if err := fillSaveCache(respJ, hash); err != nil {
+	if err := c.cacheFile(respJ.Bytecode, hash); err != nil {
 		return nil, err
 	}
 
 	return respJ, nil
 }
 
-func compileRequest(req *Request) (respJ *Response, err error) {
-	// check if we should compile locally instead of firing off to server
-	if !strings.Contains(URL, "http://") && !strings.Contains(URL, "NETCALL") {
-		fmt.Println("compiling locally...")
-		respJ = compileServerCore(req)
-	} else {
-		fmt.Println("compiling remotely...")
-		if respJ, err = requestResponse(req); err != nil {
-			return
-		}
+// create a new compiler for the language and compile the code
+func compile(code []byte, lang, dir string) ([]byte, error) {
+	c, err := NewCompileClient(lang)
+	if err != nil {
+		return nil, err
 	}
-	return
-}
-
-func fillSaveCache(respJ *Response, hash string) error {
-	var err error
-	b := respJ.Bytecode
-	f := path.Join(TMP, hash+".lll")
-	if string(b) == "NULLCACHED" {
-		respJ.Bytecode, err = ioutil.ReadFile(f)
-		if err != nil {
-			fmt.Println("read fil:", err)
-			return err
-		}
-	} else if b != nil {
-		if err := ioutil.WriteFile(f, b, 0644); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// compile just one file
-// but resolve "includes"
-func Compile(filename string, literal bool) ([]byte, error) {
-	r, err := CompileLLLClient(filename, literal)
+	r, err := c.Compile(dir, code)
 	if err != nil {
 		return nil, err
 	}
@@ -254,23 +83,24 @@ func Compile(filename string, literal bool) ([]byte, error) {
 	return b, err
 }
 
-func RunClient(tocompile string, literal bool) {
-	r, err := CompileLLLClient(tocompile, literal)
+// Compile a file and resolve includes
+func Compile(filename string) ([]byte, error) {
+	lang, err := langFromFile(filename)
 	if err != nil {
-		fmt.Println("shucks", err)
-		os.Exit(0)
+		return nil, err
 	}
-	fmt.Println(hex.EncodeToString(r.Bytecode))
+
+	literal := strings.HasSuffix(filename, Compilers[lang].Ext(""))
+	code, err := resolveCode(filename, literal)
+	if err != nil {
+		return nil, err
+
+	}
+	dir := path.Dir(filename)
+	return compile(code, lang, dir)
 }
 
-func CheckMakeDir(dir string) int {
-	_, err := os.Stat(dir)
-	if err != nil {
-		err := os.Mkdir(dir, 0777) //wtf!
-		if err != nil {
-			fmt.Println("Could not make directory. Exiting", err)
-			os.Exit(0)
-		}
-	}
-	return 0
+// Compile a literal piece of code
+func CompileLiteral(code []byte, lang string) ([]byte, error) {
+	return compile(code, lang, "something-intelligent")
 }

@@ -16,12 +16,15 @@ func main() {
 	localOnly := flag.Bool("local", false, "only listen internally")
 	port := flag.Int("port", 9999, "listen port")
 	nonet := flag.Bool("no-net", false, "do you have lll locally?")
+	lang := flag.String("lang", "lll", "language to compile")
 
 	flag.Parse()
 
+	langConfig := lllcserver.Languages[*lang]
+
 	if *host != "" {
-		lllcserver.URL = *host + "/" + "compile"
-		fmt.Println("url:", lllcserver.URL)
+		langConfig.URL = *host + "/" + "compile"
+		fmt.Println("url:", langConfig.URL)
 	}
 
 	if *client {
@@ -29,14 +32,14 @@ func main() {
 		tocompile := flag.Args()[0]
 		fmt.Println("to compile:", tocompile)
 		if *nonet {
-			b, err := lllcserver.CompileLLLWrapper(tocompile)
+			b, err := lllcserver.CompileWrapper(tocompile, *lang)
 			if err != nil {
 				fmt.Println("failed to compile!", err)
 				os.Exit(0)
 			}
 			fmt.Println("bytecode:", hex.EncodeToString(b))
 		} else {
-			lllcserver.RunClient(tocompile, false) // these are all files (literal is false)
+			lllcserver.Compile(tocompile)
 		}
 	} else {
 		lllcserver.CheckMakeDir(lllcserver.ServerTmp)

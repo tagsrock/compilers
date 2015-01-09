@@ -33,6 +33,7 @@ func NewResponse(bytecode []byte, err string) *Response {
 func requestResponse(req *Request) (*Response, error) {
 	lang := req.Language
 	URL := Languages[lang].URL
+	logger.Infoln("lang/url for request:", lang, URL)
 	// make request
 	reqJ, err := json.Marshal(req)
 	if err != nil {

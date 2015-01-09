@@ -17,6 +17,13 @@ var Languages = map[string]LangConfig{
 		Net:        true,
 		Extensions: []string{"lll", "def"},
 	},
+
+	"se": LangConfig{
+		URL:        "http://localhost:9999/compile",
+		Path:       "/usr/local/bin/serpent",
+		Net:        true,
+		Extensions: []string{"se"},
+	},
 }
 
 func SetLanguagePath(lang, path string) error {
@@ -66,6 +73,7 @@ type Compiler interface {
 	Ext(h string) string
 	IncludeRegex() string           // regular expression string
 	IncludeReplace(h string) string // new include stmt
+	CompileCmd(file string) (string, []string)
 }
 
 type CompileClient struct {
@@ -114,7 +122,7 @@ func NewCompiler(lang string) (c Compiler, err error) {
 	case "lll":
 		c = NewLLL()
 	case "se", "serpent":
-		err = UnknownLang(lang)
+		c = NewSerpent()
 	case "sol", "solidity":
 		err = UnknownLang(lang)
 	}
@@ -131,10 +139,11 @@ type LangConfig struct {
 }
 
 func NewLLL() Compiler {
-	return &LLLCompiler{}
+	return &LLLCompiler{Languages["lll"].Path}
 }
 
 type LLLCompiler struct {
+	path string
 }
 
 func (c *LLLCompiler) Lang() string {
@@ -151,4 +160,38 @@ func (c *LLLCompiler) IncludeReplace(h string) string {
 
 func (c *LLLCompiler) IncludeRegex() string {
 	return `\(include "(.+?)"\)`
+}
+
+func (c *LLLCompiler) CompileCmd(f string) (string, []string) {
+	return c.path, []string{f}
+}
+
+func NewSerpent() Compiler {
+	return &SerpentCompiler{Languages["se"].Path}
+}
+
+type SerpentCompiler struct {
+	path string
+}
+
+func (c *SerpentCompiler) Lang() string {
+	return "se"
+}
+
+func (c *SerpentCompiler) Ext(h string) string {
+	return h + "." + "se"
+}
+
+// TODO
+func (c *SerpentCompiler) IncludeReplace(h string) string {
+	return `(include "` + h + `.lll")`
+}
+
+// TODO
+func (c *SerpentCompiler) IncludeRegex() string {
+	return `\(include "(.+?)"\)`
+}
+
+func (c *SerpentCompiler) CompileCmd(f string) (string, []string) {
+	return c.path, []string{"compile", f}
 }

@@ -150,7 +150,8 @@ func CompileWrapper(filename string, lang string) ([]byte, error) {
 	filename = path.Base(filename)
 
 	os.Chdir(dir)
-	cmd := exec.Command(Languages[lang].Path, filename)
+	prgrm, args := Compilers[lang].CompileCmd(filename)
+	cmd := exec.Command(prgrm, args...)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()

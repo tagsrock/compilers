@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
-	"strings"
 )
 
 // 0 for nothing, 4 for everything
@@ -101,7 +100,7 @@ func Compile(filename string) ([]byte, error) {
 
 	logger.Infoln("lang:", lang)
 
-	literal := !strings.HasSuffix(filename, Compilers[lang].Ext(""))
+	literal := isLiteral(filename, lang)
 	logger.Infoln("is literal:", literal)
 	code, err := resolveCode(filename, literal)
 	if err != nil {

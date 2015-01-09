@@ -12,9 +12,10 @@ func init() {
 
 var Languages = map[string]LangConfig{
 	"lll": LangConfig{
-		URL:  "http://localhost:9999/compile",
-		Path: path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc"),
-		Net:  true,
+		URL:        "http://localhost:9999/compile",
+		Path:       path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc"),
+		Net:        true,
+		Extensions: []string{"lll", "def"},
 	},
 }
 
@@ -123,9 +124,10 @@ func NewCompiler(lang string) (c Compiler, err error) {
 var LangConfigs map[string]LangConfig
 
 type LangConfig struct {
-	URL  string `json:"url"`
-	Path string `json:"path"`
-	Net  bool   `json:"net"`
+	URL        string   `json:"url"`
+	Path       string   `json:"path"`
+	Net        bool     `json:"net"`
+	Extensions []string `json:"extensions"`
 }
 
 func NewLLL() Compiler {

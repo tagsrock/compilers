@@ -109,11 +109,32 @@ func (c *CompileClient) cacheFile(b []byte, hash string) error {
 func langFromFile(filename string) (string, error) {
 	ext := path.Ext(filename)
 	ext = strings.Trim(ext, ".")
-	if _, ok := Languages[ext]; !ok {
-		return "", UnknownLang(ext)
+	if _, ok := Languages[ext]; ok {
+		return ext, nil
+	}
+	for l, lc := range Languages {
+		for _, e := range lc.Extensions {
+			if ext == e {
+				return l, nil
+			}
+		}
+	}
+	return "", UnknownLang(ext)
+}
+
+func isLiteral(f, lang string) bool {
+	if strings.HasSuffix(f, Compilers[lang].Ext("")) {
+		return false
 	}
 
-	return ext, nil
+	for _, lc := range Languages {
+		for _, e := range lc.Extensions {
+			if strings.HasSuffix(f, e) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func CheckMakeDir(dir string) int {

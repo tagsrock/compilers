@@ -18,6 +18,37 @@ var Languages = map[string]LangConfig{
 	},
 }
 
+func SetLanguagePath(lang, path string) error {
+	l, ok := Languages[lang]
+	if !ok {
+		return UnknownLang(lang)
+	}
+	l.Path = path
+	Languages[lang] = l
+	return nil
+}
+
+func SetLanguageURL(lang, url string) error {
+	l, ok := Languages[lang]
+	if !ok {
+		return UnknownLang(lang)
+	}
+	l.URL = url
+	Languages[lang] = l
+	return nil
+}
+
+func SetLanguageNet(lang string, net bool) error {
+	l, ok := Languages[lang]
+	if !ok {
+		return UnknownLang(lang)
+	}
+	l.Net = net
+	Languages[lang] = l
+	return nil
+
+}
+
 var Compilers = assembleCompilers()
 
 func assembleCompilers() map[string]Compiler {

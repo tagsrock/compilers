@@ -90,6 +90,8 @@ func Compile(filename string) ([]byte, error) {
 		return nil, err
 	}
 
+	fmt.Println("lang:", lang)
+
 	literal := strings.HasSuffix(filename, Compilers[lang].Ext(""))
 	code, err := resolveCode(filename, literal)
 	if err != nil {

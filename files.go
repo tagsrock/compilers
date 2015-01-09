@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strings"
 )
 
 func (c *CompileClient) replaceIncludes(code []byte, dir string, includes map[string][]byte) ([]byte, error) {
@@ -107,11 +108,12 @@ func (c *CompileClient) cacheFile(b []byte, hash string) error {
 
 func langFromFile(filename string) (string, error) {
 	ext := path.Ext(filename)
+	ext = strings.Trim(ext, ".")
 	if _, ok := Languages[ext]; !ok {
 		return "", UnknownLang(ext)
 	}
 
-	return "", nil
+	return ext, nil
 }
 
 func CheckMakeDir(dir string) int {

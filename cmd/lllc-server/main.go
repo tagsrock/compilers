@@ -20,11 +20,10 @@ func main() {
 
 	flag.Parse()
 
-	langConfig := lllcserver.Languages[*lang]
-
 	if *host != "" {
-		langConfig.URL = *host + "/" + "compile"
-		fmt.Println("url:", langConfig.URL)
+		url := *host + "/" + "compile"
+		lllcserver.SetLanguageURL(*lang, url)
+		fmt.Println("url:", lllcserver.Languages[*lang])
 	}
 
 	if *client {
@@ -39,7 +38,11 @@ func main() {
 			}
 			fmt.Println("bytecode:", hex.EncodeToString(b))
 		} else {
-			lllcserver.Compile(tocompile)
+			code, err := lllcserver.Compile(tocompile)
+			fmt.Println(code)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	} else {
 		lllcserver.CheckMakeDir(lllcserver.ServerTmp)

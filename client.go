@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+// 0 for nothing, 4 for everything
+var DebugMode = 2
+
+var logger = &Logger{}
+
 var TMP = path.Join(homeDir(), ".lllc")
 var null = CheckMakeDir(TMP)
 
@@ -17,16 +22,17 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 	} else {
 		code = []byte(filename)
 	}
+	logger.Debugln("read code:", code)
 	return
 }
 
 //
 func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error) {
 	if c.net {
-		fmt.Println("compiling remotely...")
+		logger.Warnln("compiling remotely...")
 		respJ, err = requestResponse(req)
 	} else {
-		fmt.Println("compiling locally...")
+		logger.Warnln("compiling locally...")
 		respJ = compileServerCore(req)
 	}
 	return
@@ -37,13 +43,16 @@ func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
 	// replace includes with hash of included contents and add those contents to Includes (recursive)
 	var includes = make(map[string][]byte)
 	var err error
+	logger.Debugln("pre includes;", code)
 	code, err = c.replaceIncludes(code, dir, includes)
 	if err != nil {
 		return nil, err
 	}
+	logger.Debugln("post replaceincludes;", code)
 
 	// go through all includes, check if they have changed
 	hash, cached := c.checkCached(code, includes)
+	logger.Infoln("hash, cached:", hash, cached)
 
 	// if everything is cached, no need for request
 	if cached {
@@ -90,9 +99,10 @@ func Compile(filename string) ([]byte, error) {
 		return nil, err
 	}
 
-	fmt.Println("lang:", lang)
+	logger.Infoln("lang:", lang)
 
-	literal := strings.HasSuffix(filename, Compilers[lang].Ext(""))
+	literal := !strings.HasSuffix(filename, Compilers[lang].Ext(""))
+	logger.Infoln("is literal:", literal)
 	code, err := resolveCode(filename, literal)
 	if err != nil {
 		return nil, err

@@ -17,9 +17,12 @@ func main() {
 	port := flag.Int("port", 9999, "listen port")
 	nonet := flag.Bool("no-net", false, "do you have lll locally?")
 	lang := flag.String("lang", "lll", "language to compile")
+	log := flag.Int("log", 3, "log level")
 
 	flag.Parse()
 
+	lllcserver.DebugMode = *log
+	fmt.Println(lllcserver.DebugMode, *log)
 	if *host != "" {
 		url := *host + "/" + "compile"
 		lllcserver.SetLanguageURL(*lang, url)

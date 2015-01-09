@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -37,7 +36,7 @@ func requestResponse(req *Request) (*Response, error) {
 	// make request
 	reqJ, err := json.Marshal(req)
 	if err != nil {
-		log.Println("failed to marshal req obj", err)
+		logger.Errorln("failed to marshal req obj", err)
 		return nil, err
 	}
 	httpreq, err := http.NewRequest("POST", URL, bytes.NewBuffer(reqJ))
@@ -46,7 +45,7 @@ func requestResponse(req *Request) (*Response, error) {
 	client := &http.Client{}
 	resp, err := client.Do(httpreq)
 	if err != nil {
-		log.Println("failed!", err)
+		logger.Errorln("failed!", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -60,7 +59,7 @@ func requestResponse(req *Request) (*Response, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(body, respJ)
 	if err != nil {
-		fmt.Println("failed to unmarshal", err)
+		logger.Errorln("failed to unmarshal", err)
 		return nil, err
 	}
 	return respJ, nil

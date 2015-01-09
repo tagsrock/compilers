@@ -40,7 +40,7 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, 
 	p := path.Join(dir, string(match))
 	incl_code, err := ioutil.ReadFile(p)
 	if err != nil {
-		log.Println("failed to read include file", err)
+		logger.Errorln("failed to read include file", err)
 		return nil, fmt.Errorf("Failed to read include file: %s", err.Error())
 	}
 	this_dir := path.Dir(p)
@@ -121,9 +121,36 @@ func CheckMakeDir(dir string) int {
 	if err != nil {
 		err := os.Mkdir(dir, 0777) //wtf!
 		if err != nil {
-			fmt.Println("Could not make directory. Exiting", err)
+			logger.Errorln("Could not make directory. Exiting", err)
 			os.Exit(0)
 		}
 	}
 	return 0
+}
+
+type Logger struct {
+}
+
+func (l *Logger) Errorln(s ...interface{}) {
+	if DebugMode > 0 {
+		log.Println(s...)
+	}
+}
+
+func (l *Logger) Warnln(s ...interface{}) {
+	if DebugMode > 1 {
+		log.Println(s...)
+	}
+}
+
+func (l *Logger) Infoln(s ...interface{}) {
+	if DebugMode > 2 {
+		log.Println(s...)
+	}
+}
+
+func (l *Logger) Debugln(s ...interface{}) {
+	if DebugMode > 3 {
+		log.Println(s...)
+	}
 }

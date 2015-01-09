@@ -53,7 +53,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	respJ, err := json.Marshal(resp)
 	if err != nil {
-		fmt.Println("failed to marshal", err)
+		logger.Errorln("failed to marshal", err)
 		return
 	}
 	w.Write(respJ)
@@ -74,7 +74,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 	// read the request body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println("err on read http request body", err)
+		logger.Errorln("err on read http request body", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil
 	}
@@ -83,7 +83,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 	req := new(Request)
 	err = json.Unmarshal(body, req)
 	if err != nil {
-		log.Println("err on json unmarshal", err)
+		logger.Errorln("err on json unmarshal of request", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil
 	}
@@ -155,7 +155,7 @@ func CompileWrapper(filename string, lang string) ([]byte, error) {
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Couldn't compile!!", err)
+		logger.Errorln("Couldn't compile!!", err)
 		os.Chdir(cur)
 		return nil, err
 	}

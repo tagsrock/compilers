@@ -93,7 +93,7 @@ func compile(code []byte, lang, dir string) ([]byte, error) {
 
 // Compile a file and resolve includes
 func Compile(filename string) ([]byte, error) {
-	lang, err := langFromFile(filename)
+	lang, err := LangFromFile(filename)
 	if err != nil {
 		return nil, err
 	}

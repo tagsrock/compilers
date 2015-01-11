@@ -149,6 +149,10 @@ func CompileWrapper(filename string, lang string) ([]byte, error) {
 	dir, _ = filepath.Abs(dir)
 	filename = path.Base(filename)
 
+	if _, ok := Compilers[lang]; !ok {
+		return nil, UnknownLang(lang)
+	}
+
 	os.Chdir(dir)
 	prgrm, args := Compilers[lang].CompileCmd(filename)
 	cmd := exec.Command(prgrm, args...)

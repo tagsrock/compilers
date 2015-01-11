@@ -106,7 +106,7 @@ func (c *CompileClient) cacheFile(b []byte, hash string) error {
 	return nil
 }
 
-func langFromFile(filename string) (string, error) {
+func LangFromFile(filename string) (string, error) {
 	ext := path.Ext(filename)
 	ext = strings.Trim(ext, ".")
 	if _, ok := Languages[ext]; ok {

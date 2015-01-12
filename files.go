@@ -12,6 +12,8 @@ import (
 	"strings"
 )
 
+// Find all matches to the include regex
+// Replace filenames with hashes
 func (c *CompileClient) replaceIncludes(code []byte, dir string, includes map[string][]byte) ([]byte, error) {
 	// find includes, load those as well
 	r, _ := regexp.Compile(c.IncludeRegex())
@@ -21,6 +23,7 @@ func (c *CompileClient) replaceIncludes(code []byte, dir string, includes map[st
 	ret := r.ReplaceAllFunc(code, func(s []byte) []byte {
 		s, err := c.includeReplacer(r, s, dir, includes)
 		if err != nil {
+			fmt.Println("ERR!:", err)
 			// panic (catch)
 		}
 		return s
@@ -28,14 +31,12 @@ func (c *CompileClient) replaceIncludes(code []byte, dir string, includes map[st
 	return ret, nil
 }
 
+// read the included file, hash it; if we already have it, return include replacement
+// if we don't, run replaceIncludes on it (recursive)
+// modifies the "includes" map
 func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, included map[string][]byte) ([]byte, error) {
 	m := r.FindSubmatch(s)
 	match := m[1]
-	name := path.Base(string(match))
-	// if we've already loaded this, move on
-	if v, ok := included[name]; ok {
-		return v, nil
-	}
 	// load the file
 	p := path.Join(dir, string(match))
 	incl_code, err := ioutil.ReadFile(p)
@@ -43,16 +44,24 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, 
 		logger.Errorln("failed to read include file", err)
 		return nil, fmt.Errorf("Failed to read include file: %s", err.Error())
 	}
+
+	// compute hash
+	hash := sha256.Sum256(incl_code)
+	h := hex.EncodeToString(hash[:])
+	ret := []byte(c.IncludeReplace(h))
+	// if we've already loaded this, return the replacement
+	// and move on
+	if _, ok := included[h]; ok {
+		return ret, nil
+	}
+
+	// recursively replace the includes for this file
 	this_dir := path.Dir(p)
 	incl_code, err = c.replaceIncludes(incl_code, this_dir, included)
 	if err != nil {
 		return nil, err
 	}
-	// compute hash
-	hash := sha256.Sum256(incl_code)
-	h := hex.EncodeToString(hash[:])
 	included[h] = incl_code
-	ret := []byte(c.IncludeReplace(h))
 	return ret, nil
 }
 
@@ -135,6 +144,35 @@ func isLiteral(f, lang string) bool {
 		}
 	}
 	return true
+}
+
+func ClearCaches() error {
+	if err := ClearServerCache(); err != nil {
+		return err
+	}
+	return ClearClientCache()
+}
+
+func clearDir(dir string) error {
+	fs, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, f := range fs {
+		n := f.Name()
+		if err := os.Remove(path.Join(dir, n)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ClearServerCache() error {
+	return clearDir(ServerTmp)
+}
+
+func ClearClientCache() error {
+	return clearDir(TMP)
 }
 
 func CheckMakeDir(dir string) int {

@@ -8,6 +8,20 @@ import (
 	"net/http"
 )
 
+// compile request object
+type Request struct {
+	ScriptName string            `json:name"`
+	Language   string            `json:"language"`
+	Script     []byte            `json:"script"`   // source code file bytes
+	Includes   map[string][]byte `json:"includes"` // filename => source code file bytes
+}
+
+// compile response object
+type Response struct {
+	Bytecode []byte `json:"bytecode"`
+	Error    string `json:"error"`
+}
+
 // New Request object from script and map of include files
 func NewRequest(script []byte, includes map[string][]byte, lang string) *Request {
 	if includes == nil {
@@ -64,4 +78,12 @@ func requestResponse(req *Request) (*Response, error) {
 		return nil, err
 	}
 	return respJ, nil
+}
+
+func printRequest(req *Request) {
+	fmt.Println("SCRIPT:", string(req.Script))
+	for k, v := range req.Includes {
+		fmt.Println("include:", k)
+		fmt.Println("SCRIPT:", string(v))
+	}
 }

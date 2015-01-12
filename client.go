@@ -2,6 +2,7 @@ package lllcserver
 
 import (
 	"fmt"
+	"github.com/eris-ltd/epm-go/utils"
 	"io/ioutil"
 	"path"
 )
@@ -32,6 +33,7 @@ func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error
 		respJ, err = requestResponse(req)
 	} else {
 		logger.Warnln("compiling locally...")
+		//printRequest(req)
 		respJ = compileServerCore(req)
 	}
 	return

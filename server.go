@@ -30,20 +30,6 @@ func homeDir() string {
 var ServerTmp = ".tmp"
 var null2 = CheckMakeDir(ServerTmp)
 
-// compile request object
-type Request struct {
-	ScriptName string            `json:name"`
-	Language   string            `json:"language"`
-	Script     []byte            `json:"script"`   // source code file bytes
-	Includes   map[string][]byte `json:"includes"` // filename => source code file bytes
-}
-
-// compile response object
-type Response struct {
-	Bytecode []byte `json:"bytecode"`
-	Error    string `json:"error"`
-}
-
 // read in request body (should be pure lll code)
 // compile lll, build response object, write
 func CompileHandler(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +90,7 @@ func compileServerCore(req *Request) *Response {
 		name = "NULLCACHED"
 	} else {
 		// take sha2 of request object to get tmp filename
-		hash := sha256.Sum256([]byte(c))
+		hash := sha256.Sum256(c)
 		filename := path.Join(ServerTmp, compiler.Ext(hex.EncodeToString(hash[:])))
 		name = filename
 

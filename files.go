@@ -68,7 +68,7 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, 
 func (c *CompileClient) checkCacheIncludes(includes map[string][]byte) bool {
 	cached := true
 	for k, _ := range includes {
-		f := path.Join(TMP, c.Ext(k))
+		f := path.Join(ClientCache, c.Ext(k))
 		if _, err := os.Stat(f); err != nil {
 			cached = false
 			// save empty file named hash of include so we can check
@@ -85,7 +85,7 @@ func (c *CompileClient) checkCached(code []byte, includes map[string][]byte) (st
 	// check if the main script has been cached
 	hash := sha256.Sum256(code)
 	hexHash := hex.EncodeToString(hash[:])
-	fname := path.Join(TMP, c.Ext(hexHash))
+	fname := path.Join(ClientCache, c.Ext(hexHash))
 	_, scriptErr := os.Stat(fname)
 
 	// if an include has changed or the script has not been cached, append the code
@@ -97,7 +97,7 @@ func (c *CompileClient) checkCached(code []byte, includes map[string][]byte) (st
 }
 
 func (c *CompileClient) cachedResponse(hash string) (*Response, error) {
-	f := path.Join(TMP, c.Ext(hash))
+	f := path.Join(ClientCache, c.Ext(hash))
 	b, err := ioutil.ReadFile(f)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (c *CompileClient) cachedResponse(hash string) (*Response, error) {
 }
 
 func (c *CompileClient) cacheFile(b []byte, hash string) error {
-	f := path.Join(TMP, c.Ext(hash))
+	f := path.Join(ClientCache, c.Ext(hash))
 	if b != nil {
 		if err := ioutil.WriteFile(f, b, 0644); err != nil {
 			return err
@@ -168,11 +168,11 @@ func clearDir(dir string) error {
 }
 
 func ClearServerCache() error {
-	return clearDir(ServerTmp)
+	return clearDir(ServerCache)
 }
 
 func ClearClientCache() error {
-	return clearDir(TMP)
+	return clearDir(ClientCache)
 }
 
 func CheckMakeDir(dir string) int {

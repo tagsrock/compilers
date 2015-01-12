@@ -12,8 +12,8 @@ var DebugMode = 2
 
 var logger = &Logger{}
 
-var TMP = path.Join(homeDir(), ".lllc")
-var null = CheckMakeDir(TMP)
+var ClientCache = path.Join(utils.Lllc, "client")
+var null = CheckMakeDir(ClientCache)
 
 // filename is either a filename or literal code
 func resolveCode(filename string, literal bool) (code []byte, err error) {

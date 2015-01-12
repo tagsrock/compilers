@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/eris-ltd/epm-go/utils"
 	"github.com/go-martini/martini"
 	"io/ioutil"
 	"log"
@@ -27,8 +28,8 @@ func homeDir() string {
 	return usr.HomeDir
 }
 
-var ServerTmp = ".tmp"
-var null2 = CheckMakeDir(ServerTmp)
+var ServerCache = path.Join(utils.Lllc, "server")
+var null2 = CheckMakeDir(ServerCache)
 
 // read in request body (should be pure lll code)
 // compile lll, build response object, write
@@ -91,7 +92,7 @@ func compileServerCore(req *Request) *Response {
 	} else {
 		// take sha2 of request object to get tmp filename
 		hash := sha256.Sum256(c)
-		filename := path.Join(ServerTmp, compiler.Ext(hex.EncodeToString(hash[:])))
+		filename := path.Join(ServerCache, compiler.Ext(hex.EncodeToString(hash[:])))
 		name = filename
 
 		// lllc requires a file to read
@@ -103,7 +104,7 @@ func compileServerCore(req *Request) *Response {
 
 	// loop through includes, also save to drive
 	for k, v := range req.Includes {
-		filename := path.Join(ServerTmp, compiler.Ext(k))
+		filename := path.Join(ServerCache, compiler.Ext(k))
 		if _, err := os.Stat(filename); err != nil {
 			ioutil.WriteFile(filename, v, 0644)
 		}

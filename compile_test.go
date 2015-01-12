@@ -48,6 +48,8 @@ func TestLLLClientLocal(t *testing.T) {
 	ClearCaches()
 	SetLanguageNet("lll", false)
 	testContract(t, "tests/namereg.lll")
+	// Note: can't test more complex ones against the native compiler
+	// since it doesnt handle paths in the includes...
 	//testContract(t, path.Join(utils.ErisLtd, "eris-std-lib", "DTT", "tests", "stdarraytest.lll"))
 }
 

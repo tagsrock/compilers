@@ -69,7 +69,7 @@ func cliClient(c *cli.Context) {
 	lllcserver.SetLanguageURL(lang, url)
 	logger.Debugln("language config:", lllcserver.Languages[lang])
 
-	lllcserver.CheckMakeDir(lllcserver.TMP)
+	lllcserver.CheckMakeDir(lllcserver.ClientCache)
 	logger.Infoln("compiling", tocompile)
 	if c.Bool("local") {
 		b, err := lllcserver.CompileWrapper(tocompile, lang)
@@ -85,7 +85,7 @@ func cliClient(c *cli.Context) {
 }
 
 func cliServer(c *cli.Context) {
-	lllcserver.CheckMakeDir(lllcserver.ServerTmp)
+	lllcserver.CheckMakeDir(lllcserver.ServerCache)
 	addr := ""
 	if c.Bool("internal") {
 		addr = "localhost"

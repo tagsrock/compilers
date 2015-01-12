@@ -1,10 +1,17 @@
 lllc-server
 ===========
 
-Web Service to Compile LLL Files
+Web Server and client for compiling ethereum languages.
 
-Run the server with `go run cmd/main.go`
+Features
+--------
 
-Run the client with `go run cmd/main.go -h hostname -c file1 file2 file3 ...`
+- language agnostic (currently supports lll, serpent)
+- client side and server side caching
 
-Make sure to set the hostname to the location of the server you wish to use (defaults to localhost:9999)
+# Use the API
+
+```
+bytecode, err := lllcserver.Compile("mycontract.lll")
+```
+

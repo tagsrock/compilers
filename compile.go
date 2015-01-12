@@ -1,29 +1,87 @@
 package lllcserver
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/eris-ltd/epm-go/utils"
+	"io/ioutil"
+	"os"
 	"path"
 )
 
-// TODO: init
-func init() {
-	// read language config from  ~/.decerver
+var DefaultUrl = "http://162.218.65.211:8090/compile"
+
+// A compiler interface adds extensions and replaces includes
+type Compiler interface {
+	Lang() string
+	Ext(h string) string
+	IncludeRegex() string           // regular expression string
+	IncludeReplace(h string) string // new include stmt
+	CompileCmd(file string) (string, []string)
+}
+
+var LangConfigs map[string]LangConfig
+
+type LangConfig struct {
+	URL        string   `json:"url"`
+	Path       string   `json:"path"`
+	Net        bool     `json:"net"`
+	Extensions []string `json:"extensions"`
 }
 
 var Languages = map[string]LangConfig{
 	"lll": LangConfig{
-		URL:        "http://localhost:9999/compile",
+		URL:        DefaultUrl,
 		Path:       path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc"),
 		Net:        true,
 		Extensions: []string{"lll", "def"},
 	},
 
 	"se": LangConfig{
-		URL:        "http://localhost:9999/compile",
+		URL:        DefaultUrl,
 		Path:       "/usr/local/bin/serpent",
 		Net:        true,
 		Extensions: []string{"se"},
 	},
+}
+
+func init() {
+	// read language config from  ~/.decerver
+	// if it doesnt exist yet, do nothing
+	if _, err := os.Stat(utils.Decerver); err != nil {
+		return
+	}
+	f := path.Join(utils.Languages, "config.json")
+	err := checkConfig(f)
+	if err != nil {
+		logger.Errorln(err)
+		logger.Errorln("resorting to default language settings")
+		return
+	}
+
+}
+
+func checkConfig(f string) error {
+	if _, err := os.Stat(f); err != nil {
+		err := utils.WriteJson(&Languages, f)
+		if err != nil {
+			return fmt.Errorf("Could not write default config to %s: %s", f, err.Error())
+		}
+	}
+
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		return err
+	}
+
+	c := new(map[string]LangConfig)
+	err = json.Unmarshal(b, c)
+	if err != nil {
+		return err
+	}
+
+	Languages = *c
+	return nil
 }
 
 func SetLanguagePath(lang, path string) error {
@@ -65,15 +123,6 @@ func assembleCompilers() map[string]Compiler {
 		compilers[l], _ = NewCompiler(l)
 	}
 	return compilers
-}
-
-// A compiler interface adds extensions and replaces includes
-type Compiler interface {
-	Lang() string
-	Ext(h string) string
-	IncludeRegex() string           // regular expression string
-	IncludeReplace(h string) string // new include stmt
-	CompileCmd(file string) (string, []string)
 }
 
 type CompileClient struct {
@@ -127,15 +176,6 @@ func NewCompiler(lang string) (c Compiler, err error) {
 		err = UnknownLang(lang)
 	}
 	return
-}
-
-var LangConfigs map[string]LangConfig
-
-type LangConfig struct {
-	URL        string   `json:"url"`
-	Path       string   `json:"path"`
-	Net        bool     `json:"net"`
-	Extensions []string `json:"extensions"`
 }
 
 func NewLLL() Compiler {

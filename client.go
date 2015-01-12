@@ -113,5 +113,5 @@ func Compile(filename string) ([]byte, error) {
 
 // Compile a literal piece of code
 func CompileLiteral(code []byte, lang string) ([]byte, error) {
-	return compile(code, lang, "something-intelligent")
+	return compile(code, lang, utils.Scratch)
 }

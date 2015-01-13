@@ -29,7 +29,7 @@ func homeDir() string {
 }
 
 var ServerCache = path.Join(utils.Lllc, "server")
-var null2 = CheckMakeDir(ServerCache)
+var null2 = utils.InitDataDir(ServerCache)
 
 // read in request body (should be pure lll code)
 // compile lll, build response object, write

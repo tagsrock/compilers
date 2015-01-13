@@ -175,18 +175,6 @@ func ClearClientCache() error {
 	return clearDir(ClientCache)
 }
 
-func CheckMakeDir(dir string) int {
-	_, err := os.Stat(dir)
-	if err != nil {
-		err := os.Mkdir(dir, 0777) //wtf!
-		if err != nil {
-			logger.Errorln("Could not make directory. Exiting", err)
-			os.Exit(0)
-		}
-	}
-	return 0
-}
-
 type Logger struct {
 }
 

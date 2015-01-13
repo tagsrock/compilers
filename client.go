@@ -13,7 +13,7 @@ var DebugMode = 2
 var logger = &Logger{}
 
 var ClientCache = path.Join(utils.Lllc, "client")
-var null = CheckMakeDir(ClientCache)
+var null = utils.InitDataDir(ClientCache)
 
 // filename is either a filename or literal code
 func resolveCode(filename string, literal bool) (code []byte, err error) {

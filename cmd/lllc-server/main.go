@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/codegangsta/cli"
+	"github.com/eris-ltd/epm-go/utils"
 	"github.com/eris-ltd/lllc-server"
 	"os"
 	"runtime"
@@ -69,7 +70,7 @@ func cliClient(c *cli.Context) {
 	lllcserver.SetLanguageURL(lang, url)
 	logger.Debugln("language config:", lllcserver.Languages[lang])
 
-	lllcserver.CheckMakeDir(lllcserver.ClientCache)
+	lllcserver.InitDataDir(lllcserver.ClientCache)
 	logger.Infoln("compiling", tocompile)
 	if c.Bool("local") {
 		b, err := lllcserver.CompileWrapper(tocompile, lang)
@@ -85,7 +86,7 @@ func cliClient(c *cli.Context) {
 }
 
 func cliServer(c *cli.Context) {
-	lllcserver.CheckMakeDir(lllcserver.ServerCache)
+	lllcserver.InitDataDir(lllcserver.ServerCache)
 	addr := ""
 	if c.Bool("internal") {
 		addr = "localhost"

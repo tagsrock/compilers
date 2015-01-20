@@ -48,7 +48,7 @@ var Languages = map[string]LangConfig{
 func init() {
 	// read language config from  ~/.decerver
 	// if it doesnt exist yet, do nothing
-	if _, err := os.Stat(utils.Decerver); err != nil {
+	if _, err := os.Stat(utils.Languages); err != nil {
 		return
 	}
 	f := path.Join(utils.Languages, "config.json")

@@ -1,198 +1,178 @@
 package lllcserver
 
 import (
-	"github.com/go-martini/martini"
-	"net/http"
-	"log"
-    "strings"
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
-    "encoding/hex"
+	"fmt"
+	"github.com/eris-ltd/epm-go/utils"
+	"github.com/go-martini/martini"
 	"io/ioutil"
-    "path"
-    "path/filepath"
-    "os"
-    "os/exec"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
 	"os/user"
-    "bytes"
-    "fmt"
-    "crypto/sha256"
+	"path"
+	"path/filepath"
+	"strings"
 )
 
-/*
-    To use:
-        HTTP json post to /compile with {"code":"(lll ... )"}
-        response is simply the compiled byte code
-        uses arrays so we can pass multiple scripts at once
-*/
-
-// must have LLL compiler installed!
-func homeDir() string{
+// must have compiler installed!
+func homeDir() string {
 	usr, err := user.Current()
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 	return usr.HomeDir
 }
 
-var PathToLLL = path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc")
-var ServerTmp = ".tmp"
-var null2 = CheckMakeDir(ServerTmp)
-
-// request object
-// includes are named but scripts are nameless
-type Request struct{
-	Scripts [][]byte `json:"scripts"` // array of scripts (lll ascii bytes)
-    Includes map[string][]byte `json:"includes"` // filename => lll ascii bytes
-}
-
-// response object
-type Response struct{
-    Bytecode [][]byte `json:"bytecode"` // array of bytecode scripts to return
-    Error []string    `json:"error"` // an error for each script
-}
-
-// convenience wrapper for javascript frontend
-func CompileHandler2(w http.ResponseWriter, r *http.Request){
-    resp := compileResponse(w, r)
-    if resp == nil{
-        return 
-    }
-    code := resp.Bytecode[0]
-    hexx := hex.EncodeToString(code)
-    w.Write([]byte(fmt.Sprintf(`{"bytecode": "%s"}`, hexx)))
-}
+var ServerCache = path.Join(utils.Lllc, "server")
+var null2 = utils.InitDataDir(ServerCache)
 
 // read in request body (should be pure lll code)
 // compile lll, build response object, write
-func CompileHandler(w http.ResponseWriter, r *http.Request){
-    resp := compileResponse(w, r)
-    if resp == nil{
-        return 
-    }
-    respJ, err := json.Marshal(resp)
-    if err != nil{
-        fmt.Println("failed to marshal", err)
-        return
-    }
-    w.Write(respJ)
+func CompileHandler(w http.ResponseWriter, r *http.Request) {
+	resp := compileResponse(w, r)
+	if resp == nil {
+		return
+	}
+	respJ, err := json.Marshal(resp)
+	if err != nil {
+		logger.Errorln("failed to marshal", err)
+		return
+	}
+	w.Write(respJ)
 }
 
-func compileResponse(w http.ResponseWriter, r *http.Request) *Response{
-    // read the request body
+// convenience wrapper for javascript frontend
+func CompileHandlerJs(w http.ResponseWriter, r *http.Request) {
+	resp := compileResponse(w, r)
+	if resp == nil {
+		return
+	}
+	code := resp.Bytecode
+	hexx := hex.EncodeToString(code)
+	w.Write([]byte(fmt.Sprintf(`{"bytecode": "%s"}`, hexx)))
+}
+
+func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
+	// read the request body
 	body, err := ioutil.ReadAll(r.Body)
-	if err != nil{
-        log.Println("err on read http request body", err)
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return nil
+	if err != nil {
+		logger.Errorln("err on read http request body", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return nil
 	}
 
-    // unmarshall body into req struct
-	var req Request
-	err = json.Unmarshal(body, &req)
-	if err != nil{
-		log.Println("err on json unmarshal", err)
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return nil
+	// unmarshall body into req struct
+	req := new(Request)
+	err = json.Unmarshal(body, req)
+	if err != nil {
+		logger.Errorln("err on json unmarshal of request", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return nil
 	}
 
-    resp := compileServerCore(req)    
-    return &resp
+	resp := compileServerCore(req)
+	return resp
 }
 
 // core compile functionality. used by the server and locally to mimic the server
-func compileServerCore(req Request) Response{
-    resp := Response{[][]byte{}, []string{}}
+func compileServerCore(req *Request) *Response {
 
-    names := []string{}
-    
-    // loop through the scripts, save each to drive
-    for _, c := range req.Scripts{
-        if c == nil || len(c) == 0{
-            names = append(names, "NULLCACHED")
-            continue
-        }
-        // take sha2 of request object to get tmp filename
-        hash := sha256.Sum256([]byte(c))
-        filename := path.Join(ServerTmp, hex.EncodeToString(hash[:]) + ".lll")
-        names = append(names, filename)
+	var name string
+	lang := req.Language
+	compiler := Compilers[lang]
 
-        // lllc requires a file to read
-        // check if filename already exists. if not, write
-        if _, err := os.Stat(filename); err != nil{
-            ioutil.WriteFile(filename, c, 0644)
-        }
-    }
-    // loop through includes, also save to drive
-    for k, v := range req.Includes{
-        filename := path.Join(ServerTmp, k+".lll")
-        if _, err := os.Stat(filename); err != nil{
-            ioutil.WriteFile(filename, v, 0644)
-        }
-    }
+	c := req.Script
+	if c == nil || len(c) == 0 {
+		name = "NULLCACHED"
+	} else {
+		// take sha2 of request object to get tmp filename
+		hash := sha256.Sum256(c)
+		filename := path.Join(ServerCache, compiler.Ext(hex.EncodeToString(hash[:])))
+		name = filename
 
-    //compile scripts, return bytecode and error 
-    for _, c := range names{
-        fmt.Println("name:", c)
-        if c == "NULLCACHED"{
-            resp.Error = append(resp.Error, "")
-            resp.Bytecode = append(resp.Bytecode, []byte("NULLCACHED"))
-            continue
-        }
-        compiled, err := CompileLLLWrapper(c)
-        if err != nil{
-           resp.Error = append(resp.Error, err.Error())
-        } else{
-           resp.Error = append(resp.Error, "")
-        }
-        resp.Bytecode = append(resp.Bytecode, compiled)
-    }
-    return resp
+		// lllc requires a file to read
+		// check if filename already exists. if not, write
+		if _, err := os.Stat(filename); err != nil {
+			ioutil.WriteFile(filename, c, 0644)
+		}
+	}
+
+	// loop through includes, also save to drive
+	for k, v := range req.Includes {
+		filename := path.Join(ServerCache, compiler.Ext(k))
+		if _, err := os.Stat(filename); err != nil {
+			ioutil.WriteFile(filename, v, 0644)
+		}
+	}
+	var resp *Response
+	//compile scripts, return bytecode and error
+	if name == "NULLCACHED" {
+
+		resp = NewResponse([]byte("NULLCACHED"), "")
+	} else {
+		var e string
+		compiled, err := CompileWrapper(name, lang)
+		if err != nil {
+			e = err.Error()
+		} else {
+			e = ""
+		}
+		resp = NewResponse(compiled, e)
+	}
+
+	return resp
 }
 
-// wrapper to lllc cli
-func CompileLLLWrapper(filename string) ([]byte, error){
-    // we need to be in the same dir as the files for sake of includes
-    cur, _ := os.Getwd()
-    dir := path.Dir(filename)
-    dir, _ = filepath.Abs(dir)
-    filename = path.Base(filename)
+// wrapper to cli
+func CompileWrapper(filename string, lang string) ([]byte, error) {
+	// we need to be in the same dir as the files for sake of includes
+	cur, _ := os.Getwd()
+	dir := path.Dir(filename)
+	dir, _ = filepath.Abs(dir)
+	filename = path.Base(filename)
 
-    os.Chdir(dir)
-    cmd := exec.Command(PathToLLL, filename)
-    var out bytes.Buffer
-    cmd.Stdout = &out
-    err := cmd.Run()
-    if err != nil {
-        fmt.Println("Couldn't compile!!", err)
-        os.Chdir(cur)
-        return nil, err
-    }
-    os.Chdir(cur)
+	if _, ok := Compilers[lang]; !ok {
+		return nil, UnknownLang(lang)
+	}
 
-    outstr := out.String()
-    // get rid of new lines at the end
-    outstr = strings.TrimRight(outstr, "\n")
-    //for l:=len(outstr);outstr[l-1] == '\n';l--{
-        //outstr = outstr[:l-1]
-    //}
-    //fmt.Println("script hex", outstr)
+	os.Chdir(dir)
+	prgrm, args := Compilers[lang].CompileCmd(filename)
+	cmd := exec.Command(prgrm, args...)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		logger.Errorln("Couldn't compile!!", err)
+		os.Chdir(cur)
+		return nil, err
+	}
+	os.Chdir(cur)
 
-    b, err := hex.DecodeString(outstr)
-    if err != nil{
-        return nil, err
-    }
-    return b, nil
+	outstr := out.String()
+	// get rid of new lines at the end
+	outstr = strings.TrimRight(outstr, "\n")
+
+	b, err := hex.DecodeString(outstr)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
 
-func StartServer(addr string){
+func StartServer(addr string) {
 	//martini.Env = martini.Prod
 	srv := martini.Classic()
 	// Static files
 	srv.Use(martini.Static("./web"))
-	
+
 	srv.Post("/compile", CompileHandler)
-	srv.Post("/compile2", CompileHandler2)
+	srv.Post("/compile2", CompileHandlerJs)
 
 	srv.RunOnAddr(addr)
-	
+
 }

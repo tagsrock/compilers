@@ -70,10 +70,14 @@ var Languages = map[string]LangConfig{
 		Net:        true,
 		Extensions: []string{"se"},
 		IncludeRegexes: []string{
+			// because I'm not that good with regex and this
+			// demonstrates how to have multiple expressions to match :)
 			`create\("(.+?)"\)`,
+			`create\('(.+?)'\)`,
 		},
 		IncludeReplaces: [][]string{
 			[]string{`create("`, `.se")`},
+			[]string{`create('`, `.se')`},
 		},
 		CompileCmd: []string{
 			"/usr/local/bin/serpent",

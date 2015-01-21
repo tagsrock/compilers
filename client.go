@@ -8,6 +8,7 @@ import (
 )
 
 // 0 for nothing, 4 for everything
+// Overwritten by cmd/lllc-server
 var DebugMode = 2
 
 var logger = &Logger{}
@@ -33,7 +34,6 @@ func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error
 		respJ, err = requestResponse(req)
 	} else {
 		logger.Warnln("compiling locally...")
-		//printRequest(req)
 		respJ = compileServerCore(req)
 	}
 	return

@@ -155,7 +155,7 @@ func CompileWrapper(filename string, lang string) ([]byte, error) {
 
 	outstr := out.String()
 	// get rid of new lines at the end
-	outstr = strings.TrimRight(outstr, "\n")
+	outstr = strings.TrimSpace(outstr) //"\n")
 
 	b, err := hex.DecodeString(outstr)
 	if err != nil {

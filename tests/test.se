@@ -1,5 +1,3 @@
-init:
-	contract.storage[5] = 120
-code:
-	create("subcurrency.se")
+def lala():
+    create("subcurrency.se")
 

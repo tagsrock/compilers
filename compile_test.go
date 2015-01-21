@@ -32,7 +32,7 @@ func testContract(t *testing.T, file string) {
 	printCodeTop("us", our_code, N)
 	printCodeTop("them", truth_code, N)
 	if bytes.Compare(our_code, truth_code) != 0 {
-		t.Fatal(err)
+		t.Fatal(fmt.Errorf("Difference of %d", bytes.Compare(our_code, truth_code)))
 	}
 }
 

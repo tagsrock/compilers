@@ -73,7 +73,10 @@ func cliClient(c *cli.Context) {
 	utils.InitDataDir(lllcserver.ClientCache)
 	logger.Infoln("compiling", tocompile)
 	if c.Bool("local") {
-		b, err := lllcserver.CompileWrapper(tocompile, lang)
+		lllcserver.SetLanguageNet(lang, false)
+		//b, err := lllcserver.CompileWrapper(tocompile, lang)
+		// force it through the compile pipeline so we get caching
+		b, err := lllcserver.Compile(tocompile)
 		ifExit(err)
 		logger.Warnln("bytecode:", hex.EncodeToString(b))
 	} else {
@@ -123,7 +126,7 @@ var (
 	logFlag = cli.IntFlag{
 		Name:  "log",
 		Usage: "set the log level",
-		Value: 3,
+		Value: 5,
 	}
 
 	portFlag = cli.IntFlag{

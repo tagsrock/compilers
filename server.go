@@ -82,10 +82,9 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 
 // core compile functionality. used by the server and locally to mimic the server
 func compileServerCore(req *Request) *Response {
-	lll
 	var name string
 	lang := req.Language
-	compiler := Compilers[lang]
+	compiler := Languages[lang]
 
 	c := req.Script
 	if c == nil || len(c) == 0 {
@@ -137,12 +136,12 @@ func CompileWrapper(filename string, lang string) ([]byte, error) {
 	dir, _ = filepath.Abs(dir)
 	filename = path.Base(filename)
 
-	if _, ok := Compilers[lang]; !ok {
+	if _, ok := Languages[lang]; !ok {
 		return nil, UnknownLang(lang)
 	}
 
 	os.Chdir(dir)
-	prgrm, args := Compilers[lang].CompileCmd(filename)
+	prgrm, args := Languages[lang].Cmd(filename)
 	cmd := exec.Command(prgrm, args...)
 	var out bytes.Buffer
 	cmd.Stdout = &out

@@ -20,7 +20,8 @@ func testContract(t *testing.T, file string) {
 		t.Fatal(fmt.Errorf("Output is empty!"))
 	}
 
-	truth_code, err := CompileWrapper(file, "lll")
+	lang, _ := LangFromFile(file)
+	truth_code, err := CompileWrapper(file, lang)
 	if err != nil {
 		t.Fatal(err)
 	}

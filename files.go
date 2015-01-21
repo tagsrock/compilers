@@ -12,29 +12,43 @@ import (
 	"strings"
 )
 
+// cache compiled regex expressions
+var regexCache = make(map[string]*regexp.Regexp)
+
 // Find all matches to the include regex
 // Replace filenames with hashes
 func (c *CompileClient) replaceIncludes(code []byte, dir string, includes map[string][]byte) ([]byte, error) {
 	// find includes, load those as well
-	r, _ := regexp.Compile(c.IncludeRegex())
-	// replace all includes with hash of included lll
-	//  make sure to return hashes of includes so we can cache check them too
-	// do it recursively
-	ret := r.ReplaceAllFunc(code, func(s []byte) []byte {
-		s, err := c.includeReplacer(r, s, dir, includes)
-		if err != nil {
-			fmt.Println("ERR!:", err)
-			// panic (catch)
+	regexPatterns := c.IncludeRegexes()
+	for i, regPattern := range regexPatterns {
+		r, ok := regexCache[regPattern]
+		if !ok {
+			// cache the compiled regex
+			var err error
+			if r, err = regexp.Compile(regPattern); err != nil {
+				return nil, err
+			}
+			regexCache[regPattern] = r
 		}
-		return s
-	})
-	return ret, nil
+		// replace all includes with hash of included lll
+		//  make sure to return hashes of includes so we can cache check them too
+		// do it recursively
+		code = r.ReplaceAllFunc(code, func(s []byte) []byte {
+			s, err := c.includeReplacer(r, i, s, dir, includes)
+			if err != nil {
+				fmt.Println("ERR!:", err)
+				// panic (catch)
+			}
+			return s
+		})
+	}
+	return code, nil
 }
 
 // read the included file, hash it; if we already have it, return include replacement
 // if we don't, run replaceIncludes on it (recursive)
 // modifies the "includes" map
-func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, included map[string][]byte) ([]byte, error) {
+func (c *CompileClient) includeReplacer(r *regexp.Regexp, i int, s []byte, dir string, included map[string][]byte) ([]byte, error) {
 	m := r.FindSubmatch(s)
 	match := m[1]
 	// load the file
@@ -48,7 +62,8 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, 
 	// compute hash
 	hash := sha256.Sum256(incl_code)
 	h := hex.EncodeToString(hash[:])
-	ret := []byte(c.IncludeReplace(h))
+	replaces := c.IncludeReplace(h, i)
+	ret := []byte(replaces)
 	// if we've already loaded this, return the replacement
 	// and move on
 	if _, ok := included[h]; ok {
@@ -137,7 +152,7 @@ func LangFromFile(filename string) (string, error) {
 
 // the string is not literal if it ends in a valid extension
 func isLiteral(f, lang string) bool {
-	if strings.HasSuffix(f, Compilers[lang].Ext("")) {
+	if strings.HasSuffix(f, Languages[lang].Ext("")) {
 		return false
 	}
 

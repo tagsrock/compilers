@@ -28,7 +28,7 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 
 // send compile request to server or compile directly
 func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error) {
-	if c.net {
+	if c.config.Net {
 		logger.Warnln("compiling remotely...")
 		respJ, err = requestResponse(req)
 	} else {

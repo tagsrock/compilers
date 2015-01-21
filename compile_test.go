@@ -63,3 +63,19 @@ func TestLLLClientRemote(t *testing.T) {
 	testContract(t, "tests/namereg.lll")
 	ClearCaches()
 }
+
+func TestSerpentClientLocal(t *testing.T) {
+	ClearCaches()
+	SetLanguageNet("se", false)
+	testContract(t, "tests/test.se")
+}
+
+func TestSerpentClientRemote(t *testing.T) {
+	ClearCaches()
+	SetLanguageNet("se", false)
+	testContract(t, "tests/test.se")
+	ClearCaches()
+	SetLanguageNet("se", true)
+	testContract(t, "tests/test.se")
+	ClearCaches()
+}

@@ -70,10 +70,10 @@ var Languages = map[string]LangConfig{
 		Net:        true,
 		Extensions: []string{"se"},
 		IncludeRegexes: []string{
-			`\(include "(.+?)"\)`,
+			`create\("(.+?)"\)`,
 		},
 		IncludeReplaces: [][]string{
-			[]string{`(include "`, `.lll")`},
+			[]string{`create("`, `.se")`},
 		},
 		CompileCmd: []string{
 			"/usr/local/bin/serpent",

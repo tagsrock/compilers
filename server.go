@@ -28,11 +28,11 @@ func homeDir() string {
 	return usr.HomeDir
 }
 
+// Server cache location in decerver tree
 var ServerCache = path.Join(utils.Lllc, "server")
-var null2 = utils.InitDataDir(ServerCache)
 
-// read in request body (should be pure lll code)
-// compile lll, build response object, write
+// Main http request handler
+// Read request, compile, build response object, write
 func CompileHandler(w http.ResponseWriter, r *http.Request) {
 	resp := compileResponse(w, r)
 	if resp == nil {
@@ -46,7 +46,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(respJ)
 }
 
-// convenience wrapper for javascript frontend
+// Convenience wrapper for javascript frontend
 func CompileHandlerJs(w http.ResponseWriter, r *http.Request) {
 	resp := compileResponse(w, r)
 	if resp == nil {
@@ -57,6 +57,7 @@ func CompileHandlerJs(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf(`{"bytecode": "%s"}`, hexx)))
 }
 
+// read in the files from the request, compile them
 func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 	// read the request body
 	body, err := ioutil.ReadAll(r.Body)
@@ -81,7 +82,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 
 // core compile functionality. used by the server and locally to mimic the server
 func compileServerCore(req *Request) *Response {
-
+	lll
 	var name string
 	lang := req.Language
 	compiler := Compilers[lang]
@@ -164,6 +165,7 @@ func CompileWrapper(filename string, lang string) ([]byte, error) {
 	return b, nil
 }
 
+// Start the compile server
 func StartServer(addr string) {
 	//martini.Env = martini.Prod
 	srv := martini.Classic()
@@ -174,5 +176,4 @@ func StartServer(addr string) {
 	srv.Post("/compile2", CompileHandlerJs)
 
 	srv.RunOnAddr(addr)
-
 }

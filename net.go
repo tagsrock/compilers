@@ -43,7 +43,7 @@ func NewResponse(bytecode []byte, err string) *Response {
 	}
 }
 
-//
+// send an http request and wait for the response
 func requestResponse(req *Request) (*Response, error) {
 	lang := req.Language
 	URL := Languages[lang].URL

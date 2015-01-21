@@ -11,17 +11,16 @@ import (
 
 var DefaultUrl = "http://162.218.65.211:8090/compile"
 
-// A compiler interface adds extensions and replaces includes
+// A compiler interface adds filename extensions, replaces includes, and executes a compiler program
 type Compiler interface {
 	Lang() string
 	Ext(h string) string
-	IncludeRegex() string           // regular expression string
-	IncludeReplace(h string) string // new include stmt
-	CompileCmd(file string) (string, []string)
+	IncludeRegex() string                      // regular expression string
+	IncludeReplace(h string) string            // new include stmt
+	CompileCmd(file string) (string, []string) // command line string to execute
 }
 
-var LangConfigs map[string]LangConfig
-
+// language configuration struct
 type LangConfig struct {
 	URL        string   `json:"url"`
 	Path       string   `json:"path"`
@@ -29,6 +28,7 @@ type LangConfig struct {
 	Extensions []string `json:"extensions"`
 }
 
+// global variable mapping languages to their configs
 var Languages = map[string]LangConfig{
 	"lll": LangConfig{
 		URL:        DefaultUrl,
@@ -46,6 +46,9 @@ var Languages = map[string]LangConfig{
 }
 
 func init() {
+	utils.InitDataDir(ClientCache)
+	utils.InitDataDir(ServerCache)
+
 	// read language config from  ~/.decerver
 	// if it doesnt exist yet, do nothing
 	if _, err := os.Stat(utils.Languages); err != nil {
@@ -84,6 +87,7 @@ func checkConfig(f string) error {
 	return nil
 }
 
+// Set the languages compiler path
 func SetLanguagePath(lang, path string) error {
 	l, ok := Languages[lang]
 	if !ok {
@@ -94,6 +98,7 @@ func SetLanguagePath(lang, path string) error {
 	return nil
 }
 
+// Set the languages url
 func SetLanguageURL(lang, url string) error {
 	l, ok := Languages[lang]
 	if !ok {
@@ -104,6 +109,7 @@ func SetLanguageURL(lang, url string) error {
 	return nil
 }
 
+// Set whether the language should use the remote server or compile locally
 func SetLanguageNet(lang string, net bool) error {
 	l, ok := Languages[lang]
 	if !ok {
@@ -115,6 +121,7 @@ func SetLanguageNet(lang string, net bool) error {
 
 }
 
+// gloval variable mapping languages to their compiler interfaces
 var Compilers = assembleCompilers()
 
 func assembleCompilers() map[string]Compiler {
@@ -125,6 +132,7 @@ func assembleCompilers() map[string]Compiler {
 	return compilers
 }
 
+// Main client struct to wrap a compiler interface and its configuration data
 type CompileClient struct {
 	c    Compiler
 	url  string
@@ -132,25 +140,32 @@ type CompileClient struct {
 	net  bool
 }
 
+// Return the language name
 func (c *CompileClient) Lang() string {
 	return c.c.Lang()
 }
 
+// Return the language's main extension
 func (c *CompileClient) Ext(h string) string {
 	return c.c.Ext(h)
 }
 
+// Return the regex string to match include statements
 func (c *CompileClient) IncludeRegex() string {
 	return c.c.IncludeRegex()
 }
+
+// Return the string to replace matched regex expressions
 func (c *CompileClient) IncludeReplace(h string) string {
 	return c.c.IncludeReplace(h)
 }
 
+// Unknown language error
 func UnknownLang(lang string) error {
 	return fmt.Errorf("Unknown language %s", lang)
 }
 
+// Create a new compile client
 func NewCompileClient(lang string) (*CompileClient, error) {
 	compiler, err := NewCompiler(lang)
 	if err != nil {
@@ -166,6 +181,7 @@ func NewCompileClient(lang string) (*CompileClient, error) {
 	return cc, nil
 }
 
+// Create a new compiler interface for a given language
 func NewCompiler(lang string) (c Compiler, err error) {
 	switch lang {
 	case "lll":
@@ -178,6 +194,7 @@ func NewCompiler(lang string) (c Compiler, err error) {
 	return
 }
 
+// New LLL compiler
 func NewLLL() Compiler {
 	return &LLLCompiler{Languages["lll"].Path}
 }
@@ -206,6 +223,7 @@ func (c *LLLCompiler) CompileCmd(f string) (string, []string) {
 	return c.path, []string{f}
 }
 
+// New Serpent compiler
 func NewSerpent() Compiler {
 	return &SerpentCompiler{Languages["se"].Path}
 }

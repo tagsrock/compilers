@@ -12,8 +12,8 @@ var DebugMode = 2
 
 var logger = &Logger{}
 
+// Client cache location in decerver tree
 var ClientCache = path.Join(utils.Lllc, "client")
-var null = utils.InitDataDir(ClientCache)
 
 // filename is either a filename or literal code
 func resolveCode(filename string, literal bool) (code []byte, err error) {
@@ -26,7 +26,7 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 	return
 }
 
-//
+// send compile request to server or compile directly
 func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error) {
 	if c.net {
 		logger.Warnln("compiling remotely...")

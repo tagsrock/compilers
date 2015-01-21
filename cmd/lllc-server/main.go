@@ -55,8 +55,6 @@ func before(c *cli.Context) error {
 }
 
 func cliClient(c *cli.Context) {
-	host := c.String("host")
-	url := host + "/" + "compile"
 	tocompile := c.Args()[0]
 
 	var err error
@@ -67,7 +65,11 @@ func cliClient(c *cli.Context) {
 		ifExit(err)
 	}
 
-	lllcserver.SetLanguageURL(lang, url)
+	host := c.String("host")
+	if host != "" {
+		url := host + "/" + "compile"
+		lllcserver.SetLanguageURL(lang, url)
+	}
 	logger.Debugln("language config:", lllcserver.Languages[lang])
 
 	utils.InitDataDir(lllcserver.ClientCache)
@@ -143,7 +145,7 @@ var (
 	hostFlag = cli.StringFlag{
 		Name:  "host",
 		Usage: "set the server host (inlucde http://)",
-		Value: "http://localhost:999",
+		Value: "",
 	}
 )
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"path"
 	"testing"
 )
 
@@ -36,13 +37,14 @@ func testContract(t *testing.T, file string) {
 	}
 }
 
-func printCodeTop(s string, code []byte, n int) {
-	fmt.Println("length:", len(code))
-
-	if len(code) > n {
-		code = code[:n]
-	}
-	fmt.Printf("%s\t %s\n", s, hex.EncodeToString(code))
+func testLocalRemote(t *testing.T, lang, filename string) {
+	ClearCaches()
+	SetLanguageNet(lang, false)
+	testContract(t, filename)
+	ClearCaches()
+	SetLanguageNet(lang, true)
+	testContract(t, filename)
+	ClearCaches()
 }
 
 func TestLLLClientLocal(t *testing.T) {
@@ -55,13 +57,7 @@ func TestLLLClientLocal(t *testing.T) {
 }
 
 func TestLLLClientRemote(t *testing.T) {
-	ClearCaches()
-	SetLanguageNet("lll", false)
-	testContract(t, "tests/namereg.lll")
-	ClearCaches()
-	SetLanguageNet("lll", true)
-	testContract(t, "tests/namereg.lll")
-	ClearCaches()
+	testLocalRemote(t, "lll", "tests/namereg.lll")
 }
 
 func TestSerpentClientLocal(t *testing.T) {
@@ -71,11 +67,15 @@ func TestSerpentClientLocal(t *testing.T) {
 }
 
 func TestSerpentClientRemote(t *testing.T) {
-	ClearCaches()
-	SetLanguageNet("se", false)
-	testContract(t, "tests/test.se")
-	ClearCaches()
-	SetLanguageNet("se", true)
-	testContract(t, "tests/test.se")
-	ClearCaches()
+	testLocalRemote(t, "se", "tests/test.se")
+	testLocalRemote(t, "se", path.Join(homeDir(), "serpent", "examples", "schellingcoin", "schellingcoin.se"))
+}
+
+func printCodeTop(s string, code []byte, n int) {
+	fmt.Println("length:", len(code))
+
+	if len(code) > n {
+		code = code[:n]
+	}
+	fmt.Printf("%s\t %s\n", s, hex.EncodeToString(code))
 }

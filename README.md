@@ -19,17 +19,22 @@ see the config file at `~/.decerver/languages/config.json`.
 
 # How to play
 
-## Use the Golang API
+## Using the Golang API
 
 ```
 bytecode, err := lllcserver.Compile("mycontract.lll")
 ```
 
-Language type determined automatically from extension.
+The language is determined automatically from extension. If you want to compile literal expressions, 
+you must specify the language explicitly, ie.
 
-## Use the CLI
+```
+bytecode, err := lllcserver.CompileLiteral("[0x5](+ 4 @0x3)", "lll")
+```
 
-### Compile Remotely
+## Using the CLI
+
+#### Compile Remotely
 
 ```
 lllc-server compile --host http://lllc.erisindustries.com:8090 test.lll 
@@ -37,27 +42,27 @@ lllc-server compile --host http://lllc.erisindustries.com:8090 test.lll
 
 Leave out the `--host` flag to default to the url in the config.
 
-### Compile Locally 
+#### Compile Locally 
 Make sure you have the appropriate compiler installed and configured (you may need to adjust the `cmd` field in the config file)
 
 ```
 lllc-server compile --local test.lll
 ```
 
-### Run a server yourself
+#### Run a server yourself
 
 ```
 lllc-server --port 9000
 ```
 
-## Use the json-rpc proxy server
+## Using the json-rpc proxy server
 
 If you are coding in another language and would like to use the lllc-server client without wrapping the command line, run a proxy server and send it a simple http-json request.
 
 To run the proxy:
 
 ```
-lllc-server proxy --port 9000
+lllc-server proxy --port 9099
 ```
 
 And the JSON request:
@@ -87,7 +92,15 @@ The response JSON looks like:
 }
 ```
 
+To test, stick one of the above JSON requests into `file.json` and run
+
+```
+curl -X POST -d @file.json http://localhost:9099 --header "Content-Type:application/json"
+```
+
 
 # Support
 
 Run `lllc-server --help` or `lllc-server compile --help` for more info, or come talk to us on irc at #erisindustries and #erisindustries-dev.
+
+If you are working on a language, and would like to have it supported, please create an issue! Note it is possible to add new languages simply by editing the config file, without having to recompile the lllc-server source code.

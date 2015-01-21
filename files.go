@@ -119,7 +119,7 @@ func (c *CompileClient) cachedResponse(hash string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewResponse(b, ""), nil
+	return NewResponse(b, nil), nil
 }
 
 // cache a file to disk

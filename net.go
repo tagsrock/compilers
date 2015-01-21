@@ -2,13 +2,14 @@ package lllcserver
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
-// compile request object
+// Compile request object
 type Request struct {
 	ScriptName string            `json:name"`
 	Language   string            `json:"language"`
@@ -16,9 +17,24 @@ type Request struct {
 	Includes   map[string][]byte `json:"includes"` // filename => source code file bytes
 }
 
-// compile response object
+// Compile response object
 type Response struct {
 	Bytecode []byte `json:"bytecode"`
+	Error    string `json:"error"`
+}
+
+// Proxy request object.
+// A proxy request must contain a source.
+// If the source is a literal (rather than filename),
+// ProxyReq.Literal must be set to true and ProxyReq.Language must be provided
+type ProxyReq struct {
+	Source   string `json:"source"`
+	Literal  bool   `json:"literal"`
+	Language string `json:"language"`
+}
+
+type ProxyRes struct {
+	Bytecode string `json:"bytecode"`
 	Error    string `json:"error"`
 }
 
@@ -36,10 +52,26 @@ func NewRequest(script []byte, includes map[string][]byte, lang string) *Request
 }
 
 // New response object from bytecode and an error
-func NewResponse(bytecode []byte, err string) *Response {
+func NewResponse(bytecode []byte, err error) *Response {
+	e := ""
+	if err != nil {
+		e = err.Error()
+	}
 	return &Response{
 		Bytecode: bytecode,
-		Error:    err,
+		Error:    e,
+	}
+}
+
+func NewProxyResponse(bytecode []byte, err error) *ProxyRes {
+	script := ""
+	res := NewResponse(bytecode, err)
+	if bytecode != nil {
+		script = hex.EncodeToString(bytecode)
+	}
+	return &ProxyRes{
+		Bytecode: script,
+		Error:    res.Error,
 	}
 }
 

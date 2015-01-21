@@ -102,9 +102,7 @@ func Compile(filename string) ([]byte, error) {
 
 	logger.Infoln("lang:", lang)
 
-	literal := isLiteral(filename, lang)
-	logger.Infoln("is literal:", literal)
-	code, err := resolveCode(filename, literal)
+	code, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 
@@ -114,6 +112,6 @@ func Compile(filename string) ([]byte, error) {
 }
 
 // Compile a literal piece of code
-func CompileLiteral(code []byte, lang string) ([]byte, error) {
-	return compile(code, lang, utils.Scratch)
+func CompileLiteral(code string, lang string) ([]byte, error) {
+	return compile([]byte(code), lang, utils.Scratch)
 }

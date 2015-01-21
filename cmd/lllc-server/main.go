@@ -44,6 +44,14 @@ func main() {
 				//logFlag,
 			},
 		},
+		cli.Command{
+			Name:   "proxy",
+			Usage:  "run a proxy server for out of process access",
+			Action: cliProxy,
+			Flags: []cli.Flag{
+				portFlag,
+			},
+		},
 	}
 
 	run(app)
@@ -61,7 +69,6 @@ func cliClient(c *cli.Context) {
 	lang := c.String("language")
 	if lang == "" {
 		lang, err = lllcserver.LangFromFile(tocompile)
-		fmt.Println("in here", lang)
 		ifExit(err)
 	}
 
@@ -88,6 +95,11 @@ func cliClient(c *cli.Context) {
 		}
 		logger.Warnln("bytecode:", hex.EncodeToString(code))
 	}
+}
+
+func cliProxy(c *cli.Context) {
+	addr := "localhost:" + strconv.Itoa(c.Int("port"))
+	lllcserver.StartProxy(addr)
 }
 
 func cliServer(c *cli.Context) {

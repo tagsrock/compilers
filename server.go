@@ -31,6 +31,41 @@ func homeDir() string {
 // Server cache location in decerver tree
 var ServerCache = path.Join(utils.Lllc, "server")
 
+// Handler for proxy requests (ie. a compile request from langauge other than go)
+func ProxyHandler(w http.ResponseWriter, r *http.Request) {
+	// read the request body
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		logger.Errorln("err on read http request body", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("body:", string(body))
+	req := new(ProxyReq)
+	err = json.Unmarshal(body, req)
+	if err != nil {
+		logger.Errorln("err on read http request body", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var code []byte
+	if req.Literal {
+		code, err = CompileLiteral(req.Source, req.Language)
+	} else {
+		code, err = Compile(req.Source)
+	}
+	resp := NewProxyResponse(code, err)
+
+	respJ, err := json.Marshal(resp)
+	if err != nil {
+		logger.Errorln("failed to marshal", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Write(respJ)
+}
+
 // Main http request handler
 // Read request, compile, build response object, write
 func CompileHandler(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +76,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request) {
 	respJ, err := json.Marshal(resp)
 	if err != nil {
 		logger.Errorln("failed to marshal", err)
-		return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.Write(respJ)
 }
@@ -113,16 +148,10 @@ func compileServerCore(req *Request) *Response {
 	//compile scripts, return bytecode and error
 	if name == "NULLCACHED" {
 
-		resp = NewResponse([]byte("NULLCACHED"), "")
+		resp = NewResponse([]byte("NULLCACHED"), nil)
 	} else {
-		var e string
 		compiled, err := CompileWrapper(name, lang)
-		if err != nil {
-			e = err.Error()
-		} else {
-			e = ""
-		}
-		resp = NewResponse(compiled, e)
+		resp = NewResponse(compiled, err)
 	}
 
 	return resp
@@ -174,5 +203,13 @@ func StartServer(addr string) {
 	srv.Post("/compile", CompileHandler)
 	srv.Post("/compile2", CompileHandlerJs)
 
+	srv.RunOnAddr(addr)
+}
+
+// Start the proxy server
+// Dead simple json-rpc so we can compile code from languages other than go
+func StartProxy(addr string) {
+	srv := martini.Classic()
+	srv.Post("/", ProxyHandler)
 	srv.RunOnAddr(addr)
 }

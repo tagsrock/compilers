@@ -9,32 +9,59 @@ import (
 	"path"
 )
 
-var DefaultUrl = "http://162.218.65.211:8090/compile"
+var DefaultUrl = "http://ps.erisindustries.com:8090/compile"
 
-// A compiler interface adds extensions and replaces includes
-type Compiler interface {
-	Lang() string
-	Ext(h string) string
-	IncludeRegex() string           // regular expression string
-	IncludeReplace(h string) string // new include stmt
-	CompileCmd(file string) (string, []string)
-}
-
-var LangConfigs map[string]LangConfig
-
+// Language configuration struct
+// New language capabilities can be added to the server simply by
+// providing a LangConfig
+// Each element in IncludeReplaces is a pair of strings, between which is placed the filename
+// CompileCmd is a list of what would be white-space separated tokens on the
+// command line, with a `_` to denote the place of the filename
 type LangConfig struct {
-	URL        string   `json:"url"`
-	Path       string   `json:"path"`
-	Net        bool     `json:"net"`
-	Extensions []string `json:"extensions"`
+	URL             string     `json:"url"`
+	Path            string     `json:"path"`
+	Net             bool       `json:"net"`
+	Extensions      []string   `json:"extensions"`
+	IncludeRegexes  []string   `json:"regexes"`
+	IncludeReplaces [][]string `json:"replaces"`
+	CompileCmd      []string   `json:"cmd"`
 }
 
+// Append the language extension to the filename
+func (l LangConfig) Ext(h string) string {
+	return h + "." + l.Extensions[0]
+}
+
+// Fill in the filename and return the command line args
+func (l LangConfig) Cmd(file string) (prgrm string, args []string) {
+	prgrm = l.CompileCmd[0]
+	for _, s := range l.CompileCmd[1:] {
+		if s == "_" {
+			args = append(args, file)
+		} else {
+			args = append(args, s)
+		}
+	}
+	return
+}
+
+// Global variable mapping languages to their configs
 var Languages = map[string]LangConfig{
 	"lll": LangConfig{
 		URL:        DefaultUrl,
 		Path:       path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc"),
 		Net:        true,
 		Extensions: []string{"lll", "def"},
+		IncludeRegexes: []string{
+			`\(include "(.+?)"\)`,
+		},
+		IncludeReplaces: [][]string{
+			[]string{`(include "`, `.lll")`},
+		},
+		CompileCmd: []string{
+			path.Join(homeDir(), "cpp-ethereum/build/lllc/lllc"),
+			"_",
+		},
 	},
 
 	"se": LangConfig{
@@ -42,10 +69,28 @@ var Languages = map[string]LangConfig{
 		Path:       "/usr/local/bin/serpent",
 		Net:        true,
 		Extensions: []string{"se"},
+		IncludeRegexes: []string{
+			// because I'm not that good with regex and this
+			// demonstrates how to have multiple expressions to match :)
+			`create\("(.+?)"\)`,
+			`create\('(.+?)'\)`,
+		},
+		IncludeReplaces: [][]string{
+			[]string{`create("`, `.se")`},
+			[]string{`create('`, `.se')`},
+		},
+		CompileCmd: []string{
+			"/usr/local/bin/serpent",
+			"compile",
+			"_",
+		},
 	},
 }
 
 func init() {
+	utils.InitDataDir(ClientCache)
+	utils.InitDataDir(ServerCache)
+
 	// read language config from  ~/.decerver
 	// if it doesnt exist yet, do nothing
 	if _, err := os.Stat(utils.Languages); err != nil {
@@ -58,7 +103,6 @@ func init() {
 		logger.Errorln("resorting to default language settings")
 		return
 	}
-
 }
 
 func checkConfig(f string) error {
@@ -84,6 +128,7 @@ func checkConfig(f string) error {
 	return nil
 }
 
+// Set the languages compiler path
 func SetLanguagePath(lang, path string) error {
 	l, ok := Languages[lang]
 	if !ok {
@@ -94,6 +139,7 @@ func SetLanguagePath(lang, path string) error {
 	return nil
 }
 
+// Set the languages url
 func SetLanguageURL(lang, url string) error {
 	l, ok := Languages[lang]
 	if !ok {
@@ -104,6 +150,7 @@ func SetLanguageURL(lang, url string) error {
 	return nil
 }
 
+// Set whether the language should use the remote server or compile locally
 func SetLanguageNet(lang string, net bool) error {
 	l, ok := Languages[lang]
 	if !ok {
@@ -115,123 +162,47 @@ func SetLanguageNet(lang string, net bool) error {
 
 }
 
-var Compilers = assembleCompilers()
-
-func assembleCompilers() map[string]Compiler {
-	compilers := make(map[string]Compiler)
-	for l, _ := range Languages {
-		compilers[l], _ = NewCompiler(l)
-	}
-	return compilers
-}
-
+// Main client struct to wrap a compiler interface and its configuration data
 type CompileClient struct {
-	c    Compiler
-	url  string
-	path string
-	net  bool
+	config LangConfig
+	lang   string
 }
 
+// Return the language name
 func (c *CompileClient) Lang() string {
-	return c.c.Lang()
+	return c.lang //c.Lang()
 }
 
+// Return the language's main extension
 func (c *CompileClient) Ext(h string) string {
-	return c.c.Ext(h)
+	return c.config.Ext(h)
 }
 
-func (c *CompileClient) IncludeRegex() string {
-	return c.c.IncludeRegex()
-}
-func (c *CompileClient) IncludeReplace(h string) string {
-	return c.c.IncludeReplace(h)
+// Return the regex string to match include statements
+func (c *CompileClient) IncludeRegexes() []string {
+	return c.config.IncludeRegexes
 }
 
+// Return the string to replace matched regex expressions
+func (c *CompileClient) IncludeReplace(h string, i int) string {
+	s := c.config.IncludeReplaces[i]
+	return s[0] + h + s[1]
+}
+
+// Unknown language error
 func UnknownLang(lang string) error {
 	return fmt.Errorf("Unknown language %s", lang)
 }
 
+// Create a new compile client
 func NewCompileClient(lang string) (*CompileClient, error) {
-	compiler, err := NewCompiler(lang)
-	if err != nil {
-		return nil, err
+	l, ok := Languages[lang]
+	if !ok {
+		return nil, UnknownLang(lang)
 	}
-	l := Languages[lang]
 	cc := &CompileClient{
-		c:    compiler,
-		url:  l.URL,
-		path: l.Path,
-		net:  l.Net,
+		config: l,
+		lang:   lang,
 	}
 	return cc, nil
-}
-
-func NewCompiler(lang string) (c Compiler, err error) {
-	switch lang {
-	case "lll":
-		c = NewLLL()
-	case "se", "serpent":
-		c = NewSerpent()
-	case "sol", "solidity":
-		err = UnknownLang(lang)
-	}
-	return
-}
-
-func NewLLL() Compiler {
-	return &LLLCompiler{Languages["lll"].Path}
-}
-
-type LLLCompiler struct {
-	path string
-}
-
-func (c *LLLCompiler) Lang() string {
-	return "lll"
-}
-
-func (c *LLLCompiler) Ext(h string) string {
-	return h + "." + "lll"
-}
-
-func (c *LLLCompiler) IncludeReplace(h string) string {
-	return `(include "` + h + `.lll")`
-}
-
-func (c *LLLCompiler) IncludeRegex() string {
-	return `\(include "(.+?)"\)`
-}
-
-func (c *LLLCompiler) CompileCmd(f string) (string, []string) {
-	return c.path, []string{f}
-}
-
-func NewSerpent() Compiler {
-	return &SerpentCompiler{Languages["se"].Path}
-}
-
-type SerpentCompiler struct {
-	path string
-}
-
-func (c *SerpentCompiler) Lang() string {
-	return "se"
-}
-
-func (c *SerpentCompiler) Ext(h string) string {
-	return h + "." + "se"
-}
-
-// TODO
-func (c *SerpentCompiler) IncludeReplace(h string) string {
-	return `(include "` + h + `.lll")`
-}
-
-// TODO
-func (c *SerpentCompiler) IncludeRegex() string {
-	return `\(include "(.+?)"\)`
-}
-
-func (c *SerpentCompiler) CompileCmd(f string) (string, []string) {
-	return c.path, []string{"compile", f}
 }

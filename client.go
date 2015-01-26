@@ -8,12 +8,13 @@ import (
 )
 
 // 0 for nothing, 4 for everything
+// Overwritten by cmd/lllc-server
 var DebugMode = 2
 
 var logger = &Logger{}
 
+// Client cache location in decerver tree
 var ClientCache = path.Join(utils.Lllc, "client")
-var null = utils.InitDataDir(ClientCache)
 
 // filename is either a filename or literal code
 func resolveCode(filename string, literal bool) (code []byte, err error) {
@@ -26,14 +27,13 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 	return
 }
 
-//
+// send compile request to server or compile directly
 func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error) {
-	if c.net {
+	if c.config.Net {
 		logger.Warnln("compiling remotely...")
 		respJ, err = requestResponse(req)
 	} else {
 		logger.Warnln("compiling locally...")
-		//printRequest(req)
 		respJ = compileServerCore(req)
 	}
 	return
@@ -102,9 +102,7 @@ func Compile(filename string) ([]byte, error) {
 
 	logger.Infoln("lang:", lang)
 
-	literal := isLiteral(filename, lang)
-	logger.Infoln("is literal:", literal)
-	code, err := resolveCode(filename, literal)
+	code, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 
@@ -114,6 +112,6 @@ func Compile(filename string) ([]byte, error) {
 }
 
 // Compile a literal piece of code
-func CompileLiteral(code []byte, lang string) ([]byte, error) {
-	return compile(code, lang, utils.Scratch)
+func CompileLiteral(code string, lang string) ([]byte, error) {
+	return compile([]byte(code), lang, utils.Scratch)
 }

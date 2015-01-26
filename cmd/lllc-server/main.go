@@ -44,6 +44,14 @@ func main() {
 				//logFlag,
 			},
 		},
+		cli.Command{
+			Name:   "proxy",
+			Usage:  "run a proxy server for out of process access",
+			Action: cliProxy,
+			Flags: []cli.Flag{
+				portFlag,
+			},
+		},
 	}
 
 	run(app)
@@ -55,25 +63,29 @@ func before(c *cli.Context) error {
 }
 
 func cliClient(c *cli.Context) {
-	host := c.String("host")
-	url := host + "/" + "compile"
 	tocompile := c.Args()[0]
 
 	var err error
 	lang := c.String("language")
 	if lang == "" {
 		lang, err = lllcserver.LangFromFile(tocompile)
-		fmt.Println("in here", lang)
 		ifExit(err)
 	}
 
-	lllcserver.SetLanguageURL(lang, url)
+	host := c.String("host")
+	if host != "" {
+		url := host + "/" + "compile"
+		lllcserver.SetLanguageURL(lang, url)
+	}
 	logger.Debugln("language config:", lllcserver.Languages[lang])
 
 	utils.InitDataDir(lllcserver.ClientCache)
 	logger.Infoln("compiling", tocompile)
 	if c.Bool("local") {
-		b, err := lllcserver.CompileWrapper(tocompile, lang)
+		lllcserver.SetLanguageNet(lang, false)
+		//b, err := lllcserver.CompileWrapper(tocompile, lang)
+		// force it through the compile pipeline so we get caching
+		b, err := lllcserver.Compile(tocompile)
 		ifExit(err)
 		logger.Warnln("bytecode:", hex.EncodeToString(b))
 	} else {
@@ -83,6 +95,11 @@ func cliClient(c *cli.Context) {
 		}
 		logger.Warnln("bytecode:", hex.EncodeToString(code))
 	}
+}
+
+func cliProxy(c *cli.Context) {
+	addr := "localhost:" + strconv.Itoa(c.Int("port"))
+	lllcserver.StartProxy(addr)
 }
 
 func cliServer(c *cli.Context) {
@@ -123,7 +140,7 @@ var (
 	logFlag = cli.IntFlag{
 		Name:  "log",
 		Usage: "set the log level",
-		Value: 3,
+		Value: 5,
 	}
 
 	portFlag = cli.IntFlag{
@@ -140,7 +157,7 @@ var (
 	hostFlag = cli.StringFlag{
 		Name:  "host",
 		Usage: "set the server host (inlucde http://)",
-		Value: "http://localhost:999",
+		Value: "",
 	}
 )
 

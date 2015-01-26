@@ -12,29 +12,43 @@ import (
 	"strings"
 )
 
+// cache compiled regex expressions
+var regexCache = make(map[string]*regexp.Regexp)
+
 // Find all matches to the include regex
 // Replace filenames with hashes
 func (c *CompileClient) replaceIncludes(code []byte, dir string, includes map[string][]byte) ([]byte, error) {
 	// find includes, load those as well
-	r, _ := regexp.Compile(c.IncludeRegex())
-	// replace all includes with hash of included lll
-	//  make sure to return hashes of includes so we can cache check them too
-	// do it recursively
-	ret := r.ReplaceAllFunc(code, func(s []byte) []byte {
-		s, err := c.includeReplacer(r, s, dir, includes)
-		if err != nil {
-			fmt.Println("ERR!:", err)
-			// panic (catch)
+	regexPatterns := c.IncludeRegexes()
+	for i, regPattern := range regexPatterns {
+		r, ok := regexCache[regPattern]
+		if !ok {
+			// cache the compiled regex
+			var err error
+			if r, err = regexp.Compile(regPattern); err != nil {
+				return nil, err
+			}
+			regexCache[regPattern] = r
 		}
-		return s
-	})
-	return ret, nil
+		// replace all includes with hash of included lll
+		//  make sure to return hashes of includes so we can cache check them too
+		// do it recursively
+		code = r.ReplaceAllFunc(code, func(s []byte) []byte {
+			s, err := c.includeReplacer(r, i, s, dir, includes)
+			if err != nil {
+				fmt.Println("ERR!:", err)
+				// panic (catch)
+			}
+			return s
+		})
+	}
+	return code, nil
 }
 
 // read the included file, hash it; if we already have it, return include replacement
 // if we don't, run replaceIncludes on it (recursive)
 // modifies the "includes" map
-func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, included map[string][]byte) ([]byte, error) {
+func (c *CompileClient) includeReplacer(r *regexp.Regexp, i int, s []byte, dir string, included map[string][]byte) ([]byte, error) {
 	m := r.FindSubmatch(s)
 	match := m[1]
 	// load the file
@@ -48,7 +62,8 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, 
 	// compute hash
 	hash := sha256.Sum256(incl_code)
 	h := hex.EncodeToString(hash[:])
-	ret := []byte(c.IncludeReplace(h))
+	replaces := c.IncludeReplace(h, i)
+	ret := []byte(replaces)
 	// if we've already loaded this, return the replacement
 	// and move on
 	if _, ok := included[h]; ok {
@@ -65,6 +80,7 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, s []byte, dir string, 
 	return ret, nil
 }
 
+// check the cache for all includes, cache those not cached yet
 func (c *CompileClient) checkCacheIncludes(includes map[string][]byte) bool {
 	cached := true
 	for k, _ := range includes {
@@ -79,6 +95,7 @@ func (c *CompileClient) checkCacheIncludes(includes map[string][]byte) bool {
 	return cached
 }
 
+// check/cache all includes, hash the code, return hash and whether or not there was a full cache hit
 func (c *CompileClient) checkCached(code []byte, includes map[string][]byte) (string, bool) {
 	cachedIncludes := c.checkCacheIncludes(includes)
 
@@ -88,23 +105,24 @@ func (c *CompileClient) checkCached(code []byte, includes map[string][]byte) (st
 	fname := path.Join(ClientCache, c.Ext(hexHash))
 	_, scriptErr := os.Stat(fname)
 
-	// if an include has changed or the script has not been cached, append the code
-	// else, append nil
+	// if an include has changed or the script has not been cached
 	if !cachedIncludes || scriptErr != nil {
 		return hexHash, false
 	}
 	return hexHash, true
 }
 
+// return cached byte code as a response
 func (c *CompileClient) cachedResponse(hash string) (*Response, error) {
 	f := path.Join(ClientCache, c.Ext(hash))
 	b, err := ioutil.ReadFile(f)
 	if err != nil {
 		return nil, err
 	}
-	return NewResponse(b, ""), nil
+	return NewResponse(b, nil), nil
 }
 
+// cache a file to disk
 func (c *CompileClient) cacheFile(b []byte, hash string) error {
 	f := path.Join(ClientCache, c.Ext(hash))
 	if b != nil {
@@ -115,6 +133,7 @@ func (c *CompileClient) cacheFile(b []byte, hash string) error {
 	return nil
 }
 
+// Get language from filename extension
 func LangFromFile(filename string) (string, error) {
 	ext := path.Ext(filename)
 	ext = strings.Trim(ext, ".")
@@ -131,8 +150,9 @@ func LangFromFile(filename string) (string, error) {
 	return "", UnknownLang(ext)
 }
 
+// the string is not literal if it ends in a valid extension
 func isLiteral(f, lang string) bool {
-	if strings.HasSuffix(f, Compilers[lang].Ext("")) {
+	if strings.HasSuffix(f, Languages[lang].Ext("")) {
 		return false
 	}
 
@@ -146,6 +166,7 @@ func isLiteral(f, lang string) bool {
 	return true
 }
 
+// Clear client and server caches
 func ClearCaches() error {
 	if err := ClearServerCache(); err != nil {
 		return err
@@ -153,6 +174,7 @@ func ClearCaches() error {
 	return ClearClientCache()
 }
 
+// clear a directory of its contents
 func clearDir(dir string) error {
 	fs, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -167,14 +189,17 @@ func clearDir(dir string) error {
 	return nil
 }
 
+// Clear the server cache
 func ClearServerCache() error {
 	return clearDir(ServerCache)
 }
 
+// Clear the client cache
 func ClearClientCache() error {
 	return clearDir(ClientCache)
 }
 
+// Dead simple stupid convenient logger
 type Logger struct {
 }
 

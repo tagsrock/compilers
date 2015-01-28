@@ -98,9 +98,54 @@ To test, stick one of the above JSON requests into `file.json` and run
 curl -X POST -d @file.json http://localhost:9099 --header "Content-Type:application/json"
 ```
 
+# Install
+
+The lllc-server itself can be installed with
+
+```
+go get github.com/eris-ltd/lllc-server/cmd/lllc-server
+```
+
+Installing the actual compilers is a bit more involved. You need a bunch of cpp dependencies :(
+
+See [ethereum wiki](https://github.com/ethereum/cpp-ethereum/wiki/Building-on-Ubuntu) for dependencies (no need for qt)
+
+Note, eris stack is on a previous version of the languages (before the ABI spec) and so currently only support PoC6 LLL and Serpent 1.0
+
+Install `LLL` (eris LLL, which includes a few extra opcodes)
+
+```
+git clone git@github.com:eris-ltd/eris-cpp
+cd eris-cpp/build
+bash instructions
+```
+
+Install `Serpent`:
+```
+git clone git@github.com:ethereum/serpent
+cd serpent
+make
+sudo make install
+```
+
+Install `Solidity` (not supported yet):
+
+```
+git clone git@github.com:ethereum/cpp-ethereum
+cd cpp-ethereum
+mkdir build
+cd build
+cmake .. -
+make -j2
+```
+
+Now the final thing is make sure the configuration paths are properly set. 
+Running `epm init` (assuming epm is installed) should create the config file at `~/.decerver/languages/config.json`.
+Edit the `cmd` field for each language to have the correct path.
 
 # Support
 
 Run `lllc-server --help` or `lllc-server compile --help` for more info, or come talk to us on irc at #erisindustries and #erisindustries-dev.
 
 If you are working on a language, and would like to have it supported, please create an issue! Note it is possible to add new languages simply by editing the config file, without having to recompile the lllc-server source code.
+

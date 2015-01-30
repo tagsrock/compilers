@@ -88,14 +88,10 @@ var Languages = map[string]LangConfig{
 }
 
 func init() {
+	utils.InitDecerverDir()
 	utils.InitDataDir(ClientCache)
 	utils.InitDataDir(ServerCache)
 
-	// read language config from  ~/.decerver
-	// if it doesnt exist yet, do nothing
-	if _, err := os.Stat(utils.Languages); err != nil {
-		return
-	}
 	f := path.Join(utils.Languages, "config.json")
 	err := checkConfig(f)
 	if err != nil {

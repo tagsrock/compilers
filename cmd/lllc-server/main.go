@@ -85,15 +85,17 @@ func cliClient(c *cli.Context) {
 		lllcserver.SetLanguageNet(lang, false)
 		//b, err := lllcserver.CompileWrapper(tocompile, lang)
 		// force it through the compile pipeline so we get caching
-		b, err := lllcserver.Compile(tocompile)
+		b, abi, err := lllcserver.Compile(tocompile)
 		ifExit(err)
 		logger.Warnln("bytecode:", hex.EncodeToString(b))
+		logger.Warnln("abi:", abi)
 	} else {
-		code, err := lllcserver.Compile(tocompile)
+		code, abi, err := lllcserver.Compile(tocompile)
 		if err != nil {
 			fmt.Println(err)
 		}
 		logger.Warnln("bytecode:", hex.EncodeToString(code))
+		logger.Warnln("abi:", abi)
 	}
 }
 

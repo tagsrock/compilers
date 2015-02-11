@@ -119,7 +119,9 @@ func (c *CompileClient) cachedResponse(hash string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewResponse(b, nil), nil
+	f = path.Join(ClientCache, c.Ext(hash+"-abi"))
+	abi, _ := ioutil.ReadFile(f)
+	return NewResponse(b, string(abi), nil), nil
 }
 
 // cache a file to disk

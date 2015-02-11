@@ -161,7 +161,6 @@ func compileServerCore(req *Request) *Response {
 	}
 
 	var resp *Response
-	fmt.Println("CALLING COMPILE WRAPPER")
 	//compile scripts, return bytecode and error
 	compiled, docs, err := CompileWrapper(name, lang)
 
@@ -200,17 +199,18 @@ func CompileWrapper(filename string, lang string) ([]byte, string, error) {
 	}
 
 	os.Chdir(dir)
+	defer func() {
+		os.Chdir(cur)
+	}()
 
 	prgrm, args := Languages[lang].Cmd(filename)
 	hexCode, err := commandWrapper(prgrm, args)
 	if err != nil {
 		logger.Errorln("Couldn't compile!!", err)
-		os.Chdir(cur)
 		return nil, "", err
 	}
 
 	prgrm, args = Languages[lang].Abi(filename)
-	fmt.Println(prgrm, args)
 	jsonAbi, err := commandWrapper(prgrm, args)
 	if err != nil {
 		logger.Errorln("Couldn't produce abi doc!!", err)
@@ -219,6 +219,7 @@ func CompileWrapper(filename string, lang string) ([]byte, string, error) {
 
 	b, err := hex.DecodeString(hexCode)
 	if err != nil {
+
 		return nil, "", err
 	}
 

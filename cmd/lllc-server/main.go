@@ -6,6 +6,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/eris-ltd/epm-go/utils"
 	"github.com/eris-ltd/lllc-server"
+	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -63,6 +64,9 @@ func before(c *cli.Context) error {
 }
 
 func cliClient(c *cli.Context) {
+	if len(c.Args()) == 0 {
+		log.Fatal("Specify a contract to compile")
+	}
 	tocompile := c.Args()[0]
 
 	var err error

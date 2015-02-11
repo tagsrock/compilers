@@ -134,10 +134,13 @@ func compileServerCore(req *Request) *Response {
 	filename := path.Join(ServerCache, compiler.Ext(hex.EncodeToString(hash[:])))
 	name = filename
 
+	maybeCached := true
+
 	// lllc requires a file to read
 	// check if filename already exists. if not, write
 	if _, err := os.Stat(filename); err != nil {
 		ioutil.WriteFile(filename, c, 0644)
+		maybeCached = false
 	}
 
 	// loop through includes, also save to drive
@@ -145,12 +148,26 @@ func compileServerCore(req *Request) *Response {
 		filename := path.Join(ServerCache, compiler.Ext(k))
 		if _, err := os.Stat(filename); err != nil {
 			ioutil.WriteFile(filename, v, 0644)
+			maybeCached = false
 		}
 	}
+
+	// check cache
+	if maybeCached {
+		r, err := checkCache(hash[:])
+		if err == nil {
+			return r
+		}
+	}
+
 	var resp *Response
 	fmt.Println("CALLING COMPILE WRAPPER")
 	//compile scripts, return bytecode and error
 	compiled, docs, err := CompileWrapper(name, lang)
+
+	// cache
+	cacheResult(hash[:], compiled, docs)
+
 	resp = NewResponse(compiled, docs, err)
 
 	return resp

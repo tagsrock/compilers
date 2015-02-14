@@ -173,6 +173,8 @@ func compileServerCore(req *Request) *Response {
 }
 
 func commandWrapper(prgrm string, args []string) (string, error) {
+	a := fmt.Sprint(args)
+	logger.Infoln(fmt.Sprintf("Running command %s %s ", prgrm, a))
 	cmd := exec.Command(prgrm, args...)
 	var out bytes.Buffer
 	cmd.Stdout = &out

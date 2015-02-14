@@ -9,6 +9,8 @@ import (
 	"github.com/eris-ltd/go-ethereum/crypto"
 )
 
+var NullABI = ABI{}
+
 // Callable method given a `Name` and whether the method is a constant.
 // If the method is `Const` no transaction needs to be created for this
 // particular Method call. It can easily be simulated using a local VM.
@@ -18,10 +20,10 @@ import (
 // be flagged `true`.
 // Input specifies the required input parameters for this gives method.
 type Method struct {
-	Name   string
+	Name   string `json:"name"`
 	Const  bool
-	Input  []Argument
-	Return Type // not yet implemented
+	Input  []Argument `json:"inputs"`
+	Return Type       // not yet implemented
 }
 
 // Returns the methods string signature according to the ABI spec.

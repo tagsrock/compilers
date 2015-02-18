@@ -107,6 +107,31 @@ var Languages = map[string]LangConfig{
 			"_",
 		},
 	},
+	"sol": LangConfig{
+		URL:        DefaultUrl,
+		Path:       path.Join(homeDir(), "cpp-ethereum/build/solc/solc"),
+		Net:        true,
+		Extensions: []string{"sol"},
+		IncludeRegexes: []string{
+		},
+		IncludeReplaces: [][]string{
+		},
+		CompileCmd: []string{
+			path.Join(homeDir(), "cpp-ethereum/build/solc/solc"),
+			"_",
+			"--binary", "stdout", "|",
+			"grep", "[0-9a-fA-F]", "|",
+			"sort", "-rn", "|",
+			"awk", "{print $1; exit}",
+
+		},
+		AbiCmd: []string{
+			path.Join(homeDir(), "cpp-ethereum/build/solc/solc"),
+			"_",
+			"--json-abi", "stdout", "|",
+			"awk", "NR >= 4",
+		},
+	},
 }
 
 func init() {

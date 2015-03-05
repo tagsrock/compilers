@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/codegangsta/cli"
-	"github.com/eris-ltd/epm-go/utils"
 	"github.com/eris-ltd/lllc-server"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/codegangsta/cli"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
 	"os"
 	"runtime"
 	"strconv"

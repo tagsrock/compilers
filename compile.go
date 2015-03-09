@@ -3,7 +3,7 @@ package lllcserver
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eris-ltd/epm-go/utils"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
 	"io/ioutil"
 	"os"
 	"path"

@@ -6,9 +6,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/eris-ltd/epm-go/utils"
-	"github.com/go-martini/martini"
 	"github.com/ebuchman/go-shell-pipes"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -189,7 +189,7 @@ func commandWrapper_(prgrm string, args []string) (string, error) {
 	return outstr, nil
 }
 
-func commandWrapper(tokens ... string) (string, error){
+func commandWrapper(tokens ...string) (string, error) {
 	s, err := pipes.RunStrings(tokens...)
 	s = strings.TrimSpace(s)
 	return s, err
@@ -228,7 +228,7 @@ func CompileWrapper(filename string, lang string) ([]byte, string, error) {
 
 	b, err := hex.DecodeString(hexCode)
 	if err != nil {
-	
+
 		return nil, "", err
 	}
 

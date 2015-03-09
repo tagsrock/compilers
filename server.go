@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ebuchman/go-shell-pipes"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/ebuchman/go-shell-pipes"
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
 	"io/ioutil"

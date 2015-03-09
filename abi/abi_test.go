@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/eris-ltd/go-ethereum/crypto"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/go-ethereum/crypto"
 )
 
 const jsondata = `

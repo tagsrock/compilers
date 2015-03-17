@@ -90,5 +90,8 @@ USER $user
 WORKDIR ../..
 RUN go test --test.run LLLClientLocal
 
+ENV NEWRELIC_KEY ""
+ENV NEWRELIC_APP ""
+
 EXPOSE 5000
 CMD ["lllc-server"]

@@ -247,8 +247,10 @@ func StartServer(addr string) {
 	srv := martini.Classic()
 
 	// new relic for error reporting
-	gorelic.InitNewrelicAgent(NEWRELIC_KEY, NEWRELIC_APP, true)
-	srv.Use(gorelic.Handler)
+	if NEWRELIC_KEY != "" {
+		gorelic.InitNewrelicAgent(NEWRELIC_KEY, NEWRELIC_APP, true)
+		srv.Use(gorelic.Handler)
+	}
 
 	// Static files
 	srv.Use(martini.Static("./web"))

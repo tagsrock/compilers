@@ -3,6 +3,7 @@
 Martini is a powerful package for quickly writing modular web applications/services in Golang.
 
 Language Translations:
+* [繁體中文](translations/README_zh_tw.md)
 * [简体中文](translations/README_zh_cn.md)
 * [Português Brasileiro (pt_BR)](translations/README_pt_br.md)
 * [Español](translations/README_es_ES.md)
@@ -11,6 +12,7 @@ Language Translations:
 * [日本語](translations/README_ja_JP.md)
 * [French](translations/README_fr_FR.md)
 * [Turkish](translations/README_tr_TR.md)
+* [German](translations/README_de_DE.md)
 
 ## Getting Started
 
@@ -130,6 +132,7 @@ The following services are included with [martini.Classic()](http://godoc.org/gi
   * [martini.Context](http://godoc.org/github.com/go-martini/martini#Context) - http request context.
   * [martini.Params](http://godoc.org/github.com/go-martini/martini#Params) - `map[string]string` of named params found by route matching.
   * [martini.Routes](http://godoc.org/github.com/go-martini/martini#Routes) - Route helper service.
+  * [martini.Route](http://godoc.org/github.com/go-martini/martini#Route) - Current active route.
   * [http.ResponseWriter](http://godoc.org/net/http/#ResponseWriter) - http Response writer interface.
   * [*http.Request](http://godoc.org/net/http/#Request) - http Request.
 
@@ -333,6 +336,7 @@ Start by looking in the [martini-contrib](https://github.com/martini-contrib) pr
 * [cors](https://github.com/martini-contrib/cors) - Handler that enables CORS support.
 * [oauth2](https://github.com/martini-contrib/oauth2) - Handler that provides OAuth 2.0 login for Martini apps. Google Sign-in, Facebook Connect and Github login is supported.
 * [vauth](https://github.com/rafecolton/vauth) - Handlers for vender webhook authentication (currently GitHub and TravisCI)
+* [permissions2](https://github.com/xyproto/permissions2) - Handler for keeping track of users, login states and permissions.
 
 ### How do I integrate with existing servers?
 

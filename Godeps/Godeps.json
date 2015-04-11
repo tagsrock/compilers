@@ -66,8 +66,8 @@
 		},
 		{
 			"ImportPath": "github.com/go-martini/martini",
-			"Comment": "v1.0-85-gbbd489b",
-			"Rev": "bbd489b35fd7eac9aaf442e5671ab21cdd972926"
+			"Comment": "v1.0-119-gc657c03",
+			"Rev": "c657c03d1add219e93d48ffa493052c9a79c11b2"
 		},
 		{
 			"ImportPath": "github.com/obscuren/ecies",

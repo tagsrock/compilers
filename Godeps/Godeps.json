@@ -37,7 +37,7 @@
 		},
 		{
 			"ImportPath": "github.com/ebuchman/go-shell-pipes",
-			"Rev": "843ffa0bb9741fd149acfabb6089244947b40417"
+			"Rev": "83e1324808622485314bff0fd97b8b944200a7a4"
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/epm-go/utils",

@@ -1,7 +1,6 @@
 {
 	"lll": {
-		"url": "http://ps.erisindustries.com:8090/compile",
-		"path": "/usr/local/src/eris-cpp/build/lllc/lllc",
+		"url": "http://localhost:8090/compile",
 		"net": true,
 		"extensions": [
 			"lll",
@@ -19,32 +18,11 @@
 		"cmd": [
 			"/usr/local/src/eris-cpp/build/lllc/lllc",
 			"_"
-		]
-	},
-	"sol": {
-		"url": "http://ps.erisindustries.com:8090/compile",
-		"path": "/usr/local/src/eris-cpp/build/solc/solc",
-		"net": true,
-		"extensions": [
-			"sol"
 		],
-		"regexes": [
-			"\\(include \"(.+?)\"\\)"
-		],
-		"replaces": [
-			[
-				"(include \"",
-				".sol\")"
-			]
-		],
-		"cmd": [
-			"/usr/local/src/eris-cpp/build/solc/solc",
-			"_"
-		]
+		"abi": null
 	},
 	"se": {
-		"url": "http://ps.erisindustries.com:8090/compile",
-		"path": "/usr/local/bin/serpent",
+		"url": "http://localhost:8090/compile",
 		"net": true,
 		"extensions": [
 			"se"
@@ -67,6 +45,44 @@
 			"/usr/local/bin/serpent",
 			"compile",
 			"_"
+		],
+		"abi": [
+			"/usr/local/bin/serpent",
+			"mk_full_signature",
+			"_"
+		]
+	},
+	"sol": {
+		"url": "http://localhost:8090/compile",
+		"net": true,
+		"extensions": [
+			"sol"
+		],
+		"regexes": [],
+		"replaces": [],
+		"cmd": [
+			"/usr/bin/solc",
+			"_",
+			"--binary",
+			"stdout",
+			"|",
+			"grep",
+			"[0-9a-fA-F]",
+			"|",
+			"sort",
+			"-rn",
+			"|",
+			"awk",
+			"{print $1; exit}"
+		],
+		"abi": [
+			"/usr/bin/solc",
+			"_",
+			"--json-abi",
+			"stdout",
+			"|",
+			"awk",
+			"NR \u003e= 4"
 		]
 	}
 }

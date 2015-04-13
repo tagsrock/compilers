@@ -4,7 +4,8 @@ machine:
 
 test:
   override:
-    - docker build -t eris/compilers:unstable .
+    - "docker build -t eris/compilers:unstable .":
+        timeout: 1200
     - "docker run -d --name compiler eris/compilers:unstable && sleep 5 && docker kill compiler"
 
 deployment:

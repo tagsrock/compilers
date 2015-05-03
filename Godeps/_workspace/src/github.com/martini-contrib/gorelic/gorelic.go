@@ -2,7 +2,7 @@ package gorelic
 
 import (
 	"fmt"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
+	"github.com/go-martini/martini"
 	metrics "github.com/yvasiyarov/go-metrics"
 	"github.com/yvasiyarov/gorelic"
 	"time"

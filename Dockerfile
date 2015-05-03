@@ -76,16 +76,25 @@ COPY . $GOPATH/src/github.com/eris-ltd/$repository
 WORKDIR $GOPATH/src/github.com/eris-ltd/$repository/cmd/$repository
 RUN go get -d && go install
 
+# Add Gandi certs for eris
+COPY docker/gandi2.crt /data/gandi2.crt
+COPY docker/gandi3.crt /data/gandi3.crt
+
 # Add Eris User
 RUN groupadd --system eris && useradd --system --create-home --gid eris eris
 
-## Point to the compiler location.
-RUN mkdir --parents /home/eris/.decerver/languages
-COPY tests/config.json /home/eris/.decerver/languages/config.json
-RUN chown --recursive eris /home/eris/.decerver
+# Final setup
+ENV DECERVER /home/eris/.eris
+RUN mkdir --parents /home/eris/.eris/languages
+COPY docker/config.json /home/eris/.eris/languages/config.json
+COPY start.sh /home/eris/start.sh
+RUN chown --recursive eris /home/eris/.eris
+
+# Give it a data folder so volumes can be used (if desired)
+RUN chown --recursive eris /data
 
 USER eris
 WORKDIR /home/eris/
 
-EXPOSE 9099
-CMD ["lllc-server"]
+EXPOSE 9098 9099
+CMD ["/home/eris/start.sh"]

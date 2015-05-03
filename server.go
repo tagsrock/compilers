@@ -10,6 +10,7 @@ import (
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/gorelic"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/secure"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -242,15 +243,22 @@ func CompileWrapper(filename string, lang string) ([]byte, string, error) {
 }
 
 // Start the compile server
-func StartServer(addr string) {
-	//martini.Env = martini.Prod
-	srv := martini.Classic()
+func StartServer(addrUnsecure, addrSecure, key, cert string) {
+	martini.Env = martini.Prod
+	srv := martini.New()
+	srv.Use(martini.Logger())
+	srv.Use(martini.Recovery())
 
 	// Static files
 	srv.Use(martini.Static("./web"))
 
-	srv.Post("/compile", CompileHandler)
-	srv.Post("/compile2", CompileHandlerJs)
+	// Routes
+	r := martini.NewRouter()
+	srv.MapTo(r, (*martini.Routes)(nil))
+	srv.Action(r.Handle)
+
+	r.Post("/compile", CompileHandler)
+	r.Post("/compile2", CompileHandlerJs)
 
 	// new relic for error reporting
 	if NEWRELIC_KEY != "" {
@@ -259,7 +267,34 @@ func StartServer(addr string) {
 		srv.Use(gorelic.Handler)
 	}
 
-	srv.RunOnAddr(addr)
+	// Use SSL ?
+	if addrSecure == "" {
+
+		srv.RunOnAddr(addrUnsecure)
+
+	} else {
+
+		srv.Use(secure.Secure(secure.Options{
+			SSLRedirect: true,
+			SSLHost:     addrSecure,
+		}))
+
+		// HTTP
+		if addrUnsecure != "" {
+			go func() {
+				if err := http.ListenAndServe(addrUnsecure, srv); err != nil {
+					logger.Errorln("Cannot serve on http port: ", err)
+					os.Exit(1)
+				}
+			}()
+		}
+
+		// HTTPS
+		if err := http.ListenAndServeTLS(addrSecure, cert, key, srv); err != nil {
+			logger.Errorln("Cannot serve on https port: ", err)
+			os.Exit(1)
+		}
+	}
 }
 
 // Start the proxy server

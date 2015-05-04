@@ -56,7 +56,7 @@ func main() {
 			Usage:  "run a proxy server for out of process access",
 			Action: cliProxy,
 			Flags: []cli.Flag{
-				unsecurePortFlag,
+				portFlag,
 			},
 		},
 	}
@@ -110,7 +110,7 @@ func cliClient(c *cli.Context) {
 }
 
 func cliProxy(c *cli.Context) {
-	addr := "localhost:" + strconv.Itoa(c.Int("unsecure-port"))
+	addr := "localhost:" + strconv.Itoa(c.Int("port"))
 	lllcserver.StartProxy(addr)
 }
 
@@ -181,6 +181,12 @@ var (
 		Name:  "log",
 		Usage: "set the log level",
 		Value: 5,
+	}
+
+	portFlag = cli.IntFlag{
+		Name:  "port",
+		Usage: "set the proxy port",
+		Value: 9097,
 	}
 
 	unsecurePortFlag = cli.IntFlag{

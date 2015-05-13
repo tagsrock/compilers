@@ -1,3 +1,5 @@
+[![GoDoc](https://godoc.org/github.com/eris-ltd/lllc-server?status.png)](https://godoc.org/github.com/eris-ltd/lllc-server)
+
 [![Circle CI](https://circleci.com/gh/eris-ltd/lllc-server.svg?style=svg)](https://circleci.com/gh/eris-ltd/lllc-server)
 
 lllc-server

@@ -286,7 +286,7 @@ func openLogFile(Datadir string, filename string) *os.File {
 	return file
 }
 
-// Create the default decerver tree
+// Create the default eris directory tree
 func InitDecerverDir() (err error) {
 	for _, d := range MajorDirs {
 		err := InitDataDir(d)

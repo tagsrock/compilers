@@ -80,9 +80,9 @@ RUN go get -d && go install
 RUN groupadd --system eris && useradd --system --create-home --gid eris eris
 
 ## Point to the compiler location.
-RUN mkdir --parents /home/eris/.decerver/languages
-COPY tests/config.json /home/eris/.decerver/languages/config.json
-RUN chown --recursive eris /home/eris/.decerver
+RUN mkdir --parents /home/eris/.eris/languages
+COPY tests/config.json /home/eris/.eris/languages/config.json
+RUN chown --recursive eris /home/eris/.eris
 
 USER eris
 WORKDIR /home/eris/

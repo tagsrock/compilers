@@ -41,8 +41,8 @@
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/epm-go/utils",
-			"Comment": "v0.8-280-gf8b4a7a",
-			"Rev": "f8b4a7aabb1977f1761b1d96afca08d7d05387aa"
+			"Comment": "v0.8-280-g5c3029a",
+			"Rev": "5c3029a1e6beb948b2b432167bd65e65dc88d28a"
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/go-ethereum/crypto",

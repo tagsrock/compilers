@@ -76,6 +76,10 @@ COPY . $GOPATH/src/github.com/eris-ltd/$repository
 WORKDIR $GOPATH/src/github.com/eris-ltd/$repository/cmd/$repository
 RUN go get -d && go install
 
+# Add Gandi certs for eris
+COPY docker/gandi2.crt /data/gandi2.crt
+COPY docker/gandi3.crt /data/gandi3.crt
+
 # Add Eris User
 RUN groupadd --system eris && useradd --system --create-home --gid eris eris
 
@@ -87,5 +91,5 @@ RUN chown --recursive eris /home/eris/.eris
 USER eris
 WORKDIR /home/eris/
 
-EXPOSE 9099
-CMD ["lllc-server"]
+EXPOSE 9098 9099
+CMD ["/home/eris/start.sh"]

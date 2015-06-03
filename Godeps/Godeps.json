@@ -65,6 +65,10 @@
 			"Rev": "ba47990cdc9c6666a2d0c870685346e3f79c9080"
 		},
 		{
+			"ImportPath": "github.com/ethereum/serpent-go",
+			"Rev": "5767a0dbd759d313df3f404dadb7f98d7ab51443"
+		},
+		{
 			"ImportPath": "github.com/go-martini/martini",
 			"Comment": "v1.0-119-gc657c03",
 			"Rev": "c657c03d1add219e93d48ffa493052c9a79c11b2"

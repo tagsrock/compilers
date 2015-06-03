@@ -11,6 +11,7 @@ import (
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/gorelic"
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/secure"
+	segment "github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/segmentio/analytics-go"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,6 +27,7 @@ var (
 	//"" = abi.ABI{}
 	NEWRELIC_KEY = os.Getenv("NEWRELIC_KEY")
 	NEWRELIC_APP = os.Getenv("NEWRELIC_APP")
+	SEGMENT_KEY  = os.Getenv("SEGMENT_KEY")
 )
 
 // must have compiler installed!
@@ -37,7 +39,7 @@ func homeDir() string {
 	return usr.HomeDir
 }
 
-// Server cache location in decerver tree
+// Server cache location in eris tree
 var ServerCache = path.Join(utils.Lllc, "server")
 
 // Handler for proxy requests (ie. a compile request from langauge other than go)
@@ -88,6 +90,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request) {
 		logger.Errorln("failed to marshal", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
 	w.Write(respJ)
 }
 
@@ -122,6 +125,12 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 	}
 
 	resp := compileServerCore(req)
+
+	// track
+	if SEGMENT_KEY != "" {
+		informSegment(req.Language, r)
+	}
+
 	return resp
 }
 
@@ -178,6 +187,30 @@ func compileServerCore(req *Request) *Response {
 	resp = NewResponse(compiled, docs, err)
 
 	return resp
+}
+
+func informSegment(lang string, r *http.Request) {
+	seg := segment.New(SEGMENT_KEY)
+
+	con := make(map[string]interface{})
+	ip  := strings.Split(r.RemoteAddr, ":")[0]
+	con["ip"] = ip
+
+	prp := make(map[string]interface{})
+	prp["name"] = lang
+	prp["path"] = "/compile/" + lang
+	prp["url"]  = "http://compilers.eris.industries/compile/" + lang
+
+	t   := &segment.Page{
+		Context:     con,
+		Traits:      prp,
+		AnonymousId: ip,
+		// Category:    lang,
+		Name:        "Compile lang: " + lang,
+	}
+
+	logger.Debugln("Sending notification to Segment.")
+	seg.Page(t)
 }
 
 func commandWrapper_(prgrm string, args []string) (string, error) {

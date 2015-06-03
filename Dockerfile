@@ -83,15 +83,10 @@ COPY docker/gandi3.crt /data/gandi3.crt
 # Add Eris User
 RUN groupadd --system eris && useradd --system --create-home --gid eris eris
 
-# Final setup
-ENV DECERVER /home/eris/.eris
+## Point to the compiler location.
 RUN mkdir --parents /home/eris/.eris/languages
-COPY docker/config.json /home/eris/.eris/languages/config.json
-COPY start.sh /home/eris/start.sh
+COPY tests/config.json /home/eris/.eris/languages/config.json
 RUN chown --recursive eris /home/eris/.eris
-
-# Give it a data folder so volumes can be used (if desired)
-RUN chown --recursive eris /data
 
 USER eris
 WORKDIR /home/eris/

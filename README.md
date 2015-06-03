@@ -1,3 +1,5 @@
+[![GoDoc](https://godoc.org/github.com/eris-ltd/lllc-server?status.png)](https://godoc.org/github.com/eris-ltd/lllc-server)
+
 [![Circle CI](https://circleci.com/gh/eris-ltd/lllc-server.svg?style=svg)](https://circleci.com/gh/eris-ltd/lllc-server)
 
 lllc-server
@@ -19,7 +21,7 @@ Eris Industries' own public facing LLLC-server (at http://lllc.erisindustries.co
 so you can start compiling ethereum language right out of the box with no extra tools required.
 
 If you want to use your own server, or default to compiling locally, or otherwise adjust configuration settings,
-see the config file at `~/.decerver/languages/config.json`.
+see the config file at `~/.eris/languages/config.json`.
 
 # How to play
 
@@ -145,7 +147,7 @@ make -j2
 ```
 
 Now the final thing is make sure the configuration paths are properly set.
-Running `epm init` (assuming epm is installed) should create the config file at `~/.decerver/languages/config.json`.
+Running `epm init` (assuming epm is installed) should create the config file at `~/.eris/languages/config.json`.
 Edit the `cmd` field for each language to have the correct path.
 
 # Support

@@ -40,9 +40,12 @@
 			"Rev": "83e1324808622485314bff0fd97b8b944200a7a4"
 		},
 		{
-			"ImportPath": "github.com/eris-ltd/epm-go/utils",
-			"Comment": "v0.8-280-gf504f06",
-			"Rev": "f504f06d9e273cc10de2ba6da6b44aed2c812acf"
+			"ImportPath": "github.com/eris-ltd/common/go/common",
+			"Rev": "cc37905fbb49dccf7ab40a4411f8042754f468ed"
+		},
+		{
+			"ImportPath": "github.com/eris-ltd/common/go/log",
+			"Rev": "cc37905fbb49dccf7ab40a4411f8042754f468ed"
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/go-ethereum/crypto",
@@ -60,15 +63,6 @@
 			"Rev": "30c55aca186a1674806f2ca4b3c132d998e163d4"
 		},
 		{
-			"ImportPath": "github.com/eris-ltd/thelonious/monklog",
-			"Comment": "v0.8-59-gba47990",
-			"Rev": "ba47990cdc9c6666a2d0c870685346e3f79c9080"
-		},
-		{
-			"ImportPath": "github.com/ethereum/serpent-go",
-			"Rev": "5767a0dbd759d313df3f404dadb7f98d7ab51443"
-		},
-		{
 			"ImportPath": "github.com/go-martini/martini",
 			"Comment": "v1.0-119-gc657c03",
 			"Rev": "c657c03d1add219e93d48ffa493052c9a79c11b2"
@@ -80,6 +74,10 @@
 		{
 			"ImportPath": "github.com/martini-contrib/gorelic",
 			"Rev": "f8b0843aa3ab66d8734aa7d9acf399bdc197c65d"
+		},
+		{
+			"ImportPath": "github.com/martini-contrib/secure",
+			"Rev": "de8e19a0490b816696d093388d53f2e1f0c08b7d"
 		},
 		{
 			"ImportPath": "github.com/obscuren/ecies",

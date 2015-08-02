@@ -3,10 +3,11 @@ package lllcserver
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
 var DefaultUrl = "https://compilers.eris.industries:8091/compile"
@@ -126,11 +127,11 @@ var Languages = map[string]LangConfig{
 }
 
 func init() {
-	utils.InitDecerverDir()
-	utils.InitDataDir(ClientCache)
-	utils.InitDataDir(ServerCache)
+	common.InitErisDir()
+	common.InitDataDir(ClientCache)
+	common.InitDataDir(ServerCache)
 
-	f := path.Join(utils.Languages, "config.json")
+	f := path.Join(common.LanguagesPath, "config.json")
 	err := checkConfig(f)
 	if err != nil {
 		logger.Errorln(err)
@@ -141,7 +142,7 @@ func init() {
 
 func checkConfig(f string) error {
 	if _, err := os.Stat(f); err != nil {
-		err := utils.WriteJson(&Languages, f)
+		err := common.WriteJson(&Languages, f)
 		if err != nil {
 			return fmt.Errorf("Could not write default config to %s: %s", f, err.Error())
 		}

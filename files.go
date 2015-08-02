@@ -63,7 +63,7 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, i int, s []byte, dir s
 	// take hash before replacing includes to see if we've already parsed this file
 	hash := sha256.Sum256(incl_code)
 	hpre := hex.EncodeToString(hash[:])
-	if h, ok := includeNames[hpre]; ok{
+	if h, ok := includeNames[hpre]; ok {
 		replaces := c.IncludeReplace(h, i)
 		ret := []byte(replaces)
 		return ret, nil

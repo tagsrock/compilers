@@ -3,11 +3,12 @@ package lllcserver
 import (
 	"bytes"
 	"fmt"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
 	"os"
 	"os/exec"
 	"path"
 	"testing"
+
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
 func init() {
@@ -27,12 +28,12 @@ func testCache(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Printf("%x\n", code)
-	copyFile("tests/test-inc1.lll", path.Join(utils.Lllc, "test-inc1.lll"))
-	copyFile("tests/test-inc2.lll", path.Join(utils.Lllc, "test-inc2.lll"))
-	copyFile("tests/test-inc4.lll", path.Join(utils.Lllc, "test-inc3.lll"))
+	copyFile("tests/test-inc1.lll", path.Join(common.LllcScratchPath, "test-inc1.lll"))
+	copyFile("tests/test-inc2.lll", path.Join(common.LllcScratchPath, "test-inc2.lll"))
+	copyFile("tests/test-inc4.lll", path.Join(common.LllcScratchPath, "test-inc3.lll"))
 	cur, _ := os.Getwd()
-	os.Chdir(utils.Lllc)
-	code2, _, err := Compile(path.Join(utils.Lllc, "test-inc1.lll"))
+	os.Chdir(common.Lllc)
+	code2, _, err := Compile(path.Join(common.LllcScratchPath, "test-inc1.lll"))
 	if err != nil {
 		t.Fatal(err)
 	}

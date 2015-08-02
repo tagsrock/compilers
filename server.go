@@ -6,12 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/ebuchman/go-shell-pipes"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/gorelic"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/secure"
-	segment "github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/segmentio/analytics-go"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,6 +15,13 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/ebuchman/go-shell-pipes"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/gorelic"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/secure"
+	segment "github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/segmentio/analytics-go"
 )
 
 var (
@@ -40,7 +41,7 @@ func homeDir() string {
 }
 
 // Server cache location in eris tree
-var ServerCache = path.Join(utils.Lllc, "server")
+var ServerCache = path.Join(common.LllcScratchPath, "server")
 
 // Handler for proxy requests (ie. a compile request from langauge other than go)
 func ProxyHandler(w http.ResponseWriter, r *http.Request) {
@@ -193,20 +194,20 @@ func informSegment(lang string, r *http.Request) {
 	seg := segment.New(SEGMENT_KEY)
 
 	con := make(map[string]interface{})
-	ip  := strings.Split(r.RemoteAddr, ":")[0]
+	ip := strings.Split(r.RemoteAddr, ":")[0]
 	con["ip"] = ip
 
 	prp := make(map[string]interface{})
 	prp["name"] = lang
 	prp["path"] = "/compile/" + lang
-	prp["url"]  = "http://compilers.eris.industries/compile/" + lang
+	prp["url"] = "http://compilers.eris.industries/compile/" + lang
 
-	t   := &segment.Page{
+	t := &segment.Page{
 		Context:     con,
 		Traits:      prp,
 		AnonymousId: ip,
 		// Category:    lang,
-		Name:        "Compile lang: " + lang,
+		Name: "Compile lang: " + lang,
 	}
 
 	logger.Debugln("Sending notification to Segment.")

@@ -3,13 +3,15 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/codegangsta/cli"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
-	"github.com/eris-ltd/lllc-server"
 	"log"
 	"os"
 	"runtime"
 	"strconv"
+
+	"github.com/eris-ltd/lllc-server"
+
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/codegangsta/cli"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
 var logger = lllcserver.Logger{}
@@ -20,7 +22,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "lllc-server"
 	app.Usage = ""
-	app.Version = "0.9.0"
+	app.Version = "0.10.0"
 	app.Author = "Ethan Buchman"
 	app.Email = "ethan@erisindustries.com"
 
@@ -89,7 +91,7 @@ func cliClient(c *cli.Context) {
 	}
 	logger.Debugln("language config:", lllcserver.Languages[lang])
 
-	utils.InitDataDir(lllcserver.ClientCache)
+	common.InitDataDir(lllcserver.ClientCache)
 	logger.Infoln("compiling", tocompile)
 	if c.Bool("local") {
 		lllcserver.SetLanguageNet(lang, false)
@@ -116,7 +118,7 @@ func cliProxy(c *cli.Context) {
 
 func cliServer(c *cli.Context) {
 
-	utils.InitDataDir(lllcserver.ServerCache)
+	common.InitDataDir(lllcserver.ServerCache)
 	addrUnsecure := ""
 	addrSecure := ""
 
@@ -207,8 +209,8 @@ var (
 	}
 
 	unsecureOnlyFlag = cli.BoolFlag{
-		Name:  "no-ssl",
-		Usage: "do not use ssl",
+		Name:   "no-ssl",
+		Usage:  "do not use ssl",
 		EnvVar: "NO_SSL",
 	}
 
@@ -230,9 +232,9 @@ var (
 	}
 
 	hostFlag = cli.StringFlag{
-		Name:  "host",
-		Usage: "set the server host (include http(s)://)",
-		Value: "",
+		Name:   "host",
+		Usage:  "set the server host (include http(s)://)",
+		Value:  "",
 		EnvVar: "HOST",
 	}
 )

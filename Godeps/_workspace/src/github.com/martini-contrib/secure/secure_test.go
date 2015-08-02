@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-martini/martini"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
 )
 
 func Test_No_Config(t *testing.T) {

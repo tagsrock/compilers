@@ -12,7 +12,6 @@ import (
 )
 
 func init() {
-	DebugMode = 4
 	ClearCaches()
 }
 
@@ -32,7 +31,7 @@ func testCache(t *testing.T) {
 	copyFile("tests/test-inc2.lll", path.Join(common.LllcScratchPath, "test-inc2.lll"))
 	copyFile("tests/test-inc4.lll", path.Join(common.LllcScratchPath, "test-inc3.lll"))
 	cur, _ := os.Getwd()
-	os.Chdir(common.Lllc)
+	os.Chdir(common.LllcScratchPath)
 	code2, _, err := Compile(path.Join(common.LllcScratchPath, "test-inc1.lll"))
 	if err != nil {
 		t.Fatal(err)

@@ -8,13 +8,6 @@ import (
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
-// 0 for nothing, 4 for everything
-// Overwritten by cmd/lllc-server
-var (
-	DebugMode = 2
-	logger    = &Logger{}
-)
-
 // Client cache location in eris tree
 var ClientCache = path.Join(common.LllcScratchPath, "client")
 
@@ -47,12 +40,12 @@ func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
 	var includes = make(map[string][]byte)     // hashes to code
 	var includeNames = make(map[string]string) //hashes before replace to hashes after
 	var err error
-	logger.Debugln("pre includes;", string(code))
+	//logger.Debugln("pre includes;", string(code))
 	code, err = c.replaceIncludes(code, dir, includes, includeNames)
 	if err != nil {
 		return nil, err
 	}
-	logger.Debugln("post replaceincludes;", string(code))
+	//logger.Debugln("post replaceincludes;", string(code))
 
 	// go through all includes, check if they have changed
 	hash, cached := c.checkCached(code, includes)
@@ -70,12 +63,14 @@ func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
 		return nil, err
 	}
 
-	// fill in cached values, cache new values
-	if err := c.cacheFile(respJ.Bytecode, hash); err != nil {
-		return nil, err
-	}
-	if err := c.cacheFile([]byte(respJ.ABI), hash+"-abi"); err != nil {
-		return nil, err
+	if respJ.Error == "" {
+		// fill in cached values, cache new values
+		if err := c.cacheFile(respJ.Bytecode, hash); err != nil {
+			return nil, err
+		}
+		if err := c.cacheFile([]byte(respJ.ABI), hash+"-abi"); err != nil {
+			return nil, err
+		}
 	}
 
 	return respJ, nil

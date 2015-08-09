@@ -183,7 +183,9 @@ func compileServerCore(req *Request) *Response {
 	compiled, docs, err := CompileWrapper(name, lang)
 
 	// cache
-	cacheResult(hash[:], compiled, docs)
+	if err == nil {
+		cacheResult(hash[:], compiled, docs)
+	}
 
 	resp = NewResponse(compiled, docs, err)
 

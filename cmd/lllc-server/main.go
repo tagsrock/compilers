@@ -118,6 +118,7 @@ func cliProxy(c *cli.Context) {
 
 func cliServer(c *cli.Context) {
 
+	common.InitDataDir(lllcserver.ServerCache)
 	addrUnsecure := ""
 	addrSecure := ""
 

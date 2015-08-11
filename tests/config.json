@@ -1,6 +1,6 @@
 {
 	"lll": {
-		"url": "https://compilers.eris.industries:8091/compile",
+		"url": "http://compiler:9099/compile",
 		"net": true,
 		"extensions": [
 			"lll",
@@ -16,13 +16,13 @@
 			]
 		],
 		"cmd": [
-			"lllc",
+			"/usr/bin/lllc",
 			"_"
 		],
 		"abi": null
 	},
 	"se": {
-		"url": "https://compilers.eris.industries:8091/compile",
+		"url": "http://compiler:9099/compile",
 		"net": true,
 		"extensions": [
 			"se"
@@ -42,18 +42,18 @@
 			]
 		],
 		"cmd": [
-			"sc",
+			"/usr/bin/sc",
 			"compile",
 			"_"
 		],
 		"abi": [
-			"sc",
+			"/usr/bin/sc",
 			"mk_full_signature",
 			"_"
 		]
 	},
 	"sol": {
-		"url": "https://compilers.eris.industries:8091/compile",
+		"url": "http://compiler:9099/compile",
 		"net": true,
 		"extensions": [
 			"sol"
@@ -61,7 +61,7 @@
 		"regexes": [],
 		"replaces": [],
 		"cmd": [
-			"solc",
+			"/usr/bin/solc",
 			"_",
 			"--binary",
 			"stdout",
@@ -76,7 +76,7 @@
 			"{print $1; exit}"
 		],
 		"abi": [
-			"solc",
+			"/usr/bin/solc",
 			"_",
 			"--json-abi",
 			"stdout",

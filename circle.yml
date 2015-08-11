@@ -18,7 +18,12 @@ test:
   override:
     - "docker build -t eris/compilers .":
         timeout: 1200
-    - "docker run --name compiler --workdir /go/src/github.com/eris-ltd/${CIRCLE_PROJECT_REPONAME}/tests/ eris/compilers /go/src/github.com/eris-ltd/${CIRCLE_PROJECT_REPONAME}/tests/test.sh"
+    - >
+        docker run -d --name compiler eris/compilers;
+        docker run --user root --name compiler_slave --link compiler:compiler --workdir /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/ eris/compilers /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/test.sh;
+
+  post:
+    - "docker kill compiler && docker kill compiler_slave"
 
 deployment:
   hub:

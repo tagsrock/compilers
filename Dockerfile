@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -qy \
   curl \
   gcc \
   git \
+  libgmp-dev \
   software-properties-common \
   libc6-dev
 ENV GOLANG_VERSION 1.4.2
@@ -25,7 +26,7 @@ RUN add-apt-repository -y ppa:ethereum/ethereum && \
   add-apt-repository -y ppa:ethereum/ethereum-dev && \
   apt-get update && apt-get install -qy \
   lllc \
-  sc \
+  sc=$(apt-cache policy sc | grep ethereum-dev -B 1 | awk 'NR==1 {print $1}') \
   solc \
   && rm -rf /var/lib/apt/lists/*
 
@@ -34,7 +35,7 @@ ENV repository lllc-server
 RUN mkdir --parents $GOPATH/src/github.com/eris-ltd/$repository
 COPY . $GOPATH/src/github.com/eris-ltd/$repository
 WORKDIR $GOPATH/src/github.com/eris-ltd/$repository/cmd/$repository
-RUN go get -d && go install
+RUN go install
 
 # Add Gandi certs for eris
 COPY docker/gandi2.crt /data/gandi2.crt

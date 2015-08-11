@@ -21,11 +21,11 @@
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/common/go/common",
-			"Rev": "f48a7aa1490bf08e013cbb0c128500e1c05bc25f"
+			"Rev": "4efd89be9b8794df5518a5187af2a5e6fc9ebed9"
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/common/go/log",
-			"Rev": "f48a7aa1490bf08e013cbb0c128500e1c05bc25f"
+			"Rev": "4efd89be9b8794df5518a5187af2a5e6fc9ebed9"
 		},
 		{
 			"ImportPath": "github.com/go-martini/martini",

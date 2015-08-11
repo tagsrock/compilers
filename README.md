@@ -17,7 +17,7 @@ The Lovely Little Language Compiler: A web server and client for compiling ether
 - local proxy server for compiling from languages other than go
 - easily extensible to new languages
 
-Eris Industries' own public facing LLLC-server (at http://lllc.erisindustries.com) is hardcoded into the source,
+Eris Industries' own public facing LLLC-server (at https://compilers.eris.industries) is hardcoded into the source,
 so you can start compiling ethereum language right out of the box with no extra tools required.
 
 If you want to use your own server, or default to compiling locally, or otherwise adjust configuration settings,
@@ -43,7 +43,7 @@ bytecode, err := lllcserver.CompileLiteral("[0x5](+ 4 @0x3)", "lll")
 #### Compile Remotely
 
 ```
-lllc-server compile --host http://lllc.erisindustries.com:8090 test.lll
+lllc-server compile --host https://compilers.eris.industries:8091 test.lll
 ```
 
 Leave out the `--host` flag to default to the url in the config.
@@ -112,38 +112,20 @@ The lllc-server itself can be installed with
 go get github.com/eris-ltd/lllc-server/cmd/lllc-server
 ```
 
-Installing the actual compilers is a bit more involved. You need a bunch of cpp dependencies :(
+Installing the actual compilers is a bit more involved. :(
 
-See [ethereum wiki](https://github.com/ethereum/cpp-ethereum/wiki/Building-on-Ubuntu) for dependencies (no need for qt)
+See [ethereum wiki](https://github.com/ethereum/cpp-ethereum/wiki/Building-on-Ubuntu) and add the ethereum and ethereum-dev PPA's (no need for qt)
 
 Note, thelonious and its Genesis Doug were build on a previous version of the languages (before the ABI spec) and so currently only support PoC6 LLL and Serpent 1.0.
 But epm works fine using Solidity and Serpent on standard ethereum chains.
 
-To install `LLL` (eris LLL, which includes a few extra opcodes)
+To install the compilers:
 
 ```
-git clone git@github.com:eris-ltd/eris-cpp
-cd eris-cpp/build
-bash instructions
-```
-
-Install `Serpent`:
-```
-git clone git@github.com:ethereum/serpent
-cd serpent
-make
-sudo make install
-```
-
-Install `Solidity`:
-
-```
-git clone git@github.com:ethereum/cpp-ethereum
-cd cpp-ethereum
-mkdir build
-cd build
-cmake .. -
-make -j2
+sudo add-apt-repository ppa:ethereum/ethereum
+sudo add-apt-repository ppa:ethereum/ethereum-dev
+sudo apt-get update
+sudo apt-get install lllc sc solc
 ```
 
 Now the final thing is make sure the configuration paths are properly set.

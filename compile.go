@@ -62,7 +62,7 @@ func (l LangConfig) Abi(file string) (args []string) {
 
 // Global variable mapping languages to their configs
 var Languages = map[string]LangConfig{
-	"lll": LangConfig{
+	"lll": {
 		URL:        DefaultUrl,
 		Net:        true,
 		Extensions: []string{"lll", "def"},
@@ -70,15 +70,15 @@ var Languages = map[string]LangConfig{
 			`\(include "(.+?)"\)`,
 		},
 		IncludeReplaces: [][]string{
-			[]string{`(include "`, `.lll")`},
+			{`(include "`, `.lll")`},
 		},
 		CompileCmd: []string{
-			path.Join(homeDir(), "eris-cpp/build/lllc/lllc"),
+			"lllc",
 			"_",
 		},
 	},
 
-	"se": LangConfig{
+	"se": {
 		URL:        DefaultUrl,
 		Net:        true,
 		Extensions: []string{"se"},
@@ -89,28 +89,28 @@ var Languages = map[string]LangConfig{
 			`create\('(.+?)'\)`,
 		},
 		IncludeReplaces: [][]string{
-			[]string{`create("`, `.se")`},
-			[]string{`create('`, `.se')`},
+			{`create("`, `.se")`},
+			{`create('`, `.se')`},
 		},
 		CompileCmd: []string{
-			"/usr/local/bin/serpent",
+			"sc",
 			"compile",
 			"_",
 		},
 		AbiCmd: []string{
-			"/usr/local/bin/serpent",
+			"sc",
 			"mk_full_signature",
 			"_",
 		},
 	},
-	"sol": LangConfig{
+	"sol": {
 		URL:             DefaultUrl,
 		Net:             true,
 		Extensions:      []string{"sol"},
 		IncludeRegexes:  []string{},
 		IncludeReplaces: [][]string{},
 		CompileCmd: []string{
-			path.Join(homeDir(), "cpp-ethereum/build/solc/solc"),
+			"solc",
 			"_",
 			"--binary", "stdout", "|",
 			"grep", "[0-9a-fA-F]", "|",
@@ -118,7 +118,7 @@ var Languages = map[string]LangConfig{
 			"awk", "{print $1; exit}",
 		},
 		AbiCmd: []string{
-			path.Join(homeDir(), "cpp-ethereum/build/solc/solc"),
+			"solc",
 			"_",
 			"--json-abi", "stdout", "|",
 			"awk", "NR >= 4",

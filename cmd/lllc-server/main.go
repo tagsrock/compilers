@@ -41,7 +41,7 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
-		cli.Command{
+		{
 			Name:   "compile",
 			Usage:  "compile a contract",
 			Action: cliClient,
@@ -52,7 +52,7 @@ func main() {
 				//logFlag,
 			},
 		},
-		cli.Command{
+		{
 			Name:   "proxy",
 			Usage:  "run a proxy server for out of process access",
 			Action: cliProxy,
@@ -66,7 +66,7 @@ func main() {
 }
 
 func before(c *cli.Context) error {
-	log.SetLogLevelGlobal(log.LogLevel(c.GlobalInt("log")))
+	log.SetLogLevel("lllc-server-cli", c.GlobalInt("log"))
 	return nil
 }
 
@@ -103,15 +103,15 @@ func cliClient(c *cli.Context) {
 		// force it through the compile pipeline so we get caching
 		b, abi, err := lllcserver.Compile(tocompile)
 		ifExit(err)
-		logger.Warnln("bytecode:", hex.EncodeToString(b))
-		logger.Warnln("abi:", abi)
+		logger.Infoln("bytecode:", hex.EncodeToString(b))
+		logger.Infoln("abi:", abi)
 	} else {
 		code, abi, err := lllcserver.Compile(tocompile)
 		if err != nil {
 			fmt.Println(err)
 		}
-		logger.Warnln("bytecode:", hex.EncodeToString(code))
-		logger.Warnln("abi:", abi)
+		logger.Infoln("bytecode:", hex.EncodeToString(code))
+		logger.Infoln("abi:", abi)
 	}
 }
 

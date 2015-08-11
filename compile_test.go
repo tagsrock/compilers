@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"path"
+	// "path"
 	"testing"
 )
 
@@ -72,7 +72,7 @@ func TestSerpentClientLocal(t *testing.T) {
 
 func TestSerpentClientRemote(t *testing.T) {
 	testLocalRemote(t, "se", "tests/test.se")
-	testLocalRemote(t, "se", path.Join(homeDir(), "serpent", "examples", "schellingcoin", "schellingcoin.se"))
+	// testLocalRemote(t, "se", path.Join(homeDir(), "serpent", "examples", "schellingcoin", "schellingcoin.se"))
 }
 
 func printCodeTop(s string, code []byte, n int) {

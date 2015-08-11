@@ -1,17 +1,24 @@
 machine:
-  services:
-    - docker
+  post:
+    - rm -rf ${GOPATH%%:*}/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+    - mkdir -p ${GOPATH%%:*}/src/github.com/${CIRCLE_PROJECT_USERNAME}
+    - cp -r ${HOME}/${CIRCLE_PROJECT_REPONAME} ${GOPATH%%:*}/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+    - git config --global user.email "billings@erisindustries.com"
+    - git config --global user.name "Billings the Bot"
 
 dependencies:
+  pre:
+    - sudo curl -L -o /usr/bin/docker 'http://s3-external-1.amazonaws.com/circle-downloads/docker-1.6.0-circleci'; chmod 0755 /usr/bin/docker; true
+    - sudo service docker start
+
   override:
     - ""
 
 test:
   override:
-    - go test ./...
     - "docker build -t eris/compilers .":
         timeout: 1200
-    - "docker run -d --name compiler eris/compilers && sleep 5 && docker kill compiler"
+    - "docker run --name compiler --workdir /go/src/github.com/eris-ltd/${CIRCLE_PROJECT_REPONAME}/tests/ eris/compilers /go/src/github.com/eris-ltd/${CIRCLE_PROJECT_REPONAME}/tests/test.sh"
 
 deployment:
   hub:

@@ -16,7 +16,7 @@
 			]
 		],
 		"cmd": [
-			"/usr/local/src/eris-cpp/build/lllc/lllc",
+			"/usr/bin/lllc",
 			"_"
 		],
 		"abi": null
@@ -42,12 +42,12 @@
 			]
 		],
 		"cmd": [
-			"/usr/local/bin/serpent",
+			"/usr/bin/sc",
 			"compile",
 			"_"
 		],
 		"abi": [
-			"/usr/local/bin/serpent",
+			"/usr/bin/sc",
 			"mk_full_signature",
 			"_"
 		]

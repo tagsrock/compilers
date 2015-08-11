@@ -2,20 +2,14 @@ package lllcserver
 
 import (
 	"fmt"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
 	"io/ioutil"
 	"path"
-)
 
-// 0 for nothing, 4 for everything
-// Overwritten by cmd/lllc-server
-var (
-	DebugMode = 2
-	logger    = &Logger{}
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
 // Client cache location in eris tree
-var ClientCache = path.Join(utils.Lllc, "client")
+var ClientCache = path.Join(common.LllcScratchPath, "client")
 
 // filename is either a filename or literal code
 func resolveCode(filename string, literal bool) (code []byte, err error) {
@@ -31,10 +25,10 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 // send compile request to server or compile directly
 func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error) {
 	if c.config.Net {
-		logger.Warnln("compiling remotely...", c.config.URL)
+		logger.Infoln("compiling remotely...", c.config.URL)
 		respJ, err = requestResponse(req)
 	} else {
-		logger.Warnln("compiling locally...")
+		logger.Infoln("compiling locally...")
 		respJ = compileServerCore(req)
 	}
 	return
@@ -43,15 +37,15 @@ func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error
 // Takes a dir and some code, replaces all includes, checks cache, compiles, caches
 func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
 	// replace includes with hash of included contents and add those contents to Includes (recursive)
-	var includes = make(map[string][]byte) // hashes to code
+	var includes = make(map[string][]byte)     // hashes to code
 	var includeNames = make(map[string]string) //hashes before replace to hashes after
 	var err error
-	logger.Debugln("pre includes;", string(code))
+	//logger.Debugln("pre includes;", string(code))
 	code, err = c.replaceIncludes(code, dir, includes, includeNames)
 	if err != nil {
 		return nil, err
 	}
-	logger.Debugln("post replaceincludes;", string(code))
+	//logger.Debugln("post replaceincludes;", string(code))
 
 	// go through all includes, check if they have changed
 	hash, cached := c.checkCached(code, includes)
@@ -69,12 +63,14 @@ func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
 		return nil, err
 	}
 
-	// fill in cached values, cache new values
-	if err := c.cacheFile(respJ.Bytecode, hash); err != nil {
-		return nil, err
-	}
-	if err := c.cacheFile([]byte(respJ.ABI), hash+"-abi"); err != nil {
-		return nil, err
+	if respJ.Error == "" {
+		// fill in cached values, cache new values
+		if err := c.cacheFile(respJ.Bytecode, hash); err != nil {
+			return nil, err
+		}
+		if err := c.cacheFile([]byte(respJ.ABI), hash+"-abi"); err != nil {
+			return nil, err
+		}
 	}
 
 	return respJ, nil
@@ -119,5 +115,5 @@ func Compile(filename string) ([]byte, string, error) {
 
 // Compile a literal piece of code
 func CompileLiteral(code string, lang string) ([]byte, string, error) {
-	return compile([]byte(code), lang, utils.Lllc)
+	return compile([]byte(code), lang, common.LllcScratchPath)
 }

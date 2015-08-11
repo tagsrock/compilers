@@ -3,16 +3,16 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/codegangsta/cli"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/epm-go/utils"
-	"github.com/eris-ltd/lllc-server"
-	"log"
 	"os"
 	"runtime"
 	"strconv"
-)
 
-var logger = lllcserver.Logger{}
+	"github.com/eris-ltd/lllc-server"
+
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/codegangsta/cli"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
+	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/log"
+)
 
 // simple lllc-server and cli
 func main() {
@@ -20,12 +20,13 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "lllc-server"
 	app.Usage = ""
-	app.Version = "0.9.0"
+	app.Version = "0.10.0"
 	app.Author = "Ethan Buchman"
 	app.Email = "ethan@erisindustries.com"
 
 	app.Action = cliServer
 	app.Before = before
+	app.After = after
 
 	app.Flags = []cli.Flag{
 		securePortFlag,
@@ -40,7 +41,7 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
-		cli.Command{
+		{
 			Name:   "compile",
 			Usage:  "compile a contract",
 			Action: cliClient,
@@ -51,7 +52,7 @@ func main() {
 				//logFlag,
 			},
 		},
-		cli.Command{
+		{
 			Name:   "proxy",
 			Usage:  "run a proxy server for out of process access",
 			Action: cliProxy,
@@ -65,13 +66,18 @@ func main() {
 }
 
 func before(c *cli.Context) error {
-	lllcserver.DebugMode = c.GlobalInt("log")
+	log.SetLogLevel("lllc-server-cli", c.GlobalInt("log"))
+	return nil
+}
+
+func after(c *cli.Context) error {
+	log.Flush()
 	return nil
 }
 
 func cliClient(c *cli.Context) {
 	if len(c.Args()) == 0 {
-		log.Fatal("Specify a contract to compile")
+		ifExit(fmt.Errorf("Specify a contract to compile"))
 	}
 	tocompile := c.Args()[0]
 
@@ -89,7 +95,7 @@ func cliClient(c *cli.Context) {
 	}
 	logger.Debugln("language config:", lllcserver.Languages[lang])
 
-	utils.InitDataDir(lllcserver.ClientCache)
+	common.InitDataDir(lllcserver.ClientCache)
 	logger.Infoln("compiling", tocompile)
 	if c.Bool("local") {
 		lllcserver.SetLanguageNet(lang, false)
@@ -97,15 +103,15 @@ func cliClient(c *cli.Context) {
 		// force it through the compile pipeline so we get caching
 		b, abi, err := lllcserver.Compile(tocompile)
 		ifExit(err)
-		logger.Warnln("bytecode:", hex.EncodeToString(b))
-		logger.Warnln("abi:", abi)
+		logger.Infoln("bytecode:", hex.EncodeToString(b))
+		logger.Infoln("abi:", abi)
 	} else {
 		code, abi, err := lllcserver.Compile(tocompile)
 		if err != nil {
 			fmt.Println(err)
 		}
-		logger.Warnln("bytecode:", hex.EncodeToString(code))
-		logger.Warnln("abi:", abi)
+		logger.Infoln("bytecode:", hex.EncodeToString(code))
+		logger.Infoln("abi:", abi)
 	}
 }
 
@@ -116,7 +122,7 @@ func cliProxy(c *cli.Context) {
 
 func cliServer(c *cli.Context) {
 
-	utils.InitDataDir(lllcserver.ServerCache)
+	common.InitDataDir(lllcserver.ServerCache)
 	addrUnsecure := ""
 	addrSecure := ""
 
@@ -141,10 +147,10 @@ func cliServer(c *cli.Context) {
 	if !c.Bool("no-ssl") {
 
 		if _, err := os.Stat(key); os.IsNotExist(err) {
-			ifExit(err)
+			common.Exit(fmt.Errorf("Can't find ssl key %s. Use --no-ssl flag to disable", key))
 		}
 		if _, err := os.Stat(cert); os.IsNotExist(err) {
-			ifExit(err)
+			common.Exit(fmt.Errorf("Can't find ssl cert %s. Use --no-ssl flag to disable", cert))
 		}
 
 	}
@@ -180,7 +186,7 @@ var (
 	logFlag = cli.IntFlag{
 		Name:  "log",
 		Usage: "set the log level",
-		Value: 5,
+		Value: 4,
 	}
 
 	portFlag = cli.IntFlag{
@@ -207,8 +213,8 @@ var (
 	}
 
 	unsecureOnlyFlag = cli.BoolFlag{
-		Name:  "no-ssl",
-		Usage: "do not use ssl",
+		Name:   "no-ssl",
+		Usage:  "do not use ssl",
 		EnvVar: "NO_SSL",
 	}
 
@@ -230,9 +236,9 @@ var (
 	}
 
 	hostFlag = cli.StringFlag{
-		Name:  "host",
-		Usage: "set the server host (include http(s)://)",
-		Value: "",
+		Name:   "host",
+		Usage:  "set the server host (include http(s)://)",
+		Value:  "",
 		EnvVar: "HOST",
 	}
 )
@@ -240,6 +246,7 @@ var (
 func ifExit(err error) {
 	if err != nil {
 		logger.Errorln(err)
+		log.Flush()
 		os.Exit(0)
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"regexp"
@@ -63,7 +62,7 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, i int, s []byte, dir s
 	// take hash before replacing includes to see if we've already parsed this file
 	hash := sha256.Sum256(incl_code)
 	hpre := hex.EncodeToString(hash[:])
-	if h, ok := includeNames[hpre]; ok{
+	if h, ok := includeNames[hpre]; ok {
 		replaces := c.IncludeReplace(h, i)
 		ret := []byte(replaces)
 		return ret, nil
@@ -227,32 +226,4 @@ func ClearServerCache() error {
 // Clear the client cache
 func ClearClientCache() error {
 	return clearDir(ClientCache)
-}
-
-// Dead simple stupid convenient logger
-type Logger struct {
-}
-
-func (l *Logger) Errorln(s ...interface{}) {
-	if DebugMode > 0 {
-		log.Println(s...)
-	}
-}
-
-func (l *Logger) Warnln(s ...interface{}) {
-	if DebugMode > 1 {
-		log.Println(s...)
-	}
-}
-
-func (l *Logger) Infoln(s ...interface{}) {
-	if DebugMode > 2 {
-		log.Println(s...)
-	}
-}
-
-func (l *Logger) Debugln(s ...interface{}) {
-	if DebugMode > 3 {
-		log.Println(s...)
-	}
 }

@@ -1,6 +1,6 @@
 {
 	"lll": {
-		"url": "http://localhost:8090/compile",
+		"url": "https://compilers.eris.industries:8091/compile",
 		"net": true,
 		"extensions": [
 			"lll",
@@ -16,13 +16,13 @@
 			]
 		],
 		"cmd": [
-			"/usr/local/src/eris-cpp/build/lllc/lllc",
+			"/usr/bin/lllc",
 			"_"
 		],
 		"abi": null
 	},
 	"se": {
-		"url": "http://localhost:8090/compile",
+		"url": "https://compilers.eris.industries:8091/compile",
 		"net": true,
 		"extensions": [
 			"se"
@@ -42,18 +42,18 @@
 			]
 		],
 		"cmd": [
-			"/usr/local/bin/serpent",
+			"/usr/bin/sc",
 			"compile",
 			"_"
 		],
 		"abi": [
-			"/usr/local/bin/serpent",
+			"/usr/bin/sc",
 			"mk_full_signature",
 			"_"
 		]
 	},
 	"sol": {
-		"url": "http://localhost:8090/compile",
+		"url": "https://compilers.eris.industries:8091/compile",
 		"net": true,
 		"extensions": [
 			"sol"

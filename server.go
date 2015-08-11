@@ -25,7 +25,6 @@ import (
 )
 
 var (
-	//"" = abi.ABI{}
 	NEWRELIC_KEY = os.Getenv("NEWRELIC_KEY")
 	NEWRELIC_APP = os.Getenv("NEWRELIC_APP")
 	SEGMENT_KEY  = os.Getenv("SEGMENT_KEY")

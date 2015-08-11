@@ -67,6 +67,15 @@ func AddLogger(pkg string) *Logger {
 	return l
 }
 
+func SetLogLevelGlobal(level LogLevel) {
+	mtx.Lock()
+	defer mtx.Unlock()
+
+	for _, l := range loggers {
+		l.Level = level
+	}
+}
+
 // set levels for individual packages
 func SetLogLevel(pkg string, level LogLevel) {
 	mtx.Lock()

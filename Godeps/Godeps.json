@@ -6,26 +6,6 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "code.google.com/p/go-uuid/uuid",
-			"Comment": "null-15",
-			"Rev": "35bc42037350f0078e3c974c6ea690f1926603ab"
-		},
-		{
-			"ImportPath": "code.google.com/p/go.crypto/pbkdf2",
-			"Comment": "null-236",
-			"Rev": "69e2a90ed92d03812364aeb947b7068dc42e561e"
-		},
-		{
-			"ImportPath": "code.google.com/p/go.crypto/ripemd160",
-			"Comment": "null-236",
-			"Rev": "69e2a90ed92d03812364aeb947b7068dc42e561e"
-		},
-		{
-			"ImportPath": "code.google.com/p/go.crypto/scrypt",
-			"Comment": "null-236",
-			"Rev": "69e2a90ed92d03812364aeb947b7068dc42e561e"
-		},
-		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-137-gbca61c4",
 			"Rev": "bca61c476e3c752594983e4c9bcd5f62fb09f157"
@@ -41,26 +21,11 @@
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/common/go/common",
-			"Rev": "cc37905fbb49dccf7ab40a4411f8042754f468ed"
+			"Rev": "f48a7aa1490bf08e013cbb0c128500e1c05bc25f"
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/common/go/log",
-			"Rev": "cc37905fbb49dccf7ab40a4411f8042754f468ed"
-		},
-		{
-			"ImportPath": "github.com/eris-ltd/go-ethereum/crypto",
-			"Comment": "v0.6.8-2208-g30c55ac",
-			"Rev": "30c55aca186a1674806f2ca4b3c132d998e163d4"
-		},
-		{
-			"ImportPath": "github.com/eris-ltd/go-ethereum/ethutil",
-			"Comment": "v0.6.8-2208-g30c55ac",
-			"Rev": "30c55aca186a1674806f2ca4b3c132d998e163d4"
-		},
-		{
-			"ImportPath": "github.com/eris-ltd/go-ethereum/logger",
-			"Comment": "v0.6.8-2208-g30c55ac",
-			"Rev": "30c55aca186a1674806f2ca4b3c132d998e163d4"
+			"Rev": "f48a7aa1490bf08e013cbb0c128500e1c05bc25f"
 		},
 		{
 			"ImportPath": "github.com/go-martini/martini",
@@ -78,18 +43,6 @@
 		{
 			"ImportPath": "github.com/martini-contrib/secure",
 			"Rev": "de8e19a0490b816696d093388d53f2e1f0c08b7d"
-		},
-		{
-			"ImportPath": "github.com/obscuren/ecies",
-			"Rev": "d899334bba7bf4a157cab19d8ad836dcb1de0c34"
-		},
-		{
-			"ImportPath": "github.com/rakyll/globalconf",
-			"Rev": "415abc325023f1a00cd2d9fa512e0e71745791a2"
-		},
-		{
-			"ImportPath": "github.com/rakyll/goini",
-			"Rev": "907cca0f578a5316fb864ec6992dc3d9730ec58c"
 		},
 		{
 			"ImportPath": "github.com/segmentio/analytics-go",
@@ -112,10 +65,6 @@
 		{
 			"ImportPath": "github.com/yvasiyarov/newrelic_platform_go",
 			"Rev": "cef0ebd22fb48453114ba645d0fb80fea6e670de"
-		},
-		{
-			"ImportPath": "golang.org/x/crypto/pbkdf2",
-			"Rev": "4ed45ec682102c643324fae5dff8dab085b6c300"
 		}
 	]
 }

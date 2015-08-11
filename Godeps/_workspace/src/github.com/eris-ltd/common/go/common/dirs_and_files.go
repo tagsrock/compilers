@@ -92,11 +92,9 @@ func AbsolutePath(Datadir string, filename string) string {
 }
 
 func InitDataDir(Datadir string) error {
-	_, err := os.Stat(Datadir)
-	if err != nil {
+	if _, err := os.Stat(Datadir); err != nil {
 		if os.IsNotExist(err) {
-			err := os.MkdirAll(Datadir, 0777)
-			if err != nil {
+			if err := os.MkdirAll(Datadir, 0777); err != nil {
 				return err
 			}
 		}

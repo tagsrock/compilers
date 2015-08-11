@@ -8,6 +8,7 @@ dependencies:
 
 test:
   override:
+    - go test ./...
     - "docker build -t eris/compilers .":
         timeout: 1200
     - "docker run -d --name compiler eris/compilers && sleep 5 && docker kill compiler"

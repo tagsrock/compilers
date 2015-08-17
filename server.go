@@ -318,7 +318,7 @@ func StartServer(addrUnsecure, addrSecure, key, cert string) {
 		if addrUnsecure != "" {
 			go func() {
 				if err := http.ListenAndServe(addrUnsecure, srv); err != nil {
-					logger.Errorln("Cannot serve on http port: ", err)
+					fmt.Println("Cannot serve on http port: ", err)
 					os.Exit(1)
 				}
 			}()
@@ -326,7 +326,7 @@ func StartServer(addrUnsecure, addrSecure, key, cert string) {
 
 		// HTTPS
 		if err := http.ListenAndServeTLS(addrSecure, cert, key, srv); err != nil {
-			logger.Errorln("Cannot serve on https port: ", err)
+			fmt.Println("Cannot serve on https port: ", err)
 			os.Exit(1)
 		}
 	}

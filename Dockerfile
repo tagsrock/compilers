@@ -26,7 +26,7 @@ RUN add-apt-repository -y ppa:ethereum/ethereum && \
   add-apt-repository -y ppa:ethereum/ethereum-dev && \
   apt-get update && apt-get install -qy \
   lllc \
-  sc=$(apt-cache policy sc | grep ethereum-dev -B 1 | awk 'NR==1 {print $1}') \
+  sc \
   solc \
   && rm -rf /var/lib/apt/lists/*
 

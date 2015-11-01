@@ -43,7 +43,7 @@ bytecode, err := lllcserver.CompileLiteral("[0x5](+ 4 @0x3)", "lll")
 #### Compile Remotely
 
 ```
-lllc-server compile --host https://compilers.eris.industries:8091 test.lll
+lllc-server compile --host https://compilers.eris.industries:9090 test.lll
 ```
 
 Leave out the `--host` flag to default to the url in the config.

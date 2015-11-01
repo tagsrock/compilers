@@ -10,7 +10,7 @@ import (
 	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
-var DefaultUrl = "https://compilers.eris.industries:8091/compile"
+var DefaultUrl = "https://compilers.eris.industries:9090/compile"
 
 // Language configuration struct
 // New language capabilities can be added to the server simply by

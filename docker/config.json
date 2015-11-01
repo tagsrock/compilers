@@ -1,6 +1,6 @@
 {
 	"lll": {
-		"url": "https://compilers.eris.industries:8091/compile",
+		"url": "https://compilers.eris.industries:9090/compile",
 		"net": true,
 		"extensions": [
 			"lll",
@@ -22,7 +22,7 @@
 		"abi": null
 	},
 	"se": {
-		"url": "https://compilers.eris.industries:8091/compile",
+		"url": "https://compilers.eris.industries:9090/compile",
 		"net": true,
 		"extensions": [
 			"se"
@@ -53,7 +53,7 @@
 		]
 	},
 	"sol": {
-		"url": "https://compilers.eris.industries:8091/compile",
+		"url": "https://compilers.eris.industries:9090/compile",
 		"net": true,
 		"extensions": [
 			"sol"

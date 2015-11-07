@@ -258,10 +258,6 @@ func CompileWrapper(filename string, lang string, includes []string) ([]byte, st
 	}()
 
 	tokens := Languages[lang].Cmd(filename, includes)
-	pwd, _ := os.Getwd()
-	cached, _ := filepath.Glob("./*")
-	logger.Errorf("PWD =>\t\t\t\t%s\n", pwd)
-	logger.Errorf("Files =>\t\t\t%v\n", cached)
 	hexCode, err := commandWrapper(tokens...)
 	if err != nil {
 		logger.Errorln("Couldn't compile!!", err)

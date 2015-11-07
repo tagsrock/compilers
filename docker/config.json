@@ -58,31 +58,42 @@
 		"extensions": [
 			"sol"
 		],
-		"regexes": [],
-		"replaces": [],
+		"regexes": [
+			"import \"(.+?)\";"
+		],
+		"replaces": [
+			[
+				"(import \"./",
+				".sol\";"
+			]
+		],
 		"cmd": [
 			"/usr/bin/solc",
+			"--bin",
 			"_",
-			"--binary",
-			"stdout",
+			"imports",
 			"|",
 			"grep",
-			"[0-9a-fA-F]",
+			"Binary",
+			"-A1",
 			"|",
-			"sort",
-			"-rn",
-			"|",
-			"awk",
-			"{print $1; exit}"
+			"tail",
+			"-n",
+			"1"
 		],
 		"abi": [
 			"/usr/bin/solc",
+			"--abi",
 			"_",
-			"--json-abi",
-			"stdout",
+			"imports",
 			"|",
-			"awk",
-			"NR \u003e= 4"
+			"grep",
+			"ABI",
+			"-A1",
+			"|",
+			"tail",
+			"-n",
+			"1"
 		]
 	}
 }

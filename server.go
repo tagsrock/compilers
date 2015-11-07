@@ -124,6 +124,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 		return nil
 	}
 
+	logger.Debugf("New Request =>\t\t%v\n", req)
 	resp := compileServerCore(req)
 
 	// track
@@ -161,11 +162,13 @@ func compileServerCore(req *Request) *Response {
 	}
 
 	// loop through includes, also save to drive
+	var includes []string
 	for k, v := range req.Includes {
 		filename := path.Join(ServerCache, compiler.Ext(k))
 		if _, err := os.Stat(filename); err != nil {
 			maybeCached = false
 		}
+		includes = append(includes, filepath.Base(filename))
 		ioutil.WriteFile(filename, v, 0644)
 	}
 
@@ -179,7 +182,7 @@ func compileServerCore(req *Request) *Response {
 
 	var resp *Response
 	//compile scripts, return bytecode and error
-	compiled, docs, err := CompileWrapper(name, lang)
+	compiled, docs, err := CompileWrapper(name, lang, includes)
 
 	// cache
 	if err == nil {
@@ -201,7 +204,7 @@ func informSegment(lang string, r *http.Request) {
 	prp := make(map[string]interface{})
 	prp["name"] = lang
 	prp["path"] = "/compile/" + lang
-	prp["url"] = "http://compilers.eris.industries/compile/" + lang
+	prp["url"] = DefaultUrl + lang
 
 	t := &segment.Page{
 		Context:     con,
@@ -238,7 +241,7 @@ func commandWrapper(tokens ...string) (string, error) {
 }
 
 // wrapper to cli
-func CompileWrapper(filename string, lang string) ([]byte, string, error) {
+func CompileWrapper(filename string, lang string, includes []string) ([]byte, string, error) {
 	// we need to be in the same dir as the files for sake of includes
 	cur, _ := os.Getwd()
 	dir := path.Dir(filename)
@@ -254,14 +257,19 @@ func CompileWrapper(filename string, lang string) ([]byte, string, error) {
 		os.Chdir(cur)
 	}()
 
-	tokens := Languages[lang].Cmd(filename)
+	tokens := Languages[lang].Cmd(filename, includes)
+	pwd, _ := os.Getwd()
+	cached, _ := filepath.Glob("./*")
+	logger.Errorf("PWD =>\t\t\t\t%s\n", pwd)
+	logger.Errorf("Files =>\t\t\t%v\n", cached)
 	hexCode, err := commandWrapper(tokens...)
 	if err != nil {
 		logger.Errorln("Couldn't compile!!", err)
+		logger.Errorf("Command =>\t\t\t%v\n", tokens)
 		return nil, "", err
 	}
 
-	tokens = Languages[lang].Abi(filename)
+	tokens = Languages[lang].Abi(filename, includes)
 	jsonAbi, err := commandWrapper(tokens...)
 	if err != nil {
 		logger.Errorln("Couldn't produce abi doc!!", err)

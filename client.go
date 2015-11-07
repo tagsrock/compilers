@@ -18,17 +18,17 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 	} else {
 		code = []byte(filename)
 	}
-	logger.Debugln("read code:", code)
+	logger.Debugf("Code that is read =>\t%s\n", code)
 	return
 }
 
 // send compile request to server or compile directly
 func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error) {
 	if c.config.Net {
-		logger.Infoln("compiling remotely...", c.config.URL)
+		logger.Infof("Compiling code remotely =>\t%s\n", c.config.URL)
 		respJ, err = requestResponse(req)
 	} else {
-		logger.Infoln("compiling locally...")
+		logger.Infoln("Compiling code locally.")
 		respJ = compileServerCore(req)
 	}
 	return
@@ -40,16 +40,16 @@ func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
 	var includes = make(map[string][]byte)     // hashes to code
 	var includeNames = make(map[string]string) //hashes before replace to hashes after
 	var err error
-	//logger.Debugln("pre includes;", string(code))
+	// logger.Debugf("Before parsing includes =>\n\n%s", string(code))
 	code, err = c.replaceIncludes(code, dir, includes, includeNames)
 	if err != nil {
 		return nil, err
 	}
-	//logger.Debugln("post replaceincludes;", string(code))
+	// logger.Debugf("After parsing includes =>\t\t%s\n\n%s", includes, string(code))
 
 	// go through all includes, check if they have changed
 	hash, cached := c.checkCached(code, includes)
-	logger.Infoln("hash, cached:", hash, cached)
+	logger.Debugf("Files [Hash, Cached?] =>\t%s:%v\n", hash, cached)
 
 	// if everything is cached, no need for request
 	if cached {
@@ -102,7 +102,7 @@ func Compile(filename string) ([]byte, string, error) {
 		return nil, "", err
 	}
 
-	logger.Infoln("lang:", lang)
+	logger.Infof("Language to use =>\t\t%s\n", lang)
 
 	code, err := ioutil.ReadFile(filename)
 	if err != nil {

@@ -34,18 +34,21 @@ func (l LangConfig) Ext(h string) string {
 }
 
 // Fill in the filename and return the command line args
-func (l LangConfig) Cmd(file string) (args []string) {
+func (l LangConfig) Cmd(file string, includes []string) (args []string) {
 	for _, s := range l.CompileCmd {
 		if s == "_" {
 			args = append(args, file)
+		} else if s == "imports" {
+			args = append(args, includes...)
 		} else {
 			args = append(args, s)
 		}
 	}
+	logger.Debugf("Command Compiled =>\t\t%v\n", args)
 	return
 }
 
-func (l LangConfig) Abi(file string) (args []string) {
+func (l LangConfig) Abi(file string, includes []string) (args []string) {
 	if len(l.AbiCmd) < 2 {
 		return
 	}
@@ -53,6 +56,8 @@ func (l LangConfig) Abi(file string) (args []string) {
 	for _, s := range l.AbiCmd {
 		if s == "_" {
 			args = append(args, file)
+		} else if s == "imports" {
+			args = append(args, includes...)
 		} else {
 			args = append(args, s)
 		}
@@ -104,24 +109,42 @@ var Languages = map[string]LangConfig{
 		},
 	},
 	"sol": {
-		URL:             DefaultUrl,
-		Net:             true,
-		Extensions:      []string{"sol"},
-		IncludeRegexes:  []string{},
-		IncludeReplaces: [][]string{},
+		URL:        DefaultUrl,
+		Net:        true,
+		Extensions: []string{"sol"},
+		IncludeRegexes: []string{
+			`import "(.+?)";`,
+		},
+		IncludeReplaces: [][]string{
+			{`import "`, `.sol";`},
+		},
 		CompileCmd: []string{
-			"solc",
+			"/usr/bin/solc",
+			"--bin",
 			"_",
-			"--binary", "stdout", "|",
-			"grep", "[0-9a-fA-F]", "|",
-			"sort", "-rn", "|",
-			"awk", "{print $1; exit}",
+			"imports",
+			"|",
+			"grep",
+			"Binary",
+			"-A1",
+			"|",
+			"tail",
+			"-n",
+			"1",
 		},
 		AbiCmd: []string{
-			"solc",
+			"/usr/bin/solc",
+			"--abi",
 			"_",
-			"--json-abi", "stdout", "|",
-			"awk", "NR >= 4",
+			"imports",
+			"|",
+			"grep",
+			"ABI",
+			"-A1",
+			"|",
+			"tail",
+			"-n",
+			"1",
 		},
 	},
 }

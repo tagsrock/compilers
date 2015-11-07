@@ -87,7 +87,7 @@ func NewProxyResponse(bytecode []byte, abi string, err error) *ProxyRes {
 func requestResponse(req *Request) (*Response, error) {
 	lang := req.Language
 	URL := Languages[lang].URL
-	logger.Infoln("lang/url for request:", lang, URL)
+	// logger.Debugf("Lang & URL for request =>\t%s:%s\n", URL, lang)
 	// make request
 	reqJ, err := json.Marshal(req)
 	if err != nil {

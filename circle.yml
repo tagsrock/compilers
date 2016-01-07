@@ -10,17 +10,17 @@ dependencies:
   override:
     - sudo curl -L -o /usr/bin/docker http://s3-external-1.amazonaws.com/circle-downloads/docker-$DOCKER_VERSION-circleci; chmod 0755 /usr/bin/docker; true
     - sudo service docker start
-    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS quay.io
 
 test:
   override:
-    - "docker build -t eris/compilers . 1>/dev/null"
+    - "docker build -t quay.io/eris/compilers . 1>/dev/null"
     - >
-        docker run -d --name compiler eris/compilers;
-        docker run --user root --name compiler_slave --link compiler:compiler --workdir /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/ eris/compilers /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/test.sh;
+        docker run -d --name compiler quay.io/eris/compilers;
+        docker run --user root --name compiler_slave --link compiler:compiler --workdir /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/ quay.io/eris/compilers /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/test.sh;
 
 deployment:
   hub:
     branch: master
     commands:
-      - docker push eris/compilers
+      - docker push quay.io/eris/compilers

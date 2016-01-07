@@ -1,7 +1,7 @@
 package analytics
 
-import "github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/jehiah/go-strftime"
-import "github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/xtgo/uuid"
+import "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/jehiah/go-strftime"
+import "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/xtgo/uuid"
 import "encoding/json"
 import "net/http"
 import "errors"

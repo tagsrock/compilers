@@ -1,4 +1,4 @@
-package lllcserver
+package compilers
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
 var DefaultUrl = "https://compilers.eris.industries:9090/compile"

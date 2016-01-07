@@ -1,4 +1,4 @@
-package lllcserver
+package compilers
 
 import (
 	"crypto/sha256"

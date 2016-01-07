@@ -1,11 +1,11 @@
-package lllcserver
+package compilers
 
 import (
 	"fmt"
 	"io/ioutil"
 	"path"
 
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
 // Client cache location in eris tree

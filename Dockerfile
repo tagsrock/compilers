@@ -27,9 +27,9 @@ RUN curl -sSL -o $INSTALL_BASE/go-wrapper https://raw.githubusercontent.com/dock
 RUN chmod +x $INSTALL_BASE/go-wrapper
 
 # Install eris-compilers, a go app that manages compilations
-ENV REPO github.com/eris-ltd/lllc-server
+ENV REPO github.com/eris-ltd/eris-compilers
 ENV BASE $GOPATH/src/$REPO
-ENV NAME lllc-server
+ENV NAME eris-compilers
 RUN mkdir --parents $BASE
 COPY . $BASE/
 RUN cd $BASE/cmd/$NAME && go build -o $INSTALL_BASE/$NAME

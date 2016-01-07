@@ -1,7 +1,7 @@
 package gorelic
 
 import (
-	metrics "github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/yvasiyarov/go-metrics"
+	metrics "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/yvasiyarov/go-metrics"
 	"time"
 )
 

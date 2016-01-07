@@ -62,14 +62,14 @@ fi
 if [ ! -f /data/cert.crt ] || [ ! -f /data/key.key ]
 then
   echo "Starting server --no-ssl"
-  lllc-server --no-ssl --unsecure-port ${UNSECURE_PORT:=9099} --log 5
+  eris-compilers --no-ssl --unsecure-port ${UNSECURE_PORT:=9099} --log 5
 else
   if [ -z $SSL_ONLY ]
   then
     echo "Starting server using HTTP+HTTPS"
-    lllc-server --unsecure-port ${UNSECURE_PORT:=9099} --secure-port ${SECURE_PORT:=9098} --key /data/key.key --cert /data/cert.crt --log 5
+    eris-compilers --unsecure-port ${UNSECURE_PORT:=9099} --secure-port ${SECURE_PORT:=9098} --key /data/key.key --cert /data/cert.crt --log 5
   else
     echo "Starting server --secure-only"
-    lllc-server --secure-only --secure-port ${SECURE_PORT:=9098} --key /data/key.key --cert /data/cert.crt --log 5
+    eris-compilers --secure-only --secure-port ${SECURE_PORT:=9098} --key /data/key.key --cert /data/cert.crt --log 5
   fi
 fi

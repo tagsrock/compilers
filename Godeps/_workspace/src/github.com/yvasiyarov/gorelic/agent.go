@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	metrics "github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/yvasiyarov/go-metrics"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/yvasiyarov/newrelic_platform_go"
+	metrics "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/yvasiyarov/go-metrics"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/yvasiyarov/newrelic_platform_go"
 )
 
 const (

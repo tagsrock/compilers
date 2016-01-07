@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/yvasiyarov/gorelic"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/yvasiyarov/gorelic"
 )
 
 var newrelicLicense = flag.String("newrelic-license", "", "Newrelic license")

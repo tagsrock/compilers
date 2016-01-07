@@ -1,4 +1,4 @@
-package lllcserver
+package compilers
 
 import (
 	"bytes"
@@ -16,12 +16,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/ebuchman/go-shell-pipes"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/go-martini/martini"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/gorelic"
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/martini-contrib/secure"
-	segment "github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/segmentio/analytics-go"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/ebuchman/go-shell-pipes"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/go-martini/martini"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/martini-contrib/gorelic"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/martini-contrib/secure"
+	segment "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/segmentio/analytics-go"
 )
 
 var (

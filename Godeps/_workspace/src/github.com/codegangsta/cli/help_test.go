@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/eris-ltd/lllc-server/Godeps/_workspace/src/github.com/codegangsta/cli"
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/codegangsta/cli"
 )
 
 func Test_ShowAppHelp_NoAuthor(t *testing.T) {

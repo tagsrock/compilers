@@ -20,7 +20,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "eris-compilers"
 	app.Usage = ""
-	app.Version = "0.10.0"
+	app.Version = "0.11.3"
 	app.Author = "Ethan Buchman"
 	app.Email = "ethan@erisindustries.com"
 
@@ -95,23 +95,36 @@ func cliClient(c *cli.Context) {
 	}
 	logger.Debugln("language config:", compilers.Languages[lang])
 
+	libraries := c.String("libraries")
+
 	common.InitDataDir(compilers.ClientCache)
 	logger.Infoln("compiling", tocompile)
 	if c.Bool("local") {
 		compilers.SetLanguageNet(lang, false)
 		//b, err := compilers.CompileWrapper(tocompile, lang)
 		// force it through the compile pipeline so we get caching
-		b, abi, err := compilers.Compile(tocompile)
-		ifExit(err)
-		logger.Infoln("bytecode:", hex.EncodeToString(b))
-		logger.Infoln("abi:", abi)
+		resp := compilers.Compile(tocompile, libraries)
+		if resp.Error != "" {
+			logger.Errorln(resp.Error)
+			log.Flush()
+			os.Exit(0)
+		}
+		for _, r := range resp.Objects {
+			logger.Infoln("objectname:", r.Objectname)
+			logger.Infoln("bytecode:", hex.EncodeToString(r.Bytecode))
+			logger.Infoln("abi:", r.ABI)
+		}
 	} else {
-		code, abi, err := compilers.Compile(tocompile)
-		if err != nil {
+		resp := compilers.Compile(tocompile, libraries)
+		if resp.Error != "" {
 			fmt.Println(err)
 		}
-		logger.Infoln("bytecode:", hex.EncodeToString(code))
-		logger.Infoln("abi:", abi)
+		for _, r := range resp.Objects {
+			logger.Infoln("objectname:", r.Objectname)
+			logger.Infoln("bytecode:", hex.EncodeToString(r.Bytecode))
+			logger.Infoln("abi:", r.ABI)
+			logger.Infoln("abi:", r.ABI)
+		}
 	}
 }
 

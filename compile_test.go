@@ -14,30 +14,35 @@ func init() {
 
 // test the result of compiling through the lllc pipeline vs giving it to the wrapper
 func testContract(t *testing.T, file string) {
-	our_code, our_abi, err := Compile(file)
-	if err != nil {
-		t.Fatal(err)
+	our_resp := Compile(file, "")
+	if our_resp.Error != "" {
+		t.Fatal(fmt.Errorf(our_resp.Error))
 	}
-	if len(our_code) == 0 {
+	if len(our_resp.Objects) == 0 {
 		t.Fatal(fmt.Errorf("Output is empty!"))
 	}
 
 	lang, _ := LangFromFile(file)
-	truth_code, truth_abi, err := CompileWrapper(file, lang, []string{})
-	if err != nil {
-		t.Fatal(err)
+	truth_resp := CompileWrapper(file, lang, []string{}, "")
+	if truth_resp.Error != "" {
+		t.Fatal(fmt.Errorf(truth_resp.Error))
 	}
-	if len(truth_code) == 0 {
+	if len(truth_resp.Objects) == 0 {
 		t.Fatal(fmt.Errorf("Output is empty!"))
 	}
-	N := 100
-	printCodeTop("us", our_code, N)
-	printCodeTop("them", truth_code, N)
-	if bytes.Compare(our_code, truth_code) != 0 {
-		t.Fatal(fmt.Errorf("Difference of %d", bytes.Compare(our_code, truth_code)))
+	if len(our_resp.Objects) != len(truth_resp.Objects) {
+		t.Fatal(fmt.Errorf("Number of compiled objects differ!"))
 	}
-	if our_abi != truth_abi {
-		t.Fatal(fmt.Errorf("ABI results don't match:", our_abi, truth_abi))
+	for i, r := range our_resp.Objects {
+		N := 100
+		printCodeTop("us", r.Bytecode, N)
+		printCodeTop("them", truth_resp.Objects[i].Bytecode, N)
+		if bytes.Compare(r.Bytecode, truth_resp.Objects[i].Bytecode) != 0 {
+			t.Fatal(fmt.Errorf("Difference of %d", bytes.Compare(r.Bytecode, truth_resp.Objects[i].Bytecode)))
+		}
+		if r.ABI != truth_resp.Objects[i].ABI {
+			t.Fatal(fmt.Errorf("ABI results don't match:", r.ABI, truth_resp.Objects[i].ABI))
+		}
 	}
 }
 

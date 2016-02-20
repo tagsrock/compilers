@@ -1,14 +1,13 @@
 package compilers
 
 import (
-	"fmt"
 	"io/ioutil"
 	"path"
 
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
-// Client cache location in eris tree
+// ClientCache location in eris tree
 var ClientCache = path.Join(common.LllcScratchPath, "client")
 
 // filename is either a filename or literal code
@@ -23,19 +22,19 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 }
 
 // send compile request to server or compile directly
-func (c *CompileClient) compileRequest(req *Request) (respJ *Response, err error) {
+func (c *CompileClient) compileRequest(req *Request) (resp *Response, err error) {
 	if c.config.Net {
 		logger.Infof("Compiling code remotely =>\t%s\n", c.config.URL)
-		respJ, err = requestResponse(req)
+		resp, err = requestResponse(req)
 	} else {
 		logger.Infoln("Compiling code locally.")
-		respJ = compileServerCore(req)
+		resp = compileServerCore(req)
 	}
 	return
 }
 
-// Takes a dir and some code, replaces all includes, checks cache, compiles, caches
-func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
+// Compile takes a dir and some code, replaces all includes, checks cache, compiles, caches
+func (c *CompileClient) Compile(dir string, code []byte, libraries string) (*Response, error) {
 	// replace includes with hash of included contents and add those contents to Includes (recursive)
 	var includes = make(map[string][]byte)     // hashes to code
 	var includeNames = make(map[string]string) //hashes before replace to hashes after
@@ -49,71 +48,73 @@ func (c *CompileClient) Compile(dir string, code []byte) (*Response, error) {
 
 	// go through all includes, check if they have changed
 	hash, cached := c.checkCached(code, includes)
+
 	logger.Debugf("Files [Hash, Cached?] =>\t%s:%v\n", hash, cached)
 
 	// if everything is cached, no need for request
 	if cached {
+		// TODO: need to return all contracts/libs tied to the original src file
 		return c.cachedResponse(hash)
 	}
-	req := NewRequest(code, includes, c.Lang())
+	req := NewRequest(code, includes, c.Lang(), libraries)
 
 	// response struct (returned)
-	respJ, err := c.compileRequest(req)
+	resp, err := c.compileRequest(req)
+
 	if err != nil {
 		return nil, err
 	}
 
-	if respJ.Error == "" {
-		// fill in cached values, cache new values
-		if err := c.cacheFile(respJ.Bytecode, hash); err != nil {
-			return nil, err
-		}
-		if err := c.cacheFile([]byte(respJ.ABI), hash+"-abi"); err != nil {
-			return nil, err
+	if resp.Error == "" {
+		for _, r := range resp.Objects {
+			// fill in cached values, cache new values
+			if r.Bytecode != nil {
+				if err := c.cacheFile(r.Bytecode, hash, r.Objectname, "bin"); err != nil {
+					return nil, err
+				}
+				if err := c.cacheFile([]byte(r.ABI), hash, r.Objectname, "abi"); err != nil {
+					return nil, err
+				}
+			}
 		}
 	}
 
-	return respJ, nil
+	return resp, nil
 }
 
 // create a new compiler for the language and compile the code
-func compile(code []byte, lang, dir string) ([]byte, string, error) {
+func compile(filename string, code []byte, lang, dir string, libraries string) *Response {
 	c, err := NewCompileClient(lang)
 	if err != nil {
-		return nil, "", err
+		return NewResponse("", nil, "", err)
 	}
-	r, err := c.Compile(dir, code)
+	r, err := c.Compile(dir, code, libraries)
 	if err != nil {
-		return nil, "", err
+		return NewResponse("", nil, "", err)
 	}
-	b := r.Bytecode
-	if r.Error != "" {
-		err = fmt.Errorf(r.Error)
-	} else {
-		err = nil
-	}
-	return b, r.ABI, err
+
+	return r
 }
 
 // Compile a file and resolve includes
-func Compile(filename string) ([]byte, string, error) {
+func Compile(filename string, libraries string) *Response {
 	lang, err := LangFromFile(filename)
 	if err != nil {
-		return nil, "", err
+		return NewResponse("", nil, "", err)
 	}
 
 	logger.Infof("Language to use =>\t\t%s\n", lang)
 
 	code, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, "", err
+		return NewResponse("", nil, "", err)
 
 	}
 	dir := path.Dir(filename)
-	return compile(code, lang, dir)
+	return compile(filename, code, lang, dir, libraries)
 }
 
 // Compile a literal piece of code
-func CompileLiteral(code string, lang string) ([]byte, string, error) {
-	return compile([]byte(code), lang, common.LllcScratchPath)
+func CompileLiteral(code string, lang string) *Response {
+	return compile("Literal", []byte(code), lang, common.LllcScratchPath, "")
 }

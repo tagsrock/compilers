@@ -34,7 +34,7 @@ func (l LangConfig) Ext(h string) string {
 }
 
 // Fill in the filename and return the command line args
-func (l LangConfig) Cmd(file string, includes []string) (args []string) {
+func (l LangConfig) Cmd(file string, includes []string, libraries string) (args []string) {
 	for _, s := range l.CompileCmd {
 		if s == "_" {
 			args = append(args, file)
@@ -43,6 +43,10 @@ func (l LangConfig) Cmd(file string, includes []string) (args []string) {
 		} else {
 			args = append(args, s)
 		}
+	}
+	if libraries != "" {
+		args = append(args, "--libraries ")
+		args = append(args, libraries)
 	}
 	logger.Debugf("Command Compiled =>\t\t%v\n", args)
 	return
@@ -120,31 +124,8 @@ var Languages = map[string]LangConfig{
 		},
 		CompileCmd: []string{
 			"/usr/bin/solc",
-			"--bin",
+			"--combined-json", "bin", "abi",
 			"_",
-			"imports",
-			"|",
-			"grep",
-			"Binary",
-			"-A1",
-			"|",
-			"tail",
-			"-n",
-			"1",
-		},
-		AbiCmd: []string{
-			"/usr/bin/solc",
-			"--abi",
-			"_",
-			"imports",
-			"|",
-			"grep",
-			"ABI",
-			"-A1",
-			"|",
-			"tail",
-			"-n",
-			"1",
 		},
 	},
 }

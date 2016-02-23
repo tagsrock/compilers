@@ -6,63 +6,130 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"os/user"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/log" // so we can flush logs on exit/ifexit
+	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
 )
 
 var (
 	// Convenience Directories
-	GoPath   = os.Getenv("GOPATH")
-	ErisLtd  = path.Join(GoPath, "src", "github.com", "eris-ltd")
-	ErisGH   = "https://github.com/eris-ltd/"
-	usr, _   = user.Current() // error?!
-	ErisRoot = ResolveErisRoot()
+	GoPath            = os.Getenv("GOPATH")
+	ErisLtd           = filepath.Join(GoPath, "src", "github.com", "eris-ltd") // CSK: to deprecate
+	ErisGo            = filepath.Join(GoPath, "src", "github.com", "eris-ltd") // CSK: to keep
+	ErisGH            = "https://github.com/eris-ltd/"
+	ErisRoot          = ResolveErisRoot()
+	ErisContainerRoot = "/home/eris/.eris" // XXX: this is used as root in the `eris/base` image
 
 	// Major Directories
-	ActionsPath        = path.Join(ErisRoot, "actions")
-	BlockchainsPath    = path.Join(ErisRoot, "blockchains")
-	DataContainersPath = path.Join(ErisRoot, "data")
-	DappsPath          = path.Join(ErisRoot, "dapps")
-	FilesPath          = path.Join(ErisRoot, "files")
-	KeysPath           = path.Join(ErisRoot, "keys")
-	LanguagesPath      = path.Join(ErisRoot, "languages")
-	ServicesPath       = path.Join(ErisRoot, "services")
-	ScratchPath        = path.Join(ErisRoot, "scratch")
+	ActionsPath  = filepath.Join(ErisRoot, "actions")
+	AppsPath     = filepath.Join(ErisRoot, "apps")   // previously "dapps"
+	ChainsPath   = filepath.Join(ErisRoot, "chains") // previously "blockchains"
+	KeysPath     = filepath.Join(ErisRoot, "keys")
+	RemotesPath  = filepath.Join(ErisRoot, "remotes")
+	ScratchPath  = filepath.Join(ErisRoot, "scratch")
+	ServicesPath = filepath.Join(ErisRoot, "services")
 
-	// Keys
-	KeysDataPath = path.Join(KeysPath, "data")
-	KeyNamesPath = path.Join(KeysPath, "names")
+	// Chains Directories
+	HEAD             = filepath.Join(ChainsPath, "HEAD")
+	DefaultChainPath = filepath.Join(ChainsPath, "default")
+	AccountsTypePath = filepath.Join(ChainsPath, "account-types")
+	ChainTypePath    = filepath.Join(ChainsPath, "chain-types")
 
-	// Scratch Directories (globally coordinated)
-	EpmScratchPath  = path.Join(ScratchPath, "epm")
-	LllcScratchPath = path.Join(ScratchPath, "lllc")
-	SolcScratchPath = path.Join(ScratchPath, "sol")
-	SerpScratchPath = path.Join(ScratchPath, "ser")
+	// Keys Directories
+	KeysDataPath = filepath.Join(KeysPath, "data")
+	KeyNamesPath = filepath.Join(KeysPath, "names")
 
-	// Blockchains stuff
-	ChainsConfigPath = path.Join(BlockchainsPath, "config")
-	HEAD             = path.Join(BlockchainsPath, "HEAD")
-	Refs             = path.Join(BlockchainsPath, "refs")
+	// Scratch Directories (basically eris' cache) (globally coordinated)
+	DataContainersPath   = filepath.Join(ScratchPath, "data")
+	LanguagesScratchPath = filepath.Join(ScratchPath, "languages") // previously "~/.eris/languages"
+	LllcScratchPath      = filepath.Join(ScratchPath, "lllc")
+	SolcScratchPath      = filepath.Join(ScratchPath, "sol")
+	SerpScratchPath      = filepath.Join(ScratchPath, "ser")
+
+	// Services Directories
+	PersonalServicesPath = filepath.Join(ServicesPath, "global")
+
+	// Deprecated Directories (remove on 0.12 release)
+	BlockchainsPath = filepath.Join(ErisRoot, "blockchains")
+	DappsPath       = filepath.Join(ErisRoot, "dapps")
+	LanguagesPath   = filepath.Join(ErisRoot, "languages")
 )
 
 var MajorDirs = []string{
-	ErisRoot, ActionsPath, BlockchainsPath, DataContainersPath, DappsPath, FilesPath, KeysPath, LanguagesPath, ServicesPath, KeysDataPath, KeyNamesPath, ScratchPath, EpmScratchPath, LllcScratchPath, SolcScratchPath, SerpScratchPath, ChainsConfigPath,
+	ErisRoot,
+	ActionsPath,
+	AppsPath,
+	ChainsPath,
+	DefaultChainPath,
+	AccountsTypePath,
+	ChainTypePath,
+	KeysPath,
+	KeysDataPath,
+	KeyNamesPath,
+	RemotesPath,
+	ScratchPath,
+	DataContainersPath,
+	LanguagesScratchPath,
+	LllcScratchPath,
+	SolcScratchPath,
+	SerpScratchPath,
+	ServicesPath,
+	PersonalServicesPath,
+}
+
+// These should only be used by specific tooling rather than eris-cli level
+var ChainsDirs = []string{
+	ChainsPath,
+	DefaultChainPath,
+	AccountsTypePath,
+	ChainTypePath,
+}
+
+// These should only be used by specific tooling rather than eris-cli level
+var KeysDirs = []string{
+	KeysPath,
+	KeysDataPath,
+	KeyNamesPath,
+}
+
+// These should only be used by specific tooling rather than eris-cli level
+var ServicesDirs = []string{
+	ServicesPath,
+	PersonalServicesPath,
+}
+
+// These should only be used by specific tooling rather than eris-cli level
+var ScratchDirs = []string{
+	ScratchPath,
+	DataContainersPath,
+	LanguagesScratchPath,
+	LllcScratchPath,
+	SolcScratchPath,
+	SerpScratchPath,
+}
+
+//eris update checks if old dirs exist & migrates them
+var DirsToMigrate = map[string]string{
+	BlockchainsPath: ChainsPath,
+	DappsPath:       AppsPath,
+	LanguagesPath:   LanguagesScratchPath,
 }
 
 //---------------------------------------------
 // user and process
 
 func Usr() string {
-	u, _ := user.Current()
-	return u.HomeDir
+	u, _ := homedir.Dir()
+	return u
 }
 
 func Exit(err error) {
 	status := 0
 	if err != nil {
+		log.Flush()
 		fmt.Println(err)
 		status = 1
 	}
@@ -71,6 +138,7 @@ func Exit(err error) {
 
 func IfExit(err error) {
 	if err != nil {
+		log.Flush()
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -81,18 +149,16 @@ func IfExit(err error) {
 // filesystem
 
 func AbsolutePath(Datadir string, filename string) string {
-	if path.IsAbs(filename) {
+	if filepath.IsAbs(filename) {
 		return filename
 	}
-	return path.Join(Datadir, filename)
+	return filepath.Join(Datadir, filename)
 }
 
 func InitDataDir(Datadir string) error {
-	_, err := os.Stat(Datadir)
-	if err != nil {
+	if _, err := os.Stat(Datadir); err != nil {
 		if os.IsNotExist(err) {
-			err := os.MkdirAll(Datadir, 0777)
-			if err != nil {
+			if err := os.MkdirAll(Datadir, 0777); err != nil {
 				return err
 			}
 		}
@@ -100,6 +166,7 @@ func InitDataDir(Datadir string) error {
 	return nil
 }
 
+// TODO: [csk] give this a default string if folks want it somewhere besides ~/.eris ...?
 func ResolveErisRoot() string {
 	var eris string
 	if os.Getenv("ERIS") != "" {
@@ -110,9 +177,9 @@ func ResolveErisRoot() string {
 			if home == "" {
 				home = os.Getenv("USERPROFILE")
 			}
-			eris = path.Join(home, ".eris")
+			eris = filepath.Join(home, ".eris")
 		} else {
-			eris = path.Join(Usr(), ".eris")
+			eris = filepath.Join(Usr(), ".eris")
 		}
 	}
 	return eris
@@ -140,11 +207,11 @@ func ClearDir(dir string) error {
 	for _, f := range fs {
 		n := f.Name()
 		if f.IsDir() {
-			if err := os.RemoveAll(path.Join(dir, f.Name())); err != nil {
+			if err := os.RemoveAll(filepath.Join(dir, f.Name())); err != nil {
 				return err
 			}
 		} else {
-			if err := os.Remove(path.Join(dir, n)); err != nil {
+			if err := os.Remove(filepath.Join(dir, n)); err != nil {
 				return err
 			}
 		}
@@ -158,7 +225,17 @@ func Copy(src, dst string) error {
 		return err
 	}
 	if f.IsDir() {
-		return copyDir(src, dst)
+		tmpDir, err := ioutil.TempDir(os.TempDir(), "eris_copy")
+		if err != nil {
+			return err
+		}
+		if err := copyDir(src, tmpDir); err != nil {
+			return err
+		}
+		if err := copyDir(tmpDir, dst); err != nil {
+			return err
+		}
+		return nil
 	}
 	return copyFile(src, dst)
 }
@@ -175,8 +252,8 @@ func copyDir(src, dst string) error {
 	}
 
 	for _, f := range fs {
-		s := path.Join(src, f.Name())
-		d := path.Join(dst, f.Name())
+		s := filepath.Join(src, f.Name())
+		d := filepath.Join(dst, f.Name())
 		if f.IsDir() {
 			if err := copyDir(s, d); err != nil {
 				return err
@@ -231,15 +308,16 @@ func WriteFile(data, path string) error {
 func Editor(file string) error {
 	editr := os.Getenv("EDITOR")
 	if strings.Contains(editr, "/") {
-		editr = path.Base(editr)
+		editr = filepath.Base(editr)
 	}
 	switch editr {
 	case "", "vim", "vi":
 		return vi(file)
 	case "emacs":
 		return emacs(file)
+	default:
+		return editor(file)
 	}
-	return fmt.Errorf("Unknown editor %s", editr)
 }
 
 func emacs(file string) error {
@@ -252,6 +330,14 @@ func emacs(file string) error {
 
 func vi(file string) error {
 	cmd := exec.Command("vim", file)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func editor(file string) error {
+	cmd := exec.Command(os.Getenv("EDITOR"), file)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

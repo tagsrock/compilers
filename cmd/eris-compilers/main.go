@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/eris-ltd/eris-compilers"
+	"github.com/eris-ltd/eris-compilers/version"
 
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/codegangsta/cli"
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
@@ -20,9 +21,9 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "eris-compilers"
 	app.Usage = ""
-	app.Version = "0.11.3"
-	app.Author = "Ethan Buchman"
-	app.Email = "ethan@erisindustries.com"
+	app.Version = version.VERSION
+	app.Author = "Eris Industries"
+	app.Email = "support@erisindustries.com"
 
 	app.Action = cliServer
 	app.Before = before
@@ -36,7 +37,8 @@ func main() {
 		certFlag,
 		keyFlag,
 		internalFlag,
-		logFlag,
+		verboseFlag,
+		debugFlag,
 		hostFlag,
 	}
 
@@ -66,7 +68,13 @@ func main() {
 }
 
 func before(c *cli.Context) error {
-	log.SetLogLevel("eris-compilers-cli", c.GlobalInt("log"))
+	if c.Bool("verbose") {
+		log.SetLogLevel("eris-compilers-cli", log.LogLevelInfo)
+	} else if c.Bool("debug") {
+		log.SetLogLevel("eris-compilers-cli", log.LogLevelDebug)
+	} else {
+		log.SetLogLevel("eris-compilers-cli", log.LogLevelWarn)
+	}
 	return nil
 }
 
@@ -196,10 +204,14 @@ var (
 		Usage: "language the script is written in",
 	}
 
-	logFlag = cli.IntFlag{
-		Name:  "log",
-		Usage: "set the log level",
-		Value: 4,
+	verboseFlag = cli.BoolFlag{
+		Name:  "verbose",
+		Usage: "verbose output",
+	}
+
+	debugFlag = cli.BoolFlag{
+		Name:  "debug",
+		Usage: "debug output",
 	}
 
 	portFlag = cli.IntFlag{

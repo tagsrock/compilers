@@ -124,7 +124,7 @@ var Languages = map[string]LangConfig{
 		},
 		CompileCmd: []string{
 			"/usr/bin/solc",
-			"--combined-json", "bin", "abi",
+			"--combined-json", "bin,abi",
 			"_",
 		},
 	},
@@ -135,7 +135,7 @@ func init() {
 	common.InitDataDir(ClientCache)
 	common.InitDataDir(ServerCache)
 
-	f := path.Join(common.LanguagesPath, "config.json")
+	f := path.Join(common.LanguagesScratchPath, "config.json")
 	err := checkConfig(f)
 	if err != nil {
 		logger.Errorln(err)

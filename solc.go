@@ -8,6 +8,17 @@ type SolcItem struct {
 
 // full solc response object
 type SolcResponse struct {
-	Contracts map[string]SolcItem `json:"contracts"`
-	Version   string              `json:"version"` // json encoded
+	Contracts map[string]*SolcItem `mapstructure:"contracts" json:"contracts"`
+	Version   string               `mapstructure:"version" json:"version"` // json encoded
+}
+
+func BlankSolcItem() *SolcItem {
+	return &SolcItem{}
+}
+
+func BlankSolcResponse() *SolcResponse {
+	return &SolcResponse{
+		Version:   "",
+		Contracts: make(map[string]*SolcItem),
+	}
 }

@@ -14,13 +14,20 @@ dependencies:
 
 test:
   override:
-    - "docker build -t quay.io/eris/compilers . 1>/dev/null"
+    - "tests/build_tool.sh 1>/dev/null"
     - >
         docker run -d --name compiler quay.io/eris/compilers;
         docker run --user root --name compiler_slave --link compiler:compiler --workdir /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/ quay.io/eris/compilers /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/test.sh;
 
 deployment:
-  hub:
+  master:
     branch: master
     commands:
+      - docker push quay.io/eris/compilers
+
+deployment:
+  develop:
+    branch: develop
+    commands:
+      - docker rmi quay.io/eris/compilers:latest
       - docker push quay.io/eris/compilers

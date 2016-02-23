@@ -15,33 +15,30 @@ var AppHelpTemplate = `NAME:
    {{.Name}} - {{.Usage}}
 
 USAGE:
-   {{.Name}} {{if .Flags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} [arguments...]
-   {{if .Version}}
+   {{.Name}} {{if .Flags}}[global options] {{end}}command{{if .Flags}} [command options]{{end}} [arguments...]
+
 VERSION:
-   {{.Version}}
-   {{end}}{{if len .Authors}}
-AUTHOR(S):
-   {{range .Authors}}{{ . }}{{end}}
-   {{end}}{{if .Commands}}
+   {{.Version}}{{if len .Authors}}
+
+AUTHOR(S): 
+   {{range .Authors}}{{ . }}{{end}}{{end}}
+
 COMMANDS:
    {{range .Commands}}{{join .Names ", "}}{{ "\t" }}{{.Usage}}
-   {{end}}{{end}}{{if .Flags}}
+   {{end}}{{if .Flags}}
 GLOBAL OPTIONS:
    {{range .Flags}}{{.}}
-   {{end}}{{end}}{{if .Copyright }}
-COPYRIGHT:
-   {{.Copyright}}
-   {{end}}
+   {{end}}{{end}}
 `
 
 // The text template for the command help topic.
 // cli.go uses text/template to render templates. You can
 // render custom help text by setting this variable.
 var CommandHelpTemplate = `NAME:
-   {{.FullName}} - {{.Usage}}
+   {{.Name}} - {{.Usage}}
 
 USAGE:
-   command {{.FullName}}{{if .Flags}} [command options]{{end}} [arguments...]{{if .Description}}
+   command {{.Name}}{{if .Flags}} [command options]{{end}} [arguments...]{{if .Description}}
 
 DESCRIPTION:
    {{.Description}}{{end}}{{if .Flags}}
@@ -184,7 +181,7 @@ func printHelp(out io.Writer, templ string, data interface{}) {
 }
 
 func checkVersion(c *Context) bool {
-	if c.GlobalBool("version") || c.GlobalBool("v") || c.Bool("version") || c.Bool("v") {
+	if c.GlobalBool("version") {
 		ShowVersion(c)
 		return true
 	}
@@ -193,7 +190,7 @@ func checkVersion(c *Context) bool {
 }
 
 func checkHelp(c *Context) bool {
-	if c.GlobalBool("h") || c.GlobalBool("help") || c.Bool("h") || c.Bool("help") {
+	if c.GlobalBool("h") || c.GlobalBool("help") {
 		ShowAppHelp(c)
 		return true
 	}

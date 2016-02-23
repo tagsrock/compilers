@@ -247,6 +247,7 @@ func CompileWrapper(filename string, lang string, includes []string, libraries s
 	dir, _ = filepath.Abs(dir)
 	filename = path.Base(filename)
 
+	fmt.Printf("About to compile\t\t\t=> %s\n", path.Join(dir, filename)) // TODO these need to be log lines and we need to stop martini's log squashing.
 	if _, ok := Languages[lang]; !ok {
 		return NewResponse(filename, nil, "", UnknownLang(lang))
 	}
@@ -258,36 +259,49 @@ func CompileWrapper(filename string, lang string, includes []string, libraries s
 
 	tokens := Languages[lang].Cmd(filename, includes, libraries)
 
+	// fmt.Printf("Compiling\t\t\t\t=> %v\n", tokens) // TODO proper logging
 	hexCode, err := commandWrapper(tokens...)
 
 	if err != nil {
 		logger.Errorln("Couldn't compile!!", err)
-		logger.Errorf("Command =>\t\t\t%v\n", tokens)
+		logger.Errorf("Command\t\t\t=> %v\n", tokens)
 		return NewResponse(filename, nil, "", err)
 	}
 
 	var resp *Response
-	// attempt to decode as a solc json return structure
-	solcResp := new(SolcResponse)
+	// attempt to decode as a solc json return structure // TODO proper logging
+	solcResp := BlankSolcResponse()
 
+	// fmt.Printf("Compiler Result\t\t\t\t=> %s\n", hexCode)
 	err = json.Unmarshal([]byte(hexCode), solcResp)
 
 	if err == nil {
 
-		respItemArray := make([]ResponseItem, 1)
+		respItemArray := make([]ResponseItem, 0)
 
 		for contract, item := range solcResp.Contracts {
-			b, err := hex.DecodeString(item.Bin)
+			b, err := hex.DecodeString(strings.TrimSpace(item.Bin))
 			if err == nil {
 				respItem := ResponseItem{
-					Objectname: contract,
+					Objectname: strings.TrimSpace(contract),
 					Bytecode:   b,
-					ABI:        item.Abi,
+					ABI:        strings.TrimSpace(item.Abi),
 				}
 				respItemArray = append(respItemArray, respItem)
+			} else {
+				fmt.Errorf("Error decoding contract string\t=>\n%v\n", err)
+				return &Response{
+					Objects: nil,
+					Error:   fmt.Sprintf("%v", err),
+				}
 			}
 		}
 
+		for _, re := range respItemArray {
+			fmt.Printf("Response\t\t\t\t=> %s\n", re.Objectname)
+			fmt.Printf("\tbin\t\t\t\t=> %s\n", hex.EncodeToString(re.Bytecode))
+			fmt.Printf("\tabi\t\t\t\t=> %s\n", re.ABI)
+		}
 		return &Response{
 			Objects: respItemArray,
 			Error:   "",
@@ -310,6 +324,7 @@ func CompileWrapper(filename string, lang string, includes []string, libraries s
 			resp = NewResponse(filename, b, jsonAbi, nil)
 		}
 	}
+	fmt.Printf("Response\t\t\t\t=> %s\n", resp)
 	return resp
 }
 

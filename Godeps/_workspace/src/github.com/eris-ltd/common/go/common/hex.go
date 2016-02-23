@@ -4,10 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"reflect"
 	"strconv"
 	"strings"
 )
@@ -55,6 +52,24 @@ func Coerce2Hex(s string) string {
 	return ret
 }
 
+func CoerceHexAndPad(aa string, padright bool) string {
+	if !IsHex(aa) {
+		//first try and convert to int
+		n, err := strconv.Atoi(aa)
+		if err != nil {
+			// right pad strings
+			if padright {
+				aa = "0x" + fmt.Sprintf("%x", aa) + fmt.Sprintf("%0"+strconv.Itoa(64-len(aa)*2)+"s", "")
+			} else {
+				aa = "0x" + fmt.Sprintf("%x", aa)
+			}
+		} else {
+			aa = "0x" + fmt.Sprintf("%x", n)
+		}
+	}
+	return aa
+}
+
 func IsHex(s string) bool {
 	if len(s) < 2 {
 		return false
@@ -100,98 +115,122 @@ func StripZeros(s string) string {
 	return s[i:]
 }
 
-// hex and ints
-//---------------------------------------------------------------------------
-// reflection and json
-
-func WriteJson(config interface{}, config_file string) error {
-	b, err := json.Marshal(config)
-	if err != nil {
-		return err
-	}
-	var out bytes.Buffer
-	err = json.Indent(&out, b, "", "\t")
-	if err != nil {
-		return err
-	}
-	err = ioutil.WriteFile(config_file, out.Bytes(), 0600)
-	return err
-}
-
-func ReadJson(config interface{}, config_file string) error {
-	b, err := ioutil.ReadFile(config_file)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(b, config)
-	if err != nil {
-		fmt.Println("error unmarshalling config from file:", err)
-		return err
-	}
-	return nil
-}
-
-func NewInvalidKindErr(kind, k reflect.Kind) error {
-	return fmt.Errorf("Invalid kind. Expected %s, received %s", kind, k)
-}
-
-func FieldFromTag(v reflect.Value, field string) (string, error) {
-	iv := v.Interface()
-	st := reflect.TypeOf(iv)
-	for i := 0; i < v.NumField(); i++ {
-		tag := st.Field(i).Tag.Get("json")
-		if tag == field {
-			return st.Field(i).Name, nil
+func StripOnes(s string) string {
+	i := 0
+	for ; i < len(s); i++ {
+		if s[i:i+1] != "01" {
+			break
 		}
 	}
-	return "", fmt.Errorf("Invalid field name")
+	return s[i:]
 }
 
-// Set a field in a struct value
-// Field can be field name or json tag name
-// Values can be strings that can be cast to int or bool
-//  only handles strings, ints, bool
-func SetProperty(cv reflect.Value, field string, value interface{}) error {
-	f := cv.FieldByName(field)
-	if !f.IsValid() {
-		name, err := FieldFromTag(cv, field)
-		if err != nil {
-			return err
-		}
-		f = cv.FieldByName(name)
-	}
-	kind := f.Kind()
-
-	k := reflect.ValueOf(value).Kind()
-	if k != kind && k != reflect.String {
-		return NewInvalidKindErr(kind, k)
-	}
-
-	if kind == reflect.String {
-		f.SetString(value.(string))
-	} else if kind == reflect.Int {
-		if k != kind {
-			v, err := strconv.Atoi(value.(string))
-			if err != nil {
-				return err
-			}
-			f.SetInt(int64(v))
-		} else {
-			f.SetInt(int64(value.(int)))
-		}
-	} else if kind == reflect.Bool {
-		if k != kind {
-			v, err := strconv.ParseBool(value.(string))
-			if err != nil {
-				return err
-			}
-			f.SetBool(v)
-		} else {
-			f.SetBool(value.(bool))
-		}
-	}
-	return nil
+func Bytes2Hex(d []byte) string {
+	return hex.EncodeToString(d)
 }
 
-// reflection and json
-//---------------------------------------------------------------------------
+func RightPadBytes(slice []byte, l int) []byte {
+	if l < len(slice) {
+		return slice
+	}
+
+	padded := make([]byte, l)
+	copy(padded[0:len(slice)], slice)
+
+	return padded
+}
+
+func LeftPadBytes(slice []byte, l int) []byte {
+	if l < len(slice) {
+		return slice
+	}
+
+	padded := make([]byte, l)
+	copy(padded[l-len(slice):], slice)
+
+	return padded
+}
+
+func LeftPadString(str string, l int) string {
+	if l < len(str) {
+		return str
+	}
+
+	zeros := Bytes2Hex(make([]byte, (l-len(str))/2))
+
+	return zeros + str
+
+}
+
+func RightPadString(str string, l int) string {
+	if l < len(str) {
+		return str
+	}
+
+	zeros := Bytes2Hex(make([]byte, (l-len(str))/2))
+
+	return str + zeros
+
+}
+
+func UnLeftPadBytes(slice []byte) []byte {
+	var l int
+	for i, b := range slice {
+		if b != byte(0) {
+			l = i
+			break
+		}
+	}
+	unpadded := make([]byte, len(slice)-l)
+	copy(unpadded, slice[l:])
+
+	return unpadded
+}
+
+func UnRightPadBytes(slice []byte) []byte {
+	var l int
+	for i, b := range slice {
+		if b == byte(0) {
+			l = i
+			break
+		}
+	}
+	unpadded := make([]byte, l)
+	copy(unpadded, slice[:l])
+
+	return unpadded
+}
+
+func Address(slice []byte) (addr []byte) {
+	if len(slice) < 20 {
+		addr = LeftPadBytes(slice, 20)
+	} else if len(slice) > 20 {
+		addr = slice[len(slice)-20:]
+	} else {
+		addr = slice
+	}
+
+	addr = CopyBytes(addr)
+
+	return
+}
+
+func AddressStringToBytes(addr string) []byte {
+	var slice []byte
+	for i := 0; i < len(addr); i++ {
+		a, _ := hex.DecodeString(addr[i : i+2])
+		slice = append(slice, a[0])
+		i++
+	}
+	return slice
+}
+
+// Copy bytes
+//
+// Returns an exact copy of the provided bytes
+func CopyBytes(b []byte) (copiedBytes []byte) {
+	copiedBytes = make([]byte, len(b))
+	copy(copiedBytes, b)
+
+	return
+}

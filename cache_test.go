@@ -51,10 +51,10 @@ func TestCacheLocal(t *testing.T) {
 	testCache(t)
 }
 
-func TestCacheRemote(t *testing.T) {
-	SetLanguageNet("lll", true)
-	testCache(t)
-}
+// func TestCacheRemote(t *testing.T) {
+// 	SetLanguageNet("lll", true)
+// 	testCache(t)
+// }
 
 func TestSimple(t *testing.T) {
 	ClearCaches()

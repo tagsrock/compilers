@@ -61,14 +61,12 @@ func ProxyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var code []byte
-	var abi string
+	var resp *Response
 	if req.Literal {
-		code, abi, err = CompileLiteral(req.Source, req.Language)
+		resp = CompileLiteral(req.Source, req.Language)
 	} else {
-		code, abi, err = Compile(req.Source)
+		resp = Compile(req.Source, req.Libraries)
 	}
-	resp := NewProxyResponse(code, abi, err)
 
 	respJ, err := json.Marshal(resp)
 	if err != nil {
@@ -100,9 +98,12 @@ func CompileHandlerJs(w http.ResponseWriter, r *http.Request) {
 	if resp == nil {
 		return
 	}
-	code := resp.Bytecode
-	hexx := hex.EncodeToString(code)
-	w.Write([]byte(fmt.Sprintf(`{"bytecode": "%s"}`, hexx)))
+	respJ, err := json.Marshal(resp)
+	if err != nil {
+		logger.Errorln("failed to marshal", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Write(respJ)
 }
 
 // read in the files from the request, compile them
@@ -137,19 +138,17 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 
 // core compile functionality. used by the server and locally to mimic the server
 func compileServerCore(req *Request) *Response {
-	var name string
 	lang := req.Language
 	compiler := Languages[lang]
 
 	c := req.Script
 	if c == nil || len(c) == 0 {
-		return NewResponse(nil, "", fmt.Errorf("No script provided"))
+		return NewResponse("", nil, "", fmt.Errorf("No script provided"))
 	}
 
-	// take sha2 of request object to get tmp filename
+	// take sha256 of request object to get tmp filename
 	hash := sha256.Sum256(c)
 	filename := path.Join(ServerCache, compiler.Ext(hex.EncodeToString(hash[:])))
-	name = filename
 
 	maybeCached := true
 
@@ -174,23 +173,23 @@ func compileServerCore(req *Request) *Response {
 
 	// check cache
 	if maybeCached {
-		r, err := checkCache(hash[:])
+		r, err := checkCache(filename) // TODO:  use checkCached?
 		if err == nil {
 			return r
 		}
 	}
 
-	var resp *Response
 	//compile scripts, return bytecode and error
-	compiled, docs, err := CompileWrapper(name, lang, includes)
+	resp := CompileWrapper(filename, lang, includes, req.Libraries)
 
 	// cache
-	if err == nil {
-		cacheResult(hash[:], compiled, docs)
+	if resp.Error == "" {
+		// iterate over the array
+		for _, r := range resp.Objects {
+			// TODO: cache results using the cacheFile?
+			cacheResult(r.Objectname, r.Bytecode, r.ABI)
+		}
 	}
-
-	resp = NewResponse(compiled, docs, err)
-
 	return resp
 }
 
@@ -241,15 +240,16 @@ func commandWrapper(tokens ...string) (string, error) {
 }
 
 // wrapper to cli
-func CompileWrapper(filename string, lang string, includes []string) ([]byte, string, error) {
+func CompileWrapper(filename string, lang string, includes []string, libraries string) *Response {
 	// we need to be in the same dir as the files for sake of includes
 	cur, _ := os.Getwd()
 	dir := path.Dir(filename)
 	dir, _ = filepath.Abs(dir)
 	filename = path.Base(filename)
 
+	fmt.Printf("About to compile\t\t\t=> %s\n", path.Join(dir, filename)) // TODO these need to be log lines and we need to stop martini's log squashing.
 	if _, ok := Languages[lang]; !ok {
-		return nil, "", UnknownLang(lang)
+		return NewResponse(filename, nil, "", UnknownLang(lang))
 	}
 
 	os.Chdir(dir)
@@ -257,28 +257,75 @@ func CompileWrapper(filename string, lang string, includes []string) ([]byte, st
 		os.Chdir(cur)
 	}()
 
-	tokens := Languages[lang].Cmd(filename, includes)
+	tokens := Languages[lang].Cmd(filename, includes, libraries)
+
+	// fmt.Printf("Compiling\t\t\t\t=> %v\n", tokens) // TODO proper logging
 	hexCode, err := commandWrapper(tokens...)
+
 	if err != nil {
 		logger.Errorln("Couldn't compile!!", err)
-		logger.Errorf("Command =>\t\t\t%v\n", tokens)
-		return nil, "", err
+		logger.Errorf("Command\t\t\t=> %v\n", tokens)
+		return NewResponse(filename, nil, "", err)
 	}
 
-	tokens = Languages[lang].Abi(filename, includes)
-	jsonAbi, err := commandWrapper(tokens...)
-	if err != nil {
-		logger.Errorln("Couldn't produce abi doc!!", err)
-		// we swallow this error, but maybe we shouldnt...
+	var resp *Response
+	// attempt to decode as a solc json return structure // TODO proper logging
+	solcResp := BlankSolcResponse()
+
+	// fmt.Printf("Compiler Result\t\t\t\t=> %s\n", hexCode)
+	err = json.Unmarshal([]byte(hexCode), solcResp)
+
+	if err == nil {
+
+		respItemArray := make([]ResponseItem, 0)
+
+		for contract, item := range solcResp.Contracts {
+			b, err := hex.DecodeString(strings.TrimSpace(item.Bin))
+			if err == nil {
+				respItem := ResponseItem{
+					Objectname: strings.TrimSpace(contract),
+					Bytecode:   b,
+					ABI:        strings.TrimSpace(item.Abi),
+				}
+				respItemArray = append(respItemArray, respItem)
+			} else {
+				fmt.Errorf("Error decoding contract string\t=>\n%v\n", err)
+				return &Response{
+					Objects: nil,
+					Error:   fmt.Sprintf("%v", err),
+				}
+			}
+		}
+
+		for _, re := range respItemArray {
+			fmt.Printf("Response\t\t\t\t=> %s\n", re.Objectname)
+			fmt.Printf("\tbin\t\t\t\t=> %s\n", hex.EncodeToString(re.Bytecode))
+			fmt.Printf("\tabi\t\t\t\t=> %s\n", re.ABI)
+		}
+		return &Response{
+			Objects: respItemArray,
+			Error:   "",
+		}
+	} else {
+		// if doesn't work, then not a solc response
+		tokens = Languages[lang].Abi(filename, includes)
+		jsonAbi, err := commandWrapper(tokens...)
+
+		if err != nil {
+			logger.Errorln("Couldn't produce abi doc!!", err)
+			// we swallow this error, but maybe we shouldnt...
+		}
+
+		b, err := hex.DecodeString(hexCode)
+		if err != nil {
+			// in that case, the bytecode is not valid, so it should be flagged.
+			resp = NewResponse(filename, nil, "", err)
+		} else {
+			resp = NewResponse(filename, b, jsonAbi, nil)
+		}
 	}
-
-	b, err := hex.DecodeString(hexCode)
-	if err != nil {
-
-		return nil, "", err
-	}
-
-	return b, jsonAbi, nil
+	fmt.Printf("Response\t\t\t\t=> %s\n", resp)
+	return resp
 }
 
 // Start the compile server

@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/eris-ltd/eris-compilers"
+	"github.com/eris-ltd/eris-compilers/version"
 
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/codegangsta/cli"
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
@@ -20,9 +21,9 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "eris-compilers"
 	app.Usage = ""
-	app.Version = "0.10.0"
-	app.Author = "Ethan Buchman"
-	app.Email = "ethan@erisindustries.com"
+	app.Version = version.VERSION
+	app.Author = "Eris Industries"
+	app.Email = "support@erisindustries.com"
 
 	app.Action = cliServer
 	app.Before = before
@@ -36,7 +37,8 @@ func main() {
 		certFlag,
 		keyFlag,
 		internalFlag,
-		logFlag,
+		verboseFlag,
+		debugFlag,
 		hostFlag,
 	}
 
@@ -66,7 +68,13 @@ func main() {
 }
 
 func before(c *cli.Context) error {
-	log.SetLogLevel("eris-compilers-cli", c.GlobalInt("log"))
+	if c.Bool("verbose") {
+		log.SetLogLevel("eris-compilers-cli", log.LogLevelInfo)
+	} else if c.Bool("debug") {
+		log.SetLogLevel("eris-compilers-cli", log.LogLevelDebug)
+	} else {
+		log.SetLogLevel("eris-compilers-cli", log.LogLevelWarn)
+	}
 	return nil
 }
 
@@ -95,23 +103,36 @@ func cliClient(c *cli.Context) {
 	}
 	logger.Debugln("language config:", compilers.Languages[lang])
 
+	libraries := c.String("libraries")
+
 	common.InitDataDir(compilers.ClientCache)
 	logger.Infoln("compiling", tocompile)
 	if c.Bool("local") {
 		compilers.SetLanguageNet(lang, false)
 		//b, err := compilers.CompileWrapper(tocompile, lang)
 		// force it through the compile pipeline so we get caching
-		b, abi, err := compilers.Compile(tocompile)
-		ifExit(err)
-		logger.Infoln("bytecode:", hex.EncodeToString(b))
-		logger.Infoln("abi:", abi)
+		resp := compilers.Compile(tocompile, libraries)
+		if resp.Error != "" {
+			logger.Errorln(resp.Error)
+			log.Flush()
+			os.Exit(0)
+		}
+		for _, r := range resp.Objects {
+			logger.Infoln("objectname:", r.Objectname)
+			logger.Infoln("bytecode:", hex.EncodeToString(r.Bytecode))
+			logger.Infoln("abi:", r.ABI)
+		}
 	} else {
-		code, abi, err := compilers.Compile(tocompile)
-		if err != nil {
+		resp := compilers.Compile(tocompile, libraries)
+		if resp.Error != "" {
 			fmt.Println(err)
 		}
-		logger.Infoln("bytecode:", hex.EncodeToString(code))
-		logger.Infoln("abi:", abi)
+		for _, r := range resp.Objects {
+			logger.Infoln("objectname:", r.Objectname)
+			logger.Infoln("bytecode:", hex.EncodeToString(r.Bytecode))
+			logger.Infoln("abi:", r.ABI)
+			logger.Infoln("abi:", r.ABI)
+		}
 	}
 }
 
@@ -183,10 +204,14 @@ var (
 		Usage: "language the script is written in",
 	}
 
-	logFlag = cli.IntFlag{
-		Name:  "log",
-		Usage: "set the log level",
-		Value: 4,
+	verboseFlag = cli.BoolFlag{
+		Name:  "verbose",
+		Usage: "verbose output",
+	}
+
+	debugFlag = cli.BoolFlag{
+		Name:  "debug",
+		Usage: "debug output",
 	}
 
 	portFlag = cli.IntFlag{

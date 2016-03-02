@@ -22,9 +22,11 @@ func copyFile(src, dst string) error {
 
 func testCache(t *testing.T) {
 	ClearCaches()
-	code, _, err := Compile("tests/test-inc1.lll")
-	if err != nil {
-		t.Fatal(err)
+
+	resp := Compile("tests/test-inc1.lll", "")
+	code := resp.Objects[0].Bytecode
+	if resp.Error != "" {
+		t.Fatal(fmt.Errorf(resp.Error))
 	}
 	fmt.Printf("%x\n", code)
 	copyFile("tests/test-inc1.lll", path.Join(common.LllcScratchPath, "test-inc1.lll"))
@@ -32,9 +34,10 @@ func testCache(t *testing.T) {
 	copyFile("tests/test-inc4.lll", path.Join(common.LllcScratchPath, "test-inc3.lll"))
 	cur, _ := os.Getwd()
 	os.Chdir(common.LllcScratchPath)
-	code2, _, err := Compile(path.Join(common.LllcScratchPath, "test-inc1.lll"))
-	if err != nil {
-		t.Fatal(err)
+	resp = Compile(path.Join(common.LllcScratchPath, "test-inc1.lll"), "")
+	code2 := resp.Objects[0].Bytecode
+	if resp.Error != "" {
+		t.Fatal(fmt.Errorf(resp.Error))
 	}
 	fmt.Printf("%x\n", code2)
 	if bytes.Compare(code, code2) == 0 {
@@ -48,17 +51,18 @@ func TestCacheLocal(t *testing.T) {
 	testCache(t)
 }
 
-func TestCacheRemote(t *testing.T) {
-	SetLanguageNet("lll", true)
-	testCache(t)
-}
+// func TestCacheRemote(t *testing.T) {
+// 	SetLanguageNet("lll", true)
+// 	testCache(t)
+// }
 
 func TestSimple(t *testing.T) {
 	ClearCaches()
 	SetLanguageNet("lll", false)
-	code, _, err := Compile("tests/test-inc1.lll")
-	if err != nil {
-		t.Fatal(err)
+	resp := Compile("tests/test-inc1.lll", "")
+	code := resp.Objects[0].Bytecode
+	if resp.Error != "" {
+		t.Fatal(fmt.Errorf(resp.Error))
 	}
 	fmt.Printf("%x\n", code)
 }

@@ -5,24 +5,25 @@ MAINTAINER Eris Industries <support@erisindustries.com>
 RUN apt-get update && apt-get install -qy \
   --no-install-recommends \
   ca-certificates \
-  # libgmp-dev \
-  # libc6-dev \
   && rm -rf /var/lib/apt/lists/*
 ENV INSTALL_BASE /usr/local/bin
 
 # Golang
-ENV GOLANG_VERSION 1.4.2
-RUN curl -sSL https://golang.org/dl/go$GOLANG_VERSION.src.tar.gz \
-  | tar -v -C /usr/src -xz
-RUN cd /usr/src/go/src && ./make.bash --no-clean 2>&1
-ENV PATH /usr/src/go/bin:$PATH
-RUN mkdir -p /go/src /go/bin && chmod -R 777 /go
+ENV GOLANG_VERSION 1.5.3
+ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
+ENV GOLANG_DOWNLOAD_SHA256 43afe0c5017e502630b1aea4d44b8a7f059bf60d7f29dfd58db454d4e4e0ae53
+RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
+  && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
+  && tar -C /usr/local -xzf golang.tar.gz \
+  && rm golang.tar.gz
+ENV GOROOT /usr/local/go
 ENV GOPATH /go
-ENV PATH /go/bin:$PATH
+ENV PATH $GOPATH/bin:$GOROOT/bin:$PATH
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 WORKDIR /go
 
 # Go wrapper
-ENV GO_WRAPPER_VERSION 1.4
+ENV GO_WRAPPER_VERSION 1.5
 RUN curl -sSL -o $INSTALL_BASE/go-wrapper https://raw.githubusercontent.com/docker-library/golang/master/$GO_WRAPPER_VERSION/wheezy/go-wrapper
 RUN chmod +x $INSTALL_BASE/go-wrapper
 
@@ -33,6 +34,14 @@ ENV NAME eris-compilers
 RUN mkdir --parents $BASE
 COPY . $BASE/
 RUN cd $BASE/cmd/$NAME && go build -o $INSTALL_BASE/$NAME
+RUN unset GOLANG_VERSION && \
+  unset GOLANG_DOWNLOAD_URL && \
+  unset GOLANG_DOWNLOAD_SHA256 && \
+  unset GO_WRAPPER_VERSION && \
+  unset REPO && \
+  unset BASE && \
+  unset NAME && \
+  unset INSTALL_BASE
 
 # Setup User
 ENV USER eris

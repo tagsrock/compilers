@@ -120,19 +120,40 @@ func (c *CompileClient) checkCached(code []byte, includes map[string][]byte) (st
 
 // return cached byte code as a response
 func (c *CompileClient) cachedResponse(hash string) (*Response, error) {
-	f := path.Join(ClientCache, c.Ext(hash))
-	b, err := ioutil.ReadFile(f)
-	if err != nil {
-		return nil, err
+	d := path.Join(ClientCache, c.Ext(hash))
+	var resp *Response
+	files, _ := ioutil.ReadDir(d)
+	respItemArray := make([]ResponseItem, len(files))
+	i := 0
+	for _, f := range files {
+		fileName := f.Name()
+		b, err := ioutil.ReadFile(path.Join(d, fileName, "bin"))
+		if err != nil {
+			return nil, err
+		}
+		abi, _ := ioutil.ReadFile(path.Join(d, fileName, "abi"))
+
+		respItem := ResponseItem{
+			Objectname: fileName,
+			Bytecode:   b,
+			ABI:        string(abi),
+		}
+		respItemArray[i] = respItem
+		i++
+
 	}
-	f = path.Join(ClientCache, c.Ext(hash+"-abi"))
-	abi, _ := ioutil.ReadFile(f)
-	return NewResponse(b, string(abi), nil), nil
+	resp = &Response{
+		Objects: respItemArray,
+		Error:   "",
+	}
+
+	return resp, nil
 }
 
 // cache a file to disk
-func (c *CompileClient) cacheFile(b []byte, hash string) error {
-	f := path.Join(ClientCache, c.Ext(hash))
+func (c *CompileClient) cacheFile(b []byte, hash string, name string, ext string) error {
+	f := path.Join(ClientCache, c.Ext(hash), name, ext)
+	os.MkdirAll(path.Dir(f), 0744)
 	if b != nil {
 		if err := ioutil.WriteFile(f, b, 0644); err != nil {
 			return err
@@ -142,22 +163,21 @@ func (c *CompileClient) cacheFile(b []byte, hash string) error {
 }
 
 // check cache for server
-func checkCache(hash []byte) (*Response, error) {
-	f := path.Join(ClientCache, hex.EncodeToString(hash))
+func checkCache(objectName string) (*Response, error) {
+	f := path.Join(ServerCache, objectName)
 	if _, err := os.Stat(f); err == nil {
 		b, err := ioutil.ReadFile(f)
 		if err != nil {
 			return nil, err
 		}
-		f += "-abi"
-		abi, _ := ioutil.ReadFile(f)
-		return NewResponse(b, string(abi), nil), nil
+		abi, _ := ioutil.ReadFile(f + "-abi")
+		return NewResponse(objectName, b, string(abi), nil), nil
 	}
 	return nil, fmt.Errorf("Not cached")
 }
 
-func cacheResult(hash, compiled []byte, docs string) {
-	f := path.Join(ClientCache, hex.EncodeToString(hash))
+func cacheResult(objectName string, compiled []byte, docs string) {
+	f := path.Join(ServerCache, objectName)
 	ioutil.WriteFile(f, compiled, 0600)
 	ioutil.WriteFile(f+"-abi", []byte(docs), 0600)
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	log "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 )
 
 // Compile request object
@@ -102,16 +104,16 @@ func NewProxyResponse(bytecode []byte, abi string, err error) *ProxyRes {
 func requestResponse(req *Request) (*Response, error) {
 	lang := req.Language
 	URL := Languages[lang].URL
-	// logger.Debugf("Lang & URL for request =>\t%s:%s\n", URL, lang)
+	// log.Debugf("Lang & URL for request =>\t%s:%s\n", URL, lang)
 	// make request
 	reqJ, err := json.Marshal(req)
 	if err != nil {
-		logger.Errorln("failed to marshal req obj", err)
+		log.Errorln("failed to marshal req obj", err)
 		return nil, err
 	}
 	httpreq, err := http.NewRequest("POST", URL, bytes.NewBuffer(reqJ))
 	if err != nil {
-		logger.Errorln("failed to compose request:", err)
+		log.Errorln("failed to compose request:", err)
 		return nil, err
 	}
 	httpreq.Header.Set("Content-Type", "application/json")
@@ -119,7 +121,7 @@ func requestResponse(req *Request) (*Response, error) {
 	client := &http.Client{}
 	resp, err := client.Do(httpreq)
 	if err != nil {
-		logger.Errorln("failed to send HTTP request", err)
+		log.Errorln("failed to send HTTP request", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -133,7 +135,7 @@ func requestResponse(req *Request) (*Response, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(body, respJ)
 	if err != nil {
-		logger.Errorln("failed to unmarshal", err)
+		log.Errorln("failed to unmarshal", err)
 		return nil, err
 	}
 	return respJ, nil

@@ -21,21 +21,16 @@
 			"Rev": "4b8172520a03fa190f427bbd284db01b459bfce7"
 		},
 		{
-			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
-			"Comment": "v1.0.4",
-			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
-		},
-		{
 			"ImportPath": "github.com/ebuchman/go-shell-pipes",
 			"Rev": "83e1324808622485314bff0fd97b8b944200a7a4"
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/common/go/common",
-			"Rev": "26df169480eef97df7ed9f5419b7367895d077b4"
+			"Rev": "599e2b5057345680c99510c216d8feb0c98e2724"
 		},
 		{
 			"ImportPath": "github.com/eris-ltd/common/go/log",
-			"Rev": "26df169480eef97df7ed9f5419b7367895d077b4"
+			"Rev": "599e2b5057345680c99510c216d8feb0c98e2724"
 		},
 		{
 			"ImportPath": "github.com/go-martini/martini",
@@ -47,14 +42,6 @@
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
 		},
 		{
-			"ImportPath": "github.com/jehiah/go-strftime",
-			"Rev": "834e15c05a45371503440cc195bbd05c9a0968d9"
-		},
-		{
-			"ImportPath": "github.com/martini-contrib/gorelic",
-			"Rev": "f8b0843aa3ab66d8734aa7d9acf399bdc197c65d"
-		},
-		{
 			"ImportPath": "github.com/martini-contrib/secure",
 			"Rev": "de8e19a0490b816696d093388d53f2e1f0c08b7d"
 		},
@@ -63,43 +50,12 @@
 			"Rev": "df55a15e5ce646808815381b3db47a8c66ea62f4"
 		},
 		{
-			"ImportPath": "github.com/russross/blackfriday",
-			"Comment": "v1.2-80-g8cec3a8",
-			"Rev": "8cec3a854e68dba10faabbe31c089abf4a3e57a6"
-		},
-		{
-			"ImportPath": "github.com/segmentio/analytics-go",
-			"Comment": "v2.0.0-2-g0f10a19",
-			"Rev": "0f10a1942c812a6dc8b4978ed8a80cfc42e8a617"
-		},
-		{
-			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
-			"Rev": "244f5ac324cb97e1987ef901a0081a77bfd8e845"
-		},
-		{
 			"ImportPath": "github.com/spf13/cobra",
 			"Rev": "385fc87e4343efec233811d3d933509e8975d11a"
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
 			"Rev": "67cbc198fd11dab704b214c1e629a97af392c085"
-		},
-		{
-			"ImportPath": "github.com/xtgo/uuid",
-			"Rev": "a0b114877d4caeffbd7f87e3757c17fce570fea7"
-		},
-		{
-			"ImportPath": "github.com/yvasiyarov/go-metrics",
-			"Rev": "c25f46c4b94079672242ec48a545e7ca9ebe3aec"
-		},
-		{
-			"ImportPath": "github.com/yvasiyarov/gorelic",
-			"Comment": "v0.0.6-24-g1c0ed4e",
-			"Rev": "1c0ed4e38e62548df0051140795e569d35cf2ded"
-		},
-		{
-			"ImportPath": "github.com/yvasiyarov/newrelic_platform_go",
-			"Rev": "cef0ebd22fb48453114ba645d0fb80fea6e670de"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	log "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
@@ -48,7 +49,6 @@ func (l LangConfig) Cmd(file string, includes []string, libraries string) (args 
 		args = append(args, "--libraries ")
 		args = append(args, libraries)
 	}
-	logger.Debugf("Command Compiled =>\t\t%v\n", args)
 	return
 }
 
@@ -138,8 +138,8 @@ func init() {
 	f := path.Join(common.LanguagesScratchPath, "config.json")
 	err := checkConfig(f)
 	if err != nil {
-		logger.Errorln(err)
-		logger.Errorln("resorting to default language settings")
+		log.Errorln(err)
+		log.Errorln("resorting to default language settings")
 		return
 	}
 }

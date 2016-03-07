@@ -10,9 +10,10 @@ import (
 	"github.com/eris-ltd/eris-compilers"
 	"github.com/eris-ltd/eris-compilers/version"
 
+	log "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/codegangsta/cli"
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
-	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/log"
+	logger "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/log"
 )
 
 // simple eris-compilers and cli
@@ -68,18 +69,19 @@ func main() {
 }
 
 func before(c *cli.Context) error {
+	log.SetFormatter(logger.ErisFormatter{})
+
 	if c.Bool("verbose") {
-		log.SetLogLevel("eris-compilers-cli", log.LogLevelInfo)
+		log.SetLevel(log.InfoLevel)
 	} else if c.Bool("debug") {
-		log.SetLogLevel("eris-compilers-cli", log.LogLevelDebug)
+		log.SetLevel(log.DebugLevel)
 	} else {
-		log.SetLogLevel("eris-compilers-cli", log.LogLevelWarn)
+		log.SetLevel(log.WarnLevel)
 	}
 	return nil
 }
 
 func after(c *cli.Context) error {
-	log.Flush()
 	return nil
 }
 
@@ -101,26 +103,25 @@ func cliClient(c *cli.Context) {
 		url := host + "/" + "compile"
 		compilers.SetLanguageURL(lang, url)
 	}
-	logger.Debugln("language config:", compilers.Languages[lang])
+	log.Debugln("language config:", compilers.Languages[lang])
 
 	libraries := c.String("libraries")
 
 	common.InitDataDir(compilers.ClientCache)
-	logger.Infoln("compiling", tocompile)
+	log.Infoln("compiling", tocompile)
 	if c.Bool("local") {
 		compilers.SetLanguageNet(lang, false)
 		//b, err := compilers.CompileWrapper(tocompile, lang)
 		// force it through the compile pipeline so we get caching
 		resp := compilers.Compile(tocompile, libraries)
 		if resp.Error != "" {
-			logger.Errorln(resp.Error)
-			log.Flush()
+			log.Errorln(resp.Error)
 			os.Exit(0)
 		}
 		for _, r := range resp.Objects {
-			logger.Infoln("objectname:", r.Objectname)
-			logger.Infoln("bytecode:", hex.EncodeToString(r.Bytecode))
-			logger.Infoln("abi:", r.ABI)
+			log.Infoln("objectname:", r.Objectname)
+			log.Infoln("bytecode:", hex.EncodeToString(r.Bytecode))
+			log.Infoln("abi:", r.ABI)
 		}
 	} else {
 		resp := compilers.Compile(tocompile, libraries)
@@ -128,10 +129,10 @@ func cliClient(c *cli.Context) {
 			fmt.Println(err)
 		}
 		for _, r := range resp.Objects {
-			logger.Infoln("objectname:", r.Objectname)
-			logger.Infoln("bytecode:", hex.EncodeToString(r.Bytecode))
-			logger.Infoln("abi:", r.ABI)
-			logger.Infoln("abi:", r.ABI)
+			log.Infoln("objectname:", r.Objectname)
+			log.Infoln("bytecode:", hex.EncodeToString(r.Bytecode))
+			log.Infoln("abi:", r.ABI)
+			log.Infoln("abi:", r.ABI)
 		}
 	}
 }
@@ -270,8 +271,7 @@ var (
 
 func ifExit(err error) {
 	if err != nil {
-		logger.Errorln(err)
-		log.Flush()
+		log.Errorln(err)
 		os.Exit(0)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"path"
 
+	log "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 	"github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/eris-ltd/common/go/common"
 )
 
@@ -17,17 +18,17 @@ func resolveCode(filename string, literal bool) (code []byte, err error) {
 	} else {
 		code = []byte(filename)
 	}
-	logger.Debugf("Code that is read =>\t%s\n", code)
+	log.Debugf("Code that is read =>\t%s\n", code)
 	return
 }
 
 // send compile request to server or compile directly
 func (c *CompileClient) compileRequest(req *Request) (resp *Response, err error) {
 	if c.config.Net {
-		logger.Infof("Compiling code remotely =>\t%s\n", c.config.URL)
+		log.WithField("url", c.config.URL).Debug("Compiling code remotely")
 		resp, err = requestResponse(req)
 	} else {
-		logger.Infoln("Compiling code locally.")
+		log.Debug("Compiling code locally.")
 		resp = compileServerCore(req)
 	}
 	return
@@ -39,17 +40,20 @@ func (c *CompileClient) Compile(dir string, code []byte, libraries string) (*Res
 	var includes = make(map[string][]byte)     // hashes to code
 	var includeNames = make(map[string]string) //hashes before replace to hashes after
 	var err error
-	// logger.Debugf("Before parsing includes =>\n\n%s", string(code))
+	// log.Debugf("Before parsing includes =>\n\n%s", string(code))
 	code, err = c.replaceIncludes(code, dir, includes, includeNames)
 	if err != nil {
 		return nil, err
 	}
-	// logger.Debugf("After parsing includes =>\t\t%s\n\n%s", includes, string(code))
+	// log.Debugf("After parsing includes =>\t\t%s\n\n%s", includes, string(code))
 
 	// go through all includes, check if they have changed
 	hash, cached := c.checkCached(code, includes)
 
-	logger.Debugf("Files [Hash, Cached?] =>\t%s:%v\n", hash, cached)
+	log.WithFields(log.Fields{
+		"hash":    hash,
+		"cached?": cached,
+	}).Debug("File to compile")
 
 	// if everything is cached, no need for request
 	if cached {
@@ -103,7 +107,7 @@ func Compile(filename string, libraries string) *Response {
 		return NewResponse("", nil, "", err)
 	}
 
-	logger.Infof("Language to use =>\t\t%s\n", lang)
+	log.WithField("=>", lang).Info("Language to use")
 
 	code, err := ioutil.ReadFile(filename)
 	if err != nil {

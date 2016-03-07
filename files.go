@@ -9,6 +9,8 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	log "github.com/eris-ltd/eris-compilers/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 )
 
 // cache compiled regex expressions
@@ -55,7 +57,7 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, i int, s []byte, dir s
 	p := path.Join(dir, string(match))
 	incl_code, err := ioutil.ReadFile(p)
 	if err != nil {
-		logger.Errorln("failed to read include file", err)
+		log.Errorln("failed to read include file", err)
 		return nil, fmt.Errorf("Failed to read include file: %s", err.Error())
 	}
 
@@ -89,7 +91,7 @@ func (c *CompileClient) includeReplacer(r *regexp.Regexp, i int, s []byte, dir s
 // check the cache for all includes, cache those not cached yet
 func (c *CompileClient) checkCacheIncludes(includes map[string][]byte) bool {
 	cached := true
-	for k, _ := range includes {
+	for k := range includes {
 		f := path.Join(ClientCache, c.Ext(k))
 		if _, err := os.Stat(f); err != nil {
 			cached = false

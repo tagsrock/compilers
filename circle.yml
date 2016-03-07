@@ -25,7 +25,6 @@ deployment:
     commands:
       - docker push quay.io/eris/compilers
 
-deployment:
   develop:
     branch: develop
     commands:

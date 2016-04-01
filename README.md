@@ -114,7 +114,7 @@ go get github.com/eris-ltd/eris-compilers/cmd/eris-compilers
 
 Installing the actual compilers is a bit more involved. :(
 
-See [ethereum wiki](https://github.com/ethereum/cpp-ethereum/wiki/Building-on-Ubuntu) and add the ethereum and ethereum-dev PPA's (no need for qt)
+See [ethereum wiki](http://solidity.readthedocs.org/en/latest/installing-solidity.html#ubuntu) and add the ethereum and ethereum-dev PPA's (no need for qt)
 
 Note, thelonious and its Genesis Doug were build on a previous version of the languages (before the ABI spec) and so currently only support PoC6 LLL and Serpent 1.0.
 But epm works fine using Solidity and Serpent on standard ethereum chains.

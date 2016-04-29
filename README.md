@@ -114,7 +114,7 @@ go get github.com/eris-ltd/eris-compilers/cmd/eris-compilers
 
 Installing the actual compilers is a bit more involved. :(
 
-See [ethereum wiki](https://github.com/ethereum/cpp-ethereum/wiki/Building-on-Ubuntu) and add the ethereum and ethereum-dev PPA's (no need for qt)
+See [ethereum wiki](http://solidity.readthedocs.org/en/latest/installing-solidity.html#ubuntu) and add the ethereum and ethereum-dev PPA's (no need for qt)
 
 Note, thelonious and its Genesis Doug were build on a previous version of the languages (before the ABI spec) and so currently only support PoC6 LLL and Serpent 1.0.
 But epm works fine using Solidity and Serpent on standard ethereum chains.
@@ -137,4 +137,31 @@ Edit the `cmd` field for each language to have the correct path.
 Run `eris-compilers --help` or `eris-compilers compile --help` for more info, or come talk to us on irc at #erisindustries and #erisindustries-dev.
 
 If you are working on a language, and would like to have it supported, please create an issue! Note it is possible to add new languages simply by editing the config file, without having to recompile the eris-compilers source code.
+
+# Contributions
+
+Are Welcome! Before submitting a pull request please:
+
+* read up on [How The Marmots Git](https://github.com/eris-ltd/coding/wiki/How-The-Marmots-Git)
+* fork from `develop`
+* go fmt your changes
+* have tests
+* pull request
+* be awesome
+
+That's pretty much it. 
+
+See our [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) for more details.
+
+Please note that this repository is GPLv3.0 per the LICENSE file. Any code which is contributed via pull request shall be deemed to have consented to GPLv3.0 via submission of the code (were such code accepted into the repository).
+
+# Bug Reporting
+
+Found a bug in our stack? Make an issue!
+
+The [issue template](.github/ISSUE_TEMPLATE.md] specifies what needs to be included in your issue and will autopopulate the issue.
+
+# License
+
+[Proudly GPL-3](http://www.gnu.org/philosophy/enforcing-gpl.en.html). See [license file](https://github.com/eris-ltd/eris-cli/blob/master/LICENSE.md).
 

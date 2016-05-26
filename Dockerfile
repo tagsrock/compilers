@@ -1,17 +1,18 @@
 FROM quay.io/eris/tools
 MAINTAINER Eris Industries <support@erisindustries.com>
 
+ENV INSTALL_BASE /usr/local/bin
 # Install Dependencies
 RUN apt-get update && apt-get install -qy \
   --no-install-recommends \
   ca-certificates \
   && rm -rf /var/lib/apt/lists/*
-ENV INSTALL_BASE /usr/local/bin
 
-# Golang
-ENV GOLANG_VERSION 1.5.3
+
+# GOLANG
+ENV GOLANG_VERSION 1.6
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 43afe0c5017e502630b1aea4d44b8a7f059bf60d7f29dfd58db454d4e4e0ae53
+ENV GOLANG_DOWNLOAD_SHA256 5470eac05d273c74ff8bac7bef5bad0b5abbd1c4052efbdbc8db45332e836b0b
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
   && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
   && tar -C /usr/local -xzf golang.tar.gz \
@@ -22,10 +23,15 @@ ENV PATH $GOPATH/bin:$GOROOT/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 WORKDIR /go
 
-# Go wrapper
-ENV GO_WRAPPER_VERSION 1.5
+# GO WRAPPER
+ENV GO_WRAPPER_VERSION 1.6
 RUN curl -sSL -o $INSTALL_BASE/go-wrapper https://raw.githubusercontent.com/docker-library/golang/master/$GO_WRAPPER_VERSION/wheezy/go-wrapper
 RUN chmod +x $INSTALL_BASE/go-wrapper
+
+# GLIDE INSTALL
+RUN sudo add-apt-repository ppa:masterminds/glide \
+  && sudo apt-get update
+RUN sudo apt-get install glide
 
 # Install eris-compilers, a go app that manages compilations
 ENV REPO github.com/eris-ltd/eris-compilers
@@ -33,7 +39,8 @@ ENV BASE $GOPATH/src/$REPO
 ENV NAME eris-compilers
 RUN mkdir --parents $BASE
 COPY . $BASE/
-RUN cd $BASE/cmd/$NAME && go build -o $INSTALL_BASE/$NAME
+RUN cd $BASE && glide install && \
+  cd $BASE/cmd/$NAME && go install ./
 RUN unset GOLANG_VERSION && \
   unset GOLANG_DOWNLOAD_URL && \
   unset GOLANG_DOWNLOAD_SHA256 && \
@@ -56,8 +63,6 @@ RUN chown --recursive $USER /data
 COPY docker/start.sh /home/$USER/
 
 # Point to the compiler location.
-RUN mkdir --parents $ERIS/languages
-COPY docker/config.json $ERIS/languages/config.json
 RUN chown --recursive $USER:$USER /home/$USER
 
 # Finalize

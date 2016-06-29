@@ -62,14 +62,14 @@ fi
 if [ ! -f /data/cert.crt ] || [ ! -f /data/key.key ]
 then
   echo "Starting server --no-ssl"
-  exec eris-compilers --no-ssl --unsecure-port ${UNSECURE_PORT:=9099} --debug
+  exec eris-compilers server --no-ssl --port 9099 --debug
 else
   if [ -z $SSL_ONLY ]
   then
     echo "Starting server using HTTP+HTTPS"
-    exec eris-compilers --unsecure-port ${UNSECURE_PORT:=9099} --secure-port ${SECURE_PORT:=9098} --key /data/key.key --cert /data/cert.crt --debug
+    exec eris-compilers server --port 9099 --secure-port 9099 --key /data/key.key --cert /data/cert.crt --debug
   else
     echo "Starting server --secure-only"
-    exec eris-compilers --secure-only --secure-port ${SECURE_PORT:=9098} --key /data/key.key --cert /data/cert.crt --debug
+    exec eris-compilers server --secure-only --secure-port 9098 --key /data/key.key --cert /data/cert.crt --debug
   fi
 fi

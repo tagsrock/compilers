@@ -1,13 +1,13 @@
 FROM quay.io/eris/tools
 MAINTAINER Eris Industries <support@erisindustries.com>
 
-ENV INSTALL_BASE /usr/local/bin
 # Install Dependencies
 RUN apt-get update && apt-get install -qy \
   --no-install-recommends \
   ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
+ENV INSTALL_BASE /usr/local/bin
 
 # GOLANG
 ENV GOLANG_VERSION 1.6

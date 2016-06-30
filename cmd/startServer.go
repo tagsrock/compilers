@@ -48,7 +48,7 @@ var serverCmd = &cobra.Command{
 			}
 		}
 
-		server.StartServer(addrUnsecure, addrSecure, serverKey, serverCert)
+		server.StartServer(addrUnsecure, addrSecure, serverCert, serverKey)
 	},
 }
 
@@ -62,11 +62,11 @@ func addServerFlags() {
 }
 
 func setServerPort() uint64 {
-	return 9098
+	return 9099
 }
 
 func setSecurePort() uint64 {
-	return 9099
+	return 9098
 }
 
 func setSSL() bool {

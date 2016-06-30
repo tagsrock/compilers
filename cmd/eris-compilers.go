@@ -5,7 +5,6 @@ import (
 
 	"github.com/eris-ltd/eris-compilers/version"
 
-	"github.com/eris-ltd/common/go/common"
 	log "github.com/eris-ltd/eris-logger"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +32,6 @@ Complete documentation is available at https://docs.erisindustries.com` + "\nVer
 		} else if Debug {
 			log.SetLevel(log.DebugLevel)
 		}
-		common.InitErisDir()
 	},
 }
 

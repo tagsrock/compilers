@@ -42,5 +42,6 @@ then
   docker tag -f $testimage:latest $testimage:$release_maj
   docker tag -f $testimage:latest $testimage:$release_min
 else
-  docker build -t $testimage:$release_min $repo
+  docker build -t $testimage:latest $repo
+  docker tag $testimage:latest $testimage:$release_min
 fi

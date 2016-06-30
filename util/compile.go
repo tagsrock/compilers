@@ -44,7 +44,7 @@ type Response struct {
 	Error   string         `json:"error"`
 }
 
-func runCommand(tokens ...string) (string, error) {
+func RunCommand(tokens ...string) (string, error) {
 	s, err := pipes.RunStrings(tokens...)
 	s = strings.TrimSpace(s)
 	return s, err
@@ -115,7 +115,7 @@ func Compile(req *Request) *Response {
 
 	command := lang.Cmd(includes, req.Libraries, req.Optimize)
 	log.WithField("Command: ", command).Debug("Command Input")
-	hexCode, err := runCommand(command...)
+	hexCode, err := RunCommand(command...)
 	//cleanup
 
 	if err != nil {

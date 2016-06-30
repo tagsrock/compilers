@@ -9,12 +9,13 @@ import (
 
 	"github.com/eris-ltd/eris-compilers/util"
 
+	"github.com/eris-ltd/common/go/common"
 	log "github.com/eris-ltd/eris-logger"
 )
 
 //todo: Might also need to add in a map of library names to addrs
 func BeginCompile(url string, file string, optimize bool, libraries string) (*util.Response, error) {
-
+	common.InitErisDir()
 	request, err := util.CreateRequest(file, libraries, optimize)
 	if err != nil {
 		return nil, err

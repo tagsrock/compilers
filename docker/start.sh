@@ -67,7 +67,7 @@ else
   if [ -z $SSL_ONLY ]
   then
     echo "Starting server using HTTP+HTTPS"
-    exec eris-compilers server --port 9099 --secure-port 9099 --key /data/key.key --cert /data/cert.crt --debug
+    exec eris-compilers server --port 9098 --secure-port 9099 --key /data/key.key --cert /data/cert.crt --debug
   else
     echo "Starting server --secure-only"
     exec eris-compilers server --secure-only --secure-port 9098 --key /data/key.key --cert /data/cert.crt --debug

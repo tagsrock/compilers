@@ -8,29 +8,37 @@ import (
 
 	"github.com/eris-ltd/eris-compilers/util"
 
+	"github.com/eris-ltd/common/go/common"
 	log "github.com/eris-ltd/eris-logger"
 )
 
 // Start the compile server
 func StartServer(addrUnsecure, addrSecure, key, cert string) {
 	log.Warn("Hello I'm the marmots' compilers server")
-
+	common.InitErisDir()
 	// Routes
 
 	http.HandleFunc("/", CompileHandler)
 	// Use SSL ?
 
-	// HTTPS
 	if addrSecure != "" {
+		if addrUnsecure != "" {
+			log.Debug("Using HTTP")
+			log.WithField("=>", addrUnsecure).Debug("Listening on...")
+			go func() {
+				if err := http.ListenAndServe(addrUnsecure, nil); err != nil {
+					log.Error("Cannot serve on http port: ", err)
+					os.Exit(1)
+				}
+			}()
+		}
 		log.Debug("Using HTTPS")
 		log.WithField("=>", addrSecure).Debug("Listening on...")
-		if err := http.ListenAndServeTLS(addrSecure, cert, key, nil); err != nil {
-			log.Error("Cannot serve on https port: ", err)
+		if err := http.ListenAndServeTLS(addrUnsecure, key, cert, nil); err != nil {
+			log.Error("Cannot serve on http port: ", err)
 			os.Exit(1)
 		}
 	}
-
-		// HTTP
 	if addrUnsecure != "" {
 		log.Debug("Using HTTP")
 		log.WithField("=>", addrUnsecure).Debug("Listening on...")

@@ -13,28 +13,18 @@ import (
 )
 
 // Start the compile server
-func StartServer(addrUnsecure, addrSecure, key, cert string) {
+func StartServer(addrUnsecure, addrSecure, cert, key string) {
 	log.Warn("Hello I'm the marmots' compilers server")
 	common.InitErisDir()
 	// Routes
 
 	http.HandleFunc("/", CompileHandler)
 	// Use SSL ?
-
+	log.Debug(cert)
 	if addrSecure != "" {
-		if addrUnsecure != "" {
-			log.Debug("Using HTTP")
-			log.WithField("=>", addrUnsecure).Debug("Listening on...")
-			go func() {
-				if err := http.ListenAndServe(addrUnsecure, nil); err != nil {
-					log.Error("Cannot serve on http port: ", err)
-					os.Exit(1)
-				}
-			}()
-		}
 		log.Debug("Using HTTPS")
 		log.WithField("=>", addrSecure).Debug("Listening on...")
-		if err := http.ListenAndServeTLS(addrUnsecure, key, cert, nil); err != nil {
+		if err := http.ListenAndServeTLS(addrSecure, cert, key, nil); err != nil {
 			log.Error("Cannot serve on http port: ", err)
 			os.Exit(1)
 		}

@@ -26,7 +26,7 @@ then
     echo "Removing old certs"
     rm /data/cert.crt
   fi
-  if [ "$ERIS" = "true" ]
+  if [ "$ERISCOMPILER" = "true" ]
   then
     echo "Moving eris' certs into location"
     echo -e "$CERT" >> /data/cert.crt

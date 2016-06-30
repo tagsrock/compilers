@@ -52,7 +52,7 @@ RUN unset GOLANG_VERSION && \
 
 # Setup User
 ENV USER eris
-ENV ERIS /home/$USER/.eris
+ENV ERISDIR /home/$USER/.eris
 
 # Add Gandi certs for eris
 COPY docker/gandi2.crt /data/gandi2.crt
@@ -67,7 +67,7 @@ RUN chown --recursive $USER:$USER /home/$USER
 
 # Finalize
 USER $USER
-VOLUME $ERIS
+VOLUME $ERISDIR
 WORKDIR /home/$USER
 EXPOSE 9098 9099
 CMD ["/home/eris/start.sh"]

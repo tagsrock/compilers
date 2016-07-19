@@ -26,12 +26,12 @@ func BeginCompile(url string, file string, optimize bool, libraries string) (*ut
 
 	log.WithField("cached?", cached).Debug("Cached Item(s)")
 
-	for k, v := range request.Includes {
+	/*for k, v := range request.Includes {
 		log.WithFields(log.Fields{
 			"k": k,
 			"v": string(v.Script),
 		}).Debug("check request loop")
-	}
+	}*/
 
 	var resp *util.Response
 	// if everything is cached, no need for request
@@ -43,7 +43,7 @@ func BeginCompile(url string, file string, optimize bool, libraries string) (*ut
 		}
 		util.PrintResponse(*resp)
 	} else {
-		log.Warn("Could not find cached object, compiling...")
+		log.Debug("Could not find cached object, compiling...")
 		if url == "" {
 			resp = util.Compile(request)
 		} else {

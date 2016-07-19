@@ -77,7 +77,7 @@ func (c *Compiler) includeReplacer(r *regexp.Regexp, originCode []byte, dir stri
 	// take hash before replacing includes to see if we've already parsed this file
 	hash := sha256.Sum256(incl_code)
 	includeHash := hex.EncodeToString(hash[:])
-	log.Debug("This is hash of included code", includeHash)
+	log.WithField("=>", includeHash).Debug("Included Code's Hash")
 	if _, ok := included[includeHash]; ok {
 		//then replace
 		fullReplacement := strings.SplitAfter(m[0], m[2])

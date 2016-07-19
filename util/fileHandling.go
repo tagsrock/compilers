@@ -23,7 +23,6 @@ var (
 func (c *Compiler) replaceIncludes(code []byte, dir string, includes map[string]*IncludedFiles) ([]byte, error) {
 	// find includes, load those as well
 	regexPattern := c.IncludeRegex()
-	log.WithField("=>", regexPattern).Debug("Regex Pattern")
 	var regExpression *regexp.Regexp
 	var err error
 	if regExpression, err = regexp.Compile(regexPattern); err != nil {
@@ -48,8 +47,6 @@ func (c *Compiler) replaceIncludes(code []byte, dir string, includes map[string]
 	originHash := sha256.Sum256(code)
 	origin := hex.EncodeToString(originHash[:])
 	origin += "." + c.lang
-
-	log.Debug("CURRENT ENCODING OF NAME: ", origin)
 	
 	includeFile := &IncludedFiles{
 		ObjectNames: OriginObjectNames,
@@ -86,7 +83,6 @@ func (c *Compiler) includeReplacer(r *regexp.Regexp, originCode []byte, dir stri
 		fullReplacement := strings.SplitAfter(m[0], m[2])
 		fullReplacement[1] = includeHash + "." + c.lang + "\""
 		ret := strings.Join(fullReplacement, "")
-		log.Debug("return string: ", string(ret))
 		return []byte(ret), nil
 	}
 
@@ -107,7 +103,6 @@ func (c *Compiler) includeReplacer(r *regexp.Regexp, originCode []byte, dir stri
 	fullReplacement := strings.SplitAfter(m[0], m[2])
 	fullReplacement[1] = h + "." + c.lang + m[4]
 	ret := []byte(strings.Join(fullReplacement, ""))
-	log.Debug("return string: ", string(ret))
 	return ret, nil
 }
 

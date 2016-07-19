@@ -151,10 +151,9 @@ func Compile(req *Request) *Response {
 			"name": re.Objectname,
 			"bin":  re.Bytecode,
 			"abi":  re.ABI,
-		}).Warn("Response formulated")
+		}).Debug("Response formulated")
 	}
 
-	log.Debug("\n")
 	return &Response{
 		Objects: respItemArray,
 		Error:   "",

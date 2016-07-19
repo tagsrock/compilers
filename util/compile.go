@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 
-	"github.com/ebuchman/go-shell-pipes"
 	log "github.com/eris-ltd/eris-logger"
 )
 
@@ -45,8 +45,11 @@ type Response struct {
 }
 
 func RunCommand(tokens ...string) (string, error) {
-	s, err := pipes.RunStrings(tokens...)
-	s = strings.TrimSpace(s)
+	cmd := tokens[0]
+	args := tokens[1:]
+	shellCmd := exec.Command(cmd, args...)
+	output, err := shellCmd.CombinedOutput()
+	s := strings.TrimSpace(string(output))
 	return s, err
 }
 
@@ -164,17 +167,17 @@ func Compile(req *Request) *Response {
 func (l LangConfig) Cmd(includes []string, libraries string, optimize bool) (args []string) {
 	for _, s := range l.CompileCmd {
 		if s == "_" {
+			if optimize {
+				args = append(args, "--optimize")
+			}
+			if libraries != "" {
+				args = append(args, "--libraries")
+				args = append(args, libraries)
+			}
 			args = append(args, includes...)
 		} else {
 			args = append(args, s)
 		}
-	}
-	if optimize {
-		args = append(args, "--optimize")
-	}
-	if libraries != "" {
-		args = append(args, "--libraries ")
-		args = append(args, libraries)
 	}
 	return
 }

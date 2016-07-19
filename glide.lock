@@ -1,5 +1,5 @@
 hash: d52aac842cc5aa5dfe6dfab97bc5af4df445c4e1bd6bd9cf570182c0f8614d70
-updated: 2016-06-29T01:17:24.148877727-05:00
+updated: 2016-07-19T09:21:20.155669139-05:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: fa152c58bc15761d0200cb75fe958b89a9d4888e

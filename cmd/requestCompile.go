@@ -22,6 +22,7 @@ var (
 	compilerPort  string
 	compilerUrl   string
 	compilerDir   string
+	libraries     string
 	compilerSSL   bool
 	compilerLocal bool
 	optimizeSolc  bool
@@ -37,7 +38,7 @@ var compileCmd = &cobra.Command{
 			os.Exit(0)
 		}
 		url := createUrl()
-		_, err := cli.BeginCompile(url, args[0], optimizeSolc, "")
+		_, err := cli.BeginCompile(url, args[0], optimizeSolc, libraries)
 		if err != nil {
 			log.Error(err)
 		}
@@ -48,6 +49,7 @@ func addCompileFlags() {
 	compileCmd.Flags().StringVarP(&compilerPort, "port", "p", setDefaultPort(), "call listening port")
 	compileCmd.Flags().StringVarP(&compilerUrl, "url", "u", setDefaultURL(), "set the url for where to compile your contracts (no http(s) or port, please)")
 	compileCmd.Flags().StringVarP(&compilerDir, "dir", "D", setDefaultDirectoryRoute(), "directory location to search for on the remote server")
+	compileCmd.Flags().StringVarP(&libraries, "libs", "L", "", "libraries string (libName:Address[, or whitespace]...)")
 	compileCmd.Flags().BoolVarP(&compilerSSL, "ssl", "s", setCompilerSSL(), "call https")
 	compileCmd.Flags().BoolVarP(&compilerLocal, "local", "l", setCompilerLocal(), "use local compilers to compile message (good for debugging or if server goes down)")
 	compileCmd.Flags().BoolVarP(&optimizeSolc, "optimize", "o", setOptimizeSolc(), "optimize code (solidity only)")

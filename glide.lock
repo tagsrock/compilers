@@ -1,0 +1,46 @@
+hash: d52aac842cc5aa5dfe6dfab97bc5af4df445c4e1bd6bd9cf570182c0f8614d70
+updated: 2016-07-19T09:21:20.155669139-05:00
+imports:
+- name: github.com/Azure/go-ansiterm
+  version: fa152c58bc15761d0200cb75fe958b89a9d4888e
+  subpackages:
+  - winterm
+- name: github.com/bugsnag/bugsnag-go
+  version: 31ae3484de3e96dbc4de1756b14ad6393b94103c
+  subpackages:
+  - errors
+- name: github.com/bugsnag/osext
+  version: 0dd3f918b21bec95ace9dc86c7e70266cfc5c702
+- name: github.com/bugsnag/panicwrap
+  version: d6191e27ad06236eaad65d79e49a08b03b9f8029
+- name: github.com/docker/docker
+  version: d4bff5e3aa014f7062f1d7a6c929336e2a88faff
+  subpackages:
+  - pkg/term
+  - pkg/system
+  - pkg/term/windows
+- name: github.com/docker/go-units
+  version: f2d77a61e3c169b43402a0a1e84f06daf29b8190
+- name: github.com/ebuchman/go-shell-pipes
+  version: 83e1324808622485314bff0fd97b8b944200a7a4
+- name: github.com/eris-ltd/common
+  version: 875c64ec7e1525b3c8e0efed7d4974665fff4942
+  subpackages:
+  - go/common
+- name: github.com/eris-ltd/eris-logger
+  version: ea48a395d6ecc0eccc67a26da9fc7a6106fabb84
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/mitchellh/go-homedir
+  version: 756f7b183b7ab78acdbbee5c7f392838ed459dda
+- name: github.com/Sirupsen/logrus
+  version: f3cfb454f4c209e6668c95216c4744b8fddb2356
+- name: github.com/spf13/cobra
+  version: 6a8bd97bdb1fc0d08a83459940498ea49d3e8c93
+- name: github.com/spf13/pflag
+  version: 367864438f1b1a3c7db4da06a2f55b144e6784e0
+- name: golang.org/x/sys
+  version: 62bee037599929a6e9146f29d10dd5208c43507d
+  subpackages:
+  - unix
+devImports: []

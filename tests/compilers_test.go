@@ -212,6 +212,17 @@ func TestLocalSingle(t *testing.T) {
 	util.ClearCache(common.SolcScratchPath)
 }
 
+func TestFaultyContract(t *testing.T) {
+	util.ClearCache(common.SolcScratchPath)
+	expectedSolcResponse := util.BlankSolcResponse()
+
+	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "faultyContract.sol").Output(); 
+	t.Log(actualOutput)
+	t.Log(err.Error())
+	output := strings.TrimSpace(string(actualOutput))
+	err = json.Unmarshal([]byte(output), expectedSolcResponse)
+}
+
 func contains(s []util.ResponseItem, e util.ResponseItem) bool {
     for _, a := range s {
         if a == e {

@@ -19,11 +19,12 @@ type Compiler struct {
 
 // Compile request object
 type Request struct {
-	ScriptName string                    `json:"name"`
-	Language   string                    `json:"language"`
-	Includes   map[string]*IncludedFiles `json:"includes"`  // our required files and metadata
-	Libraries  string                    `json:"libraries"` // string of libName:LibAddr separated by comma
-	Optimize   bool                      `json:"optimize"`  // run with optimize flag
+	ScriptName 		string                    `json:"name"`
+	Language   		string                    `json:"language"`
+	Includes   		map[string]*IncludedFiles `json:"includes"`  // our required files and metadata
+	Libraries  		string                    `json:"libraries"` // string of libName:LibAddr separated by comma
+	Optimize   		bool                      `json:"optimize"`  // run with optimize flag
+	FileReplacement map[string]string		  `json:"replacement"`
 }
 
 // this handles all of our imports
@@ -44,6 +45,7 @@ type Response struct {
 	Error   string         `json:"error"`
 }
 
+
 func RunCommand(tokens ...string) (string, error) {
 	cmd := tokens[0]
 	args := tokens[1:]
@@ -56,6 +58,8 @@ func RunCommand(tokens ...string) (string, error) {
 func CreateRequest(file string, libraries string, optimize bool) (*Request, error) {
 	var includes = make(map[string]*IncludedFiles)
 
+	//maps hashes to original file name
+	var hashFileReplacement = make(map[string]string)
 	language, err := LangFromFile(file)
 	if err != nil {
 		return &Request{}, err
@@ -70,17 +74,17 @@ func CreateRequest(file string, libraries string, optimize bool) (*Request, erro
 	}
 	dir := path.Dir(file)
 	//log.Debug("Before parsing includes =>\n\n%s", string(code))
-	code, err = compiler.replaceIncludes(code, dir, includes)
+	code, err = compiler.replaceIncludes(code, dir, file, includes, hashFileReplacement)
 	if err != nil {
 		return &Request{}, err
 	}
 
-	return compiler.CompilerRequest(file, includes, libraries, optimize), nil
+	return compiler.CompilerRequest(file, includes, libraries, optimize, hashFileReplacement), nil
 
 }
 
 // New Request object from script and map of include files
-func (c *Compiler) CompilerRequest(file string, includes map[string]*IncludedFiles, libs string, optimize bool) *Request {
+func (c *Compiler) CompilerRequest(file string, includes map[string]*IncludedFiles, libs string, optimize bool, hashFileReplacement map[string]string) *Request {
 	if includes == nil {
 		includes = make(map[string]*IncludedFiles)
 	}
@@ -89,6 +93,7 @@ func (c *Compiler) CompilerRequest(file string, includes map[string]*IncludedFil
 		Includes:   includes,
 		Libraries:  libs,
 		Optimize:   optimize,
+		FileReplacement: hashFileReplacement,
 	}
 }
 
@@ -122,11 +127,15 @@ func Compile(req *Request) *Response {
 	//cleanup
 
 	if err != nil {
+		for _, str := range includes {
+			hexCode = strings.Replace(hexCode, str, req.FileReplacement[str], -1)
+		}
 		log.WithFields(log.Fields{
 			"err":     err,
 			"command": command,
-		}).Error("Could not compile", err)
-		return compilerResponse("", "", "", err)
+			"response": hexCode,
+		}).Error("Could not compile")
+		return compilerResponse("", "", "", fmt.Errorf(hexCode))
 	}
 
 	solcResp := BlankSolcResponse()

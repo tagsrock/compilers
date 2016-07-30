@@ -20,7 +20,7 @@ var (
 
 // Find all matches to the include regex
 // Replace filenames with hashes
-func (c *Compiler) replaceIncludes(code []byte, dir string, includes map[string]*IncludedFiles) ([]byte, error) {
+func (c *Compiler) replaceIncludes(code []byte, dir, file string, includes map[string]*IncludedFiles, hashFileReplacement map[string]string) ([]byte, error) {
 	// find includes, load those as well
 	regexPattern := c.IncludeRegex()
 	var regExpression *regexp.Regexp
@@ -37,7 +37,7 @@ func (c *Compiler) replaceIncludes(code []byte, dir string, includes map[string]
 	// do it recursively
 	code = regExpression.ReplaceAllFunc(code, func(s []byte) []byte {
 		log.WithField("=>", string(s)).Debug("Include Replacer result")
-		s, err := c.includeReplacer(regExpression, s, dir, includes)
+		s, err := c.includeReplacer(regExpression, s, dir, includes, hashFileReplacement)
 		if err != nil {
 			log.Error("ERR!:", err)
 		}
@@ -54,6 +54,7 @@ func (c *Compiler) replaceIncludes(code []byte, dir string, includes map[string]
 	}
 
 	includes[origin] = includeFile
+	hashFileReplacement[origin] = file
 
 	return code, nil
 }
@@ -61,7 +62,7 @@ func (c *Compiler) replaceIncludes(code []byte, dir string, includes map[string]
 // read the included file, hash it; if we already have it, return include replacement
 // if we don't, run replaceIncludes on it (recursive)
 // modifies the "includes" map
-func (c *Compiler) includeReplacer(r *regexp.Regexp, originCode []byte, dir string, included map[string]*IncludedFiles) ([]byte, error) {
+func (c *Compiler) includeReplacer(r *regexp.Regexp, originCode []byte, dir string, included map[string]*IncludedFiles, hashFileReplacement map[string]string) ([]byte, error) {
 	// regex look for strings that would match the import statement
 	m := r.FindStringSubmatch(string(originCode))
 	match := m[3]
@@ -88,7 +89,7 @@ func (c *Compiler) includeReplacer(r *regexp.Regexp, originCode []byte, dir stri
 
 	// recursively replace the includes for this file
 	this_dir := path.Dir(newFilePath)
-	incl_code, err = c.replaceIncludes(incl_code, this_dir, included)
+	incl_code, err = c.replaceIncludes(incl_code, this_dir, newFilePath, included, hashFileReplacement)
 	if err != nil {
 		return nil, err
 	}
@@ -181,5 +182,8 @@ func PrintResponse(resp Response) {
 			"bin":  r.Bytecode,
 			"abi":  r.ABI,
 		}).Debug("Response")
+	}
+	if resp.Error != "" {
+		log.Debug(resp.Error)
 	}
 }

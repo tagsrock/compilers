@@ -134,7 +134,7 @@ func Compile(req *Request) *Response {
 			"err":     err,
 			"command": command,
 			"response": hexCode,
-		}).Error("Could not compile")
+		}).Debug("Could not compile")
 		return compilerResponse("", "", "", fmt.Errorf(hexCode))
 	}
 

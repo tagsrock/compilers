@@ -29,9 +29,9 @@ RUN curl -sSL -o $INSTALL_BASE/go-wrapper https://raw.githubusercontent.com/dock
 RUN chmod +x $INSTALL_BASE/go-wrapper
 
 # GLIDE INSTALL
-RUN sudo add-apt-repository ppa:masterminds/glide \
-  && sudo apt-get update
-RUN sudo apt-get install glide
+RUN add-apt-repository ppa:masterminds/glide \
+  && apt-get update
+RUN apt-get install glide
 
 # Install eris-compilers, a go app that manages compilations
 ENV REPO github.com/eris-ltd/eris-compilers

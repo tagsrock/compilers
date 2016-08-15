@@ -51,8 +51,8 @@ func BeginCompile(url string, file string, optimize bool, libraries string) (*ut
 			if err != nil {
 				return nil, err
 			}
-			util.PrintResponse(*resp)
 		}
+		util.PrintResponse(*resp)
 		resp.CacheNewResponse(*request)
 	}
 

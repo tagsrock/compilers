@@ -176,14 +176,15 @@ func createTemporaryFile(name string, code []byte) (*os.File, error) {
 }
 
 func PrintResponse(resp Response) {
-	for _, r := range resp.Objects {
-		log.WithFields(log.Fields{
-			"name": r.Objectname,
-			"bin":  r.Bytecode,
-			"abi":  r.ABI,
-		}).Warn("Response")
-	}
 	if resp.Error != "" {
 		log.Warn(resp.Error)
+	} else {
+		for _, r := range resp.Objects {
+			log.WithFields(log.Fields{
+				"name": r.Objectname,
+				"bin":  r.Bytecode,
+				"abi":  r.ABI,
+			}).Warn("Response")
+		}
 	}
 }

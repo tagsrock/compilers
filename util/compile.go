@@ -125,7 +125,7 @@ func Compile(req *Request) *Response {
 	log.WithField("Command: ", command).Debug("Command Input")
 	hexCode, err := RunCommand(command...)
 	//cleanup
-
+	log.WithField("=>", hexCode).Debug("Output from command: ")
 	if err != nil {
 		for _, str := range includes {
 			hexCode = strings.Replace(hexCode, str, req.FileReplacement[str], -1)
@@ -135,7 +135,7 @@ func Compile(req *Request) *Response {
 			"command": command,
 			"response": hexCode,
 		}).Debug("Could not compile")
-		return compilerResponse("", "", "", fmt.Errorf(hexCode))
+		return compilerResponse("", "", "", fmt.Errorf("%v", hexCode))
 	}
 
 	solcResp := BlankSolcResponse()

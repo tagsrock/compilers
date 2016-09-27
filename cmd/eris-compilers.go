@@ -16,14 +16,14 @@ var (
 	Debug   bool
 )
 
-var RootCmd = &cobra.Command{
+var CompilersCmd = &cobra.Command{
 	Use:   "eris-compilers COMMAND [FLAG ...]",
 	Short: "A client/server set up for automatic compilation of smart contracts",
 	Long: `A client/server set up for automatic compilation of smart contracts
 
 Made with <3 by Eris Industries.
 
-Complete documentation is available at https://docs.erisindustries.com` + "\nVersion:\n " + VERSION,
+Complete documentation is available at https://monax.io/docs/documentation` + "\nVersion:\n " + VERSION,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		log.SetOutput(os.Stdout)
 		log.SetLevel(log.WarnLevel)
@@ -38,7 +38,7 @@ Complete documentation is available at https://docs.erisindustries.com` + "\nVer
 func Execute() {
 	AddCommands()
 	AddGlobalFlags()
-	RootCmd.Execute()
+	CompilersCmd.Execute()
 }
 
 func AddCommands() {
@@ -47,8 +47,8 @@ func AddCommands() {
 }
 
 func AddGlobalFlags() {
-	RootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", SetVerbose(), "verbose output")
-	RootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "d", SetDebug(), "debug level output")
+	CompilersCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", SetVerbose(), "verbose output")
+	CompilersCmd.PersistentFlags().BoolVarP(&Debug, "debug", "d", SetDebug(), "debug level output")
 }
 
 func SetVerbose() bool {

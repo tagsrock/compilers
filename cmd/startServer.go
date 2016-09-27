@@ -9,7 +9,7 @@ import (
 )
 
 func BuildServerCommand() {
-	RootCmd.AddCommand(serverCmd)
+	CompilersCmd.AddCommand(serverCmd)
 	addServerFlags()
 }
 

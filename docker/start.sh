@@ -7,7 +7,7 @@ set -e
 # to serve over SSL, it must have the domain
 # cert, intermediate cert(s), and the root
 # cert concatenated into a single cert file
-# The gandi certs for *.eris.industries have
+# The gandi certs for *.monax.io have
 # been added to the container (the intermediate
 # and the root certificate) so that only the
 # end use wildcard cert needs to be added as

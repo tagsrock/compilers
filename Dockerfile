@@ -1,5 +1,5 @@
 FROM quay.io/eris/tools
-MAINTAINER Eris Industries <support@erisindustries.com>
+MAINTAINER Monax Industries <support@monax.io>
 
 # Install Dependencies
 RUN apt-get update && apt-get install -qy \

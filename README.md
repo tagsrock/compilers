@@ -40,7 +40,9 @@ If you want to use your own server, look below on how to get set up.
 ## Usage
 
 ```
-client "github.com/eris-ltd/eris-compilers/network"
+import (
+	client "github.com/eris-ltd/eris-compilers/network"
+)
 
 url := "https://compilers.monax.io:9099/compile"
 filename := "maSolcFile.sol"

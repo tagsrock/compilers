@@ -23,13 +23,13 @@ IMAGE=quay.io/eris/compilers
 
 set -e
 
-#if [ "$JENKINS_URL" ] || [ "$CIRCLE_BRANCH" ]
-#then
-#  REPO=`pwd`
-#  CI="true"
-#else
+if [ "$JENKINS_URL" ] || [ "$CIRCLE_BRANCH" ]
+then
+  REPO=`pwd`
+  CI="true"
+else
   REPO=$GOPATH/src/github.com/eris-ltd/$TARGET
-#fi
+fi
 
 release_min=$(cat $REPO/version/version.go | tail -n 1 | cut -d \  -f 4 | tr -d '"')
 release_maj=$(echo $release_min | cut -d . -f 1-2)

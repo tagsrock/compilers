@@ -2,15 +2,31 @@
 
 [![Circle CI](https://circleci.com/gh/eris-ltd/eris-compilers.svg?style=svg)](https://circleci.com/gh/eris-ltd/eris-compilers)
 
-eris-compilers
-===========
+# Eris Compiler Service
 
+```
 A web server and client for compiling smart contract languages.
+```
 
-# Features
+The Eris Compilers Service is a helper tool to help in grabbing necessary data such as binaries and ABIs from your preferred language for smart contracts in a simple manner. Currently that language is Solidity, but the service is easily extensible to other languages in the future.
+
+## Install
+
+1. Install Go
+2. (Optional) [Install Solidity](http://solidity.readthedocs.org/en/latest/installing-solidity.html)
+
+The eris-compilers itself can be installed with
+
+```
+go get github.com/eris-ltd/eris-compilers/cmd/eris-compilers
+```
+
+You can also start the compilers service in a docker container via the [eris-CLI](https://github.com/eris-ltd/eris-cli) with a simple `eris services start compilers`.
+
+## Features
 
 - Supports Solidity
-- returns smart contract abis
+- returns smart contract abis and binaries
 - handles included files recursively with regex matching
 - client side and server side caching
 - configuration file with per-language options
@@ -21,9 +37,7 @@ so you can start compiling smart contract language right out of the box with no 
 
 If you want to use your own server, look below on how to get set up.
 
-# How to play
-
-## Using the Golang API
+## Usage
 
 ```
 client "github.com/eris-ltd/eris-compilers/network"
@@ -39,8 +53,6 @@ contractName := output.Objects[0].Objectname // contract C would give you C here
 binary := output.Objects[0].Bytecode //gives you binary
 abi := output.Objects[0].ABI //gives you the ABI
 ```
-
-## Using the CLI
 
 #### Compile Remotely
 
@@ -65,18 +77,6 @@ eris-compilers server --no-ssl
 
 will run a simple http server. For encryption, pass in a key with the `--key` flag, or a certificate with the `--cert` flag and drop the `--no-ssl`.
 
-# Install
-
-The eris-compilers itself can be installed with
-
-```
-go get github.com/eris-ltd/eris-compilers/cmd/eris-compilers
-```
-
-Currently the compilers server supports only solidity, which can be readily and easily installed [here](http://solidity.readthedocs.org/en/latest/installing-solidity.html)
-
-You can also start the compilers service in a docker container via the eris CLI with a simple `eris services start compilers`.
-
 # Support
 
 Run `eris-compilers server --help` or `eris-compilers compile --help` for more info, or come talk to us on [Slack](https://slack.monax.io).
@@ -94,7 +94,7 @@ Are Welcome! Before submitting a pull request please:
 * pull request
 * be awesome
 
-That's pretty much it. 
+That's pretty much it.
 
 See our [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) for more details.
 
@@ -108,5 +108,5 @@ The [issue template](.github/ISSUE_TEMPLATE.md] specifies what needs to be inclu
 
 # License
 
-[Proudly GPL-3](http://www.gnu.org/philosophy/enforcing-gpl.en.html). See [license file](https://github.com/eris-ltd/eris-cli/blob/master/LICENSE.md).
+[Proudly GPL-3](http://www.gnu.org/philosophy/enforcing-gpl.en.html). See [license file](https://github.com/eris-ltd/eris-compilers/blob/master/LICENSE.md).
 

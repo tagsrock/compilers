@@ -84,7 +84,7 @@ func setDefaultDirectoryRoute() string {
 }
 
 func setDefaultURL() string {
-	return "compilers.eris.industries"
+	return "compilers.monax.io"
 }
 
 func setDefaultPort() string {

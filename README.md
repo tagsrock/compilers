@@ -17,7 +17,7 @@ The Lovely Little Language Compiler: A web server and client for compiling smart
 - local proxy server for compiling from languages other than go
 - easily extensible to new languages
 
-Eris Industries' own public facing LLLC-server (at https://compilers.eris.industries) is hardcoded into the source,
+Monax Industries' own public facing LLLC-server (at https://compilers.monax.io) is hardcoded into the source,
 so you can start compiling smart contract language right out of the box with no extra tools required.
 
 If you want to use your own server, or default to compiling locally, or otherwise adjust configuration settings,
@@ -43,7 +43,7 @@ bytecode, err := compilers.CompileLiteral("[0x5](+ 4 @0x3)", "lll")
 #### Compile Remotely
 
 ```
-eris-compilers compile --host https://compilers.eris.industries:9090 test.lll
+eris-compilers compile --host https://compilers.monax.io:9090 test.lll
 ```
 
 Leave out the `--host` flag to default to the url in the config.
@@ -134,7 +134,7 @@ Edit the `cmd` field for each language to have the correct path.
 
 # Support
 
-Run `eris-compilers --help` or `eris-compilers compile --help` for more info, or come talk to us on irc at #erisindustries and #erisindustries-dev.
+Run `eris-compilers --help` or `eris-compilers compile --help` for more info, or come talk to us on Slack at https://slack.monax.io
 
 If you are working on a language, and would like to have it supported, please create an issue! Note it is possible to add new languages simply by editing the config file, without having to recompile the eris-compilers source code.
 

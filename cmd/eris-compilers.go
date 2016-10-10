@@ -21,9 +21,9 @@ var CompilersCmd = &cobra.Command{
 	Short: "A client/server set up for automatic compilation of smart contracts",
 	Long: `A client/server set up for automatic compilation of smart contracts
 
-Made with <3 by Eris Industries.
+Made with <3 by Monax Industries.
 
-Complete documentation is available at https://monax.io/docs/documentation` + "\nVersion:\n " + VERSION,
+Complete documentation is available at https://monax.io/docs/documentation/compilers`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		log.SetOutput(os.Stdout)
 		log.SetLevel(log.WarnLevel)

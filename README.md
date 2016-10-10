@@ -5,37 +5,39 @@
 eris-compilers
 ===========
 
-The Lovely Little Language Compiler: A web server and client for compiling smart contract languages.
+A web server and client for compiling smart contract languages.
 
 # Features
 
-- language agnostic (currently supports lll, serpent2.0, solidity)
-- returns smart contract abis (for serpent and solidity)
+- Supports Solidity
+- returns smart contract abis
 - handles included files recursively with regex matching
 - client side and server side caching
 - configuration file with per-language options
-- local proxy server for compiling from languages other than go
 - easily extensible to new languages
 
-Monax Industries' own public facing LLLC-server (at https://compilers.monax.io) is hardcoded into the source,
+Monax Industries' own public facing compiler server (at https://compilers.monax.io) is hardcoded into the source,
 so you can start compiling smart contract language right out of the box with no extra tools required.
 
-If you want to use your own server, or default to compiling locally, or otherwise adjust configuration settings,
-see the config file at `~/.eris/languages/config.json`.
+If you want to use your own server, look below on how to get set up.
 
 # How to play
 
 ## Using the Golang API
 
 ```
-bytecode, err := compilers.Compile("mycontract.lll")
-```
+client "github.com/eris-ltd/eris-compilers/network"
 
-The language is determined automatically from extension. If you want to compile literal expressions,
-you must specify the language explicitly, ie.
+url := "https://compilers.monax.io:9099/compile"
+filename := "maSolcFile.sol"
+optimize := true
+librariesString := "maLibrariez:0x1234567890"
 
-```
-bytecode, err := compilers.CompileLiteral("[0x5](+ 4 @0x3)", "lll")
+output, err := client.BeginCompile(url, filename, optimize, librariesString)
+
+contractName := output.Objects[0].Objectname // contract C would give you C here
+binary := output.Objects[0].Bytecode //gives you binary
+abi := output.Objects[0].ABI //gives you the ABI
 ```
 
 ## Using the CLI
@@ -43,66 +45,25 @@ bytecode, err := compilers.CompileLiteral("[0x5](+ 4 @0x3)", "lll")
 #### Compile Remotely
 
 ```
-eris-compilers compile --host https://compilers.monax.io:9090 test.lll
+eris-compilers compile test.sol
 ```
 
-Leave out the `--host` flag to default to the url in the config.
+Will by default compile directly using the monax servers. You can configure this to call a different server by checking out the ```--help``` option.
 
 #### Compile Locally
 Make sure you have the appropriate compiler installed and configured (you may need to adjust the `cmd` field in the config file)
 
 ```
-eris-compilers compile --local test.lll
+eris-compilers compile --local test.sol
 ```
 
 #### Run a server yourself
 
 ```
-eris-compilers --port 9000
+eris-compilers server --no-ssl
 ```
 
-## Using the json-rpc proxy server
-
-If you are coding in another language and would like to use the eris-compilers client without wrapping the command line, run a proxy server and send it a simple http-json request.
-
-To run the proxy:
-
-```
-eris-compilers proxy --port 9099
-```
-
-And the JSON request:
-
-```
-{
- source:"myfile.se"
-}
-```
-
-Or, to compile literals:
-
-```
-{
- source: "x=5",
- literal: true,
- language: "se"
-}
-```
-
-The response JSON looks like:
-
-```
-{
- bytecode:"600580600b60003960105660056020525b6000f3",
- error:""
-}
-```
-
-To test, stick one of the above JSON requests into `file.json` and run
-
-```
-curl -X POST -d @file.json http://localhost:9099 --header "Content-Type:application/json"
-```
+will run a simple http server. For encryption, pass in a key with the `--key` flag, or a certificate with the `--cert` flag and drop the `--no-ssl`.
 
 # Install
 
@@ -112,31 +73,15 @@ The eris-compilers itself can be installed with
 go get github.com/eris-ltd/eris-compilers/cmd/eris-compilers
 ```
 
-Installing the actual compilers is a bit more involved. :(
+Currently the compilers server supports only solidity, which can be readily and easily installed [here](http://solidity.readthedocs.org/en/latest/installing-solidity.html)
 
-See [ethereum wiki](http://solidity.readthedocs.org/en/latest/installing-solidity.html#ubuntu) and add the ethereum and ethereum-dev PPA's (no need for qt)
-
-Note, thelonious and its Genesis Doug were build on a previous version of the languages (before the ABI spec) and so currently only support PoC6 LLL and Serpent 1.0.
-But epm works fine using Solidity and Serpent on standard ethereum chains.
-
-To install the compilers:
-
-```
-sudo add-apt-repository ppa:ethereum/ethereum
-sudo add-apt-repository ppa:ethereum/ethereum-dev
-sudo apt-get update
-sudo apt-get install lllc sc solc
-```
-
-Now the final thing is make sure the configuration paths are properly set.
-Running `epm init` (assuming epm is installed) should create the config file at `~/.eris/languages/config.json`.
-Edit the `cmd` field for each language to have the correct path.
+You can also start the compilers service in a docker container via the eris CLI with a simple `eris services start compilers`.
 
 # Support
 
-Run `eris-compilers --help` or `eris-compilers compile --help` for more info, or come talk to us on Slack at https://slack.monax.io
+Run `eris-compilers server --help` or `eris-compilers compile --help` for more info, or come talk to us on [Slack](https://slack.monax.io).
 
-If you are working on a language, and would like to have it supported, please create an issue! Note it is possible to add new languages simply by editing the config file, without having to recompile the eris-compilers source code.
+If you are working on a language, and would like to have it supported, please create an issue!
 
 # Contributions
 

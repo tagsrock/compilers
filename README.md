@@ -1,31 +1,25 @@
+# Eris Compiler Service
+
 [![GoDoc](https://godoc.org/github.com/eris-ltd/eris-compilers?status.png)](https://godoc.org/github.com/eris-ltd/eris-compilers)
 
 [![Circle CI](https://circleci.com/gh/eris-ltd/eris-compilers.svg?style=svg)](https://circleci.com/gh/eris-ltd/eris-compilers)
 
-# Eris Compiler Service
-
-```
-A web server and client for compiling smart contract languages.
-```
-
 The Eris Compilers Service is a helper tool to help in grabbing necessary data such as binaries and ABIs from your preferred language for smart contracts in a simple manner. Currently that language is Solidity, but the service is easily extensible to other languages in the future.
 
-## Install
+## Table of Contents
 
-1. Install Go
-2. (Optional) [Install Solidity](http://solidity.readthedocs.org/en/latest/installing-solidity.html)
+- [Background](#background)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contribute](#contribute)
+- [License](#license)
 
-The eris-compilers itself can be installed with
+## Background
 
-```
-go get github.com/eris-ltd/eris-compilers/cmd/eris-compilers
-```
+A web server and client for compiling smart contract languages.
 
-You can also start the compilers service in a docker container via the [eris-CLI](https://github.com/eris-ltd/eris-cli) with a simple `eris services start compilers`.
-
-## Features
-
-- Supports Solidity
+**Features:**
+- compiles Solidity
 - returns smart contract abis and binaries
 - handles included files recursively with regex matching
 - client side and server side caching
@@ -35,9 +29,19 @@ You can also start the compilers service in a docker container via the [eris-CLI
 Monax Industries' own public facing compiler server (at https://compilers.monax.io) is hardcoded into the source,
 so you can start compiling smart contract language right out of the box with no extra tools required.
 
-If you want to use your own server, look below on how to get set up.
+## Installation
+
+`eris-compilers` is intended to run as a service in a docker container via [eris-cli](https://monax.io/docs/documentation/cli/). The server can be started with: `eris services start compilers`.
+
+### For Developers
+
+1. [Install go](https://golang.org/doc/install)
+3. `go get github.com/eris-ltd/eris-compilers/cmd/eris-compilers`
+2. (Optional) [Install Solidity](http://solidity.readthedocs.org/en/latest/installing-solidity.html)
 
 ## Usage
+
+### As A Library
 
 ```
 import (
@@ -52,26 +56,27 @@ librariesString := "maLibrariez:0x1234567890"
 output, err := client.BeginCompile(url, filename, optimize, librariesString)
 
 contractName := output.Objects[0].Objectname // contract C would give you C here
-binary := output.Objects[0].Bytecode //gives you binary
-abi := output.Objects[0].ABI //gives you the ABI
+binary := output.Objects[0].Bytecode // gives you the binary
+abi := output.Objects[0].ABI // gives you the ABI
 ```
 
-#### Compile Remotely
+### Compile Remotely
 
 ```
 eris-compilers compile test.sol
 ```
 
-Will by default compile directly using the monax servers. You can configure this to call a different server by checking out the ```--help``` option.
+Will by default compile directly using the monax servers. You can configure this to call a different server by checking out the `--help` option.
 
-#### Compile Locally
+### Compile Locally
+
 Make sure you have the appropriate compiler installed and configured (you may need to adjust the `cmd` field in the config file)
 
 ```
 eris-compilers compile --local test.sol
 ```
 
-#### Run a server yourself
+### Run a server yourself
 
 ```
 eris-compilers server --no-ssl
@@ -79,36 +84,17 @@ eris-compilers server --no-ssl
 
 will run a simple http server. For encryption, pass in a key with the `--key` flag, or a certificate with the `--cert` flag and drop the `--no-ssl`.
 
-# Support
+### Support
 
 Run `eris-compilers server --help` or `eris-compilers compile --help` for more info, or come talk to us on [Slack](https://slack.monax.io).
 
 If you are working on a language, and would like to have it supported, please create an issue!
 
-# Contributions
+## Contribute
 
-Are Welcome! Before submitting a pull request please:
+See the [eris platform contributing file here](https://github.com/eris-ltd/coding/blob/master/github/CONTRIBUTING.md).
 
-* read up on [How The Marmots Git](https://github.com/eris-ltd/coding/wiki/How-The-Marmots-Git)
-* fork from `develop`
-* go fmt your changes
-* have tests
-* pull request
-* be awesome
+## License
 
-That's pretty much it.
-
-See our [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) for more details.
-
-Please note that this repository is GPLv3.0 per the LICENSE file. Any code which is contributed via pull request shall be deemed to have consented to GPLv3.0 via submission of the code (were such code accepted into the repository).
-
-# Bug Reporting
-
-Found a bug in our stack? Make an issue!
-
-The [issue template](.github/ISSUE_TEMPLATE.md] specifies what needs to be included in your issue and will autopopulate the issue.
-
-# License
-
-[Proudly GPL-3](http://www.gnu.org/philosophy/enforcing-gpl.en.html). See [license file](https://github.com/eris-ltd/eris-compilers/blob/master/LICENSE.md).
+[GPL-3](LICENSE)
 

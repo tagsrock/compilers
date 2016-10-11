@@ -36,17 +36,13 @@ release_maj=$(echo $release_min | cut -d . -f 1-2)
 
 # Build
 docker build -t $IMAGE:build $REPO
-docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/$TARGET > $REPO/$TARGET
+docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/$TARGET > $REPO/"$TARGET"_build_artifact
 docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/solc > $REPO/solc
 docker build -t $IMAGE:$release_min -f Dockerfile.deploy $REPO
 
 # Cleanup
-rm $REPO/$TARGET
+rm $REPO/"$TARGET"_build_artifact
 rm $REPO/solc
-if [ "$CI" ]
-then
-  docker rmi $IMAGE:build
-fi
 
 # Extra Tags
 if [[ "$branch" = "master" ]]

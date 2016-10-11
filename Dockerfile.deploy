@@ -7,11 +7,11 @@ ENV TARGET eris-compilers
 USER root
 RUN apk add --no-cache --update ca-certificates curl && \
     update-ca-certificates
-ADD ./solc $INSTALL_BASE
+COPY ./solc $INSTALL_BASE/solc
 # runtime customization end here
 
 # Get the binary from the artifact in pwd
-ADD ./$TARGET $INSTALL_BASE
+COPY ./"$TARGET"_build_artifact $INSTALL_BASE/$TARGET
 RUN chmod +x --recursive $INSTALL_BASE
 
 # Finalize

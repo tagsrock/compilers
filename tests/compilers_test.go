@@ -214,11 +214,18 @@ func TestLocalSingle(t *testing.T) {
 
 func TestFaultyContract(t *testing.T) {
 	util.ClearCache(common.SolcScratchPath)
-	expectedSolcResponse := util.BlankSolcResponse()
+	var expectedSolcResponse util.Response
 
-	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "faultyContract.sol").Output(); 
-	t.Log(actualOutput)
-	t.Log(err.Error())
+	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "faultyContract.sol").CombinedOutput(); 
+	err = json.Unmarshal(actualOutput, expectedSolcResponse)
+	t.Log(expectedSolcResponse.Error)
+	resp, err := net.BeginCompile("", "faultyContract.sol", false, "")
+	t.Log(resp.Error)
+	if err != nil {
+		if expectedSolcResponse.Error != resp.Error {
+			t.Errorf("Expected %v got %v", expectedSolcResponse.Error, resp.Error)
+		}
+	}
 	output := strings.TrimSpace(string(actualOutput))
 	err = json.Unmarshal([]byte(output), expectedSolcResponse)
 }

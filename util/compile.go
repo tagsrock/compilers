@@ -19,12 +19,12 @@ type Compiler struct {
 
 // Compile request object
 type Request struct {
-	ScriptName 		string                    `json:"name"`
-	Language   		string                    `json:"language"`
-	Includes   		map[string]*IncludedFiles `json:"includes"`  // our required files and metadata
-	Libraries  		string                    `json:"libraries"` // string of libName:LibAddr separated by comma
-	Optimize   		bool                      `json:"optimize"`  // run with optimize flag
-	FileReplacement map[string]string		  `json:"replacement"`
+	ScriptName      string                    `json:"name"`
+	Language        string                    `json:"language"`
+	Includes        map[string]*IncludedFiles `json:"includes"`  // our required files and metadata
+	Libraries       string                    `json:"libraries"` // string of libName:LibAddr separated by comma
+	Optimize        bool                      `json:"optimize"`  // run with optimize flag
+	FileReplacement map[string]string         `json:"replacement"`
 }
 
 // this handles all of our imports
@@ -44,7 +44,6 @@ type Response struct {
 	Objects []ResponseItem `json:"objects"`
 	Error   string         `json:"error"`
 }
-
 
 func RunCommand(tokens ...string) (string, error) {
 	cmd := tokens[0]
@@ -89,10 +88,10 @@ func (c *Compiler) CompilerRequest(file string, includes map[string]*IncludedFil
 		includes = make(map[string]*IncludedFiles)
 	}
 	return &Request{
-		Language:   c.lang,
-		Includes:   includes,
-		Libraries:  libs,
-		Optimize:   optimize,
+		Language:        c.lang,
+		Includes:        includes,
+		Libraries:       libs,
+		Optimize:        optimize,
 		FileReplacement: hashFileReplacement,
 	}
 }
@@ -125,17 +124,17 @@ func Compile(req *Request) *Response {
 	log.WithField("Command: ", command).Debug("Command Input")
 	hexCode, err := RunCommand(command...)
 	//cleanup
-
+	log.WithField("=>", hexCode).Debug("Output from command: ")
 	if err != nil {
 		for _, str := range includes {
 			hexCode = strings.Replace(hexCode, str, req.FileReplacement[str], -1)
 		}
 		log.WithFields(log.Fields{
-			"err":     err,
-			"command": command,
+			"err":      err,
+			"command":  command,
 			"response": hexCode,
-		}).Error("Could not compile")
-		return compilerResponse("", "", "", fmt.Errorf(hexCode))
+		}).Debug("Could not compile")
+		return compilerResponse("", "", "", fmt.Errorf("%v", hexCode))
 	}
 
 	solcResp := BlankSolcResponse()
@@ -160,9 +159,9 @@ func Compile(req *Request) *Response {
 
 	for _, re := range respItemArray {
 		log.WithFields(log.Fields{
-			"name": re.Objectname,
-			"bin":  re.Bytecode,
-			"abi":  re.ABI,
+			"_name": re.Objectname,
+			"bin":   re.Bytecode,
+			"abi":   re.ABI,
 		}).Debug("Response formulated")
 	}
 

@@ -14,7 +14,7 @@ import (
 )
 
 func BuildCompileCommand() {
-	RootCmd.AddCommand(compileCmd)
+	CompilersCmd.AddCommand(compileCmd)
 	addCompileFlags()
 }
 
@@ -34,7 +34,7 @@ var compileCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			fmt.Errorf("Specify a contract to compile \n\n")
-			RootCmd.Help()
+			CompilersCmd.Help()
 			os.Exit(0)
 		}
 		url := createUrl()
@@ -84,7 +84,7 @@ func setDefaultDirectoryRoute() string {
 }
 
 func setDefaultURL() string {
-	return "compilers.eris.industries"
+	return "compilers.monax.io"
 }
 
 func setDefaultPort() string {
@@ -94,4 +94,3 @@ func setDefaultPort() string {
 	pat, _ := strconv.Atoi(verSplit[2])
 	return fmt.Sprintf("1%01d%02d%01d", maj, min, pat)
 }
-

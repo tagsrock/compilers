@@ -1,8 +1,9 @@
-# Eris Compiler Service
+# Eris Compilers
 
-[![GoDoc](https://godoc.org/github.com/eris-ltd/eris-compilers?status.png)](https://godoc.org/github.com/eris-ltd/eris-compilers)
-
-[![Circle CI](https://circleci.com/gh/eris-ltd/eris-compilers.svg?style=svg)](https://circleci.com/gh/eris-ltd/eris-compilers)
+|[![GoDoc](https://godoc.org/github.com/eris-compilers?status.png)](https://godoc.org/github.com/eris-ltd/eris-compilers) | Linux |
+|---|-------|
+| Master | [![Circle CI](https://circleci.com/gh/eris-ltd/eris-compilers/tree/master.svg?style=svg)](https://circleci.com/gh/eris-ltd/eris-compilers/tree/master) |
+| Develop | [![Circle CI (develop)](https://circleci.com/gh/eris-ltd/eris-compilers/tree/develop.svg?style=svg)](https://circleci.com/gh/eris-ltd/eris-compilers/tree/develop) |
 
 The Eris Compilers Service is a helper tool to help in grabbing necessary data such as binaries and ABIs from your preferred language for smart contracts in a simple manner. Currently that language is Solidity, but the service is easily extensible to other languages in the future.
 
@@ -45,7 +46,7 @@ so you can start compiling smart contract language right out of the box with no 
 
 ```
 import (
-	client "github.com/eris-ltd/eris-compilers/network"
+  client "github.com/eris-ltd/eris-compilers/network"
 )
 
 url := "https://compilers.monax.io:9099/compile"
@@ -96,5 +97,4 @@ See the [eris platform contributing file here](https://github.com/eris-ltd/codin
 
 ## License
 
-[GPL-3](LICENSE)
-
+[GPL-3](license.md)

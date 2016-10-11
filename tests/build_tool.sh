@@ -2,9 +2,9 @@
 # ----------------------------------------------------------
 # PURPOSE
 
-# This is the build script for eris:compilers. It will build the tool
-# into docker containers in a reliable and predicatable
-# manner.
+# This is the build script for the eris stack. It will
+# build the tool into docker containers in a reliable and
+# predicatable manner.
 
 # ----------------------------------------------------------
 # REQUIREMENTS
@@ -17,31 +17,41 @@
 # build_tool.sh
 
 # ----------------------------------------------------------
-# Set defaults
-set -e
-if [ "$CIRCLE_BRANCH" ]
-then
-  repo=`pwd`
-else
-  repo=$GOPATH/src/github.com/eris-ltd/eris-compilers
-fi
-branch=${CIRCLE_BRANCH:=master}
-branch=${branch/-/_}
-testimage=${testimage:="quay.io/eris/compilers"}
 
-release_min=$(cat $repo/version/version.go | tail -n 1 | cut -d \  -f 4 | tr -d '"')
+TARGET=eris-compilers
+IMAGE=quay.io/eris/compilers
+
+set -e
+
+if [ "$JENKINS_URL" ] || [ "$CIRCLE_BRANCH" ]
+then
+  REPO=`pwd`
+  CI="true"
+else
+  REPO=$GOPATH/src/github.com/eris-ltd/$TARGET
+fi
+
+release_min=$(cat $REPO/version/version.go | tail -n 1 | cut -d \  -f 4 | tr -d '"')
 release_maj=$(echo $release_min | cut -d . -f 1-2)
 
-# ---------------------------------------------------------------------------
-# Go!
+# Build
+docker build -t $IMAGE:build $REPO
+docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/$TARGET > $REPO/"$TARGET"_build_artifact
+docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/solc > $REPO/solc
+docker build -t $IMAGE:$release_min -f Dockerfile.deploy $REPO
 
+# Cleanup
+rm $REPO/"$TARGET"_build_artifact
+rm $REPO/solc
 
+# Extra Tags
 if [[ "$branch" = "master" ]]
 then
-  docker build -t $testimage:latest $repo
-  docker tag -f $testimage:latest $testimage:$release_maj
-  docker tag -f $testimage:latest $testimage:$release_min
-else
-  docker build -t $testimage:latest $repo
-  docker tag $testimage:latest $testimage:$release_min
+  docker tag -f $IMAGE:$release_min $IMAGE:$release_maj
+  docker tag -f $IMAGE:$release_min $IMAGE:latest
+fi
+
+if [ "$CIRCLE_BRANCH" ]
+then
+  docker tag -f $IMAGE:$release_min $IMAGE:latest
 fi

@@ -1,73 +1,49 @@
-FROM quay.io/eris/tools
-MAINTAINER Monax Industries <support@monax.io>
+FROM quay.io/eris/build
+MAINTAINER Monax <support@monax.io>
 
-# Install Dependencies
-RUN apt-get update && apt-get install -qy \
-  --no-install-recommends \
-  ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+# build customizations start here
+ENV SOLC_VERSION 0.3.6
+ENV JSONCPP_VERSION 1.7.7
 
-ENV INSTALL_BASE /usr/local/bin
+# install build depenedencies
+RUN apk --no-cache --update add build-base cmake boost-dev file
 
-# GOLANG
-ENV GOLANG_VERSION 1.6
-ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 5470eac05d273c74ff8bac7bef5bad0b5abbd1c4052efbdbc8db45332e836b0b
-RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
-  && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
-  && tar -C /usr/local -xzf golang.tar.gz \
-  && rm golang.tar.gz
-ENV GOROOT /usr/local/go
-ENV GOPATH /go
-ENV PATH $GOPATH/bin:$GOROOT/bin:$PATH
-RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
-WORKDIR /go
+# stop boost complaining about sys/poll.h
+RUN sed -i -E -e 's/include <sys\/poll.h>/include <poll.h>/' /usr/include/boost/asio/detail/socket_types.hpp
 
-# GO WRAPPER
-ENV GO_WRAPPER_VERSION 1.6
-RUN curl -sSL -o $INSTALL_BASE/go-wrapper https://raw.githubusercontent.com/docker-library/golang/master/$GO_WRAPPER_VERSION/wheezy/go-wrapper
-RUN chmod +x $INSTALL_BASE/go-wrapper
+# get correct repositories
+WORKDIR /src
+RUN git clone https://github.com/open-source-parsers/jsoncpp
+RUN git clone https://github.com/ethereum/solidity
 
-# GLIDE INSTALL
-RUN add-apt-repository ppa:masterminds/glide \
-  && apt-get update
-RUN apt-get install glide
+# alpine has jsoncpp-dev, but it doesn't provide static libs
+WORKDIR /src/jsoncpp
+RUN git checkout $JSONCPP_VERSION \
+  && cmake -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF . \
+  && make jsoncpp_lib_static \
+  && make install
 
-# Install eris-compilers, a go app that manages compilations
-ENV REPO github.com/eris-ltd/eris-compilers
-ENV BASE $GOPATH/src/$REPO
-ENV NAME eris-compilers
-RUN mkdir --parents $BASE
-COPY . $BASE/
-RUN cd $BASE && glide install && \
-  cd $BASE/cmd/$NAME && go install ./
-RUN unset GOLANG_VERSION && \
-  unset GOLANG_DOWNLOAD_URL && \
-  unset GOLANG_DOWNLOAD_SHA256 && \
-  unset GO_WRAPPER_VERSION && \
-  unset REPO && \
-  unset BASE && \
-  unset NAME && \
-  unset INSTALL_BASE
+# build solidity
+WORKDIR /src/solidity/build
+RUN git checkout v$SOLC_VERSION \
+  && cmake -DCMAKE_BUILD_TYPE=Release \
+          -DTESTS=1 \
+          -DSTATIC_LINKING=1 \
+          .. \
+  && make --jobs=2 solc soltest \
+  && install -s solc/solc /usr/local/bin \
+  && install -s test/soltest /usr/local/bin
+# build customizations end here
 
-# Setup User
-ENV USER eris
-ENV ERISDIR /home/$USER/.eris
+# Install eris-compilers, a go app that serves compilation results
+ENV TARGET eris-compilers
+ENV REPO $GOPATH/src/github.com/eris-ltd/$TARGET
 
-# Add Gandi certs for eris
-COPY docker/gandi2.crt /data/gandi2.crt
-COPY docker/gandi3.crt /data/gandi3.crt
-RUN chown --recursive $USER /data
+ADD ./glide.yaml $REPO/
+ADD ./glide.lock $REPO/
+WORKDIR $REPO
+RUN glide install
 
-# Copy in start script
-COPY docker/start.sh /home/$USER/
-
-# Point to the compiler location.
-RUN chown --recursive $USER:$USER /home/$USER
-
-# Finalize
-USER $USER
-VOLUME $ERISDIR
-WORKDIR /home/$USER
-EXPOSE 9098 9099
-CMD ["/home/eris/start.sh"]
+COPY . $REPO/.
+RUN cd $REPO/cmd/$TARGET && \
+  go build --ldflags '-extldflags "-static"' -o $INSTALL_BASE/$TARGET

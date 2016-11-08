@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/monax/cli/log"
 	"github.com/monax/compilers/perform"
 	"github.com/monax/compilers/version"
-	"github.com/monax/cli/log"
 
 	"github.com/spf13/cobra"
 )

@@ -98,6 +98,6 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *util.Response {
 		resp = util.Compile(req)
 		resp.CacheNewResponse(*req)
 	}
-	util.PrintResponse(*resp)
+	util.PrintResponse(*resp, false)
 	return resp
 }

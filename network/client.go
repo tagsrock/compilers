@@ -41,7 +41,6 @@ func BeginCompile(url string, file string, optimize bool, libraries string) (*ut
 		if err != nil {
 			return nil, err
 		}
-		util.PrintResponse(*resp)
 	} else {
 		log.Debug("Could not find cached object, compiling...")
 		if url == "" {
@@ -52,9 +51,10 @@ func BeginCompile(url string, file string, optimize bool, libraries string) (*ut
 				return nil, err
 			}
 		}
-		util.PrintResponse(*resp)
 		resp.CacheNewResponse(*request)
 	}
+
+	util.PrintResponse(*resp, false)
 
 	return resp, nil
 }

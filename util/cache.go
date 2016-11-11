@@ -80,7 +80,7 @@ func (resp Response) CacheNewResponse(req Request) {
 		os.Chdir(cur)
 	}()
 	for fileDir, metadata := range req.Includes {
-		dir := path.Join(cacheLocation, strings.TrimRight(fileDir, "." + req.Language))
+		dir := path.Join(cacheLocation, strings.TrimRight(fileDir, "."+req.Language))
 		os.MkdirAll(dir, 0700)
 		objectNames := metadata.ObjectNames
 		for _, name := range objectNames {

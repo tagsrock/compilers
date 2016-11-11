@@ -77,8 +77,8 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *util.Response {
 	log.WithFields(log.Fields{
 		"lang": req.Language,
 		// "script": string(req.Script),
-		"libs":   req.Libraries,
-		"incl":   req.Includes,
+		"libs": req.Libraries,
+		"incl": req.Includes,
 	}).Debug("New Request")
 
 	cached := util.CheckCached(req.Includes, req.Language)
@@ -98,6 +98,6 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *util.Response {
 		resp = util.Compile(req)
 		resp.CacheNewResponse(*req)
 	}
-	util.PrintResponse(*resp)
+	util.PrintResponse(*resp, false)
 	return resp
 }

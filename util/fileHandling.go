@@ -47,7 +47,7 @@ func (c *Compiler) replaceIncludes(code []byte, dir, file string, includes map[s
 	originHash := sha256.Sum256(code)
 	origin := hex.EncodeToString(originHash[:])
 	origin += "." + c.lang
-	
+
 	includeFile := &IncludedFiles{
 		ObjectNames: OriginObjectNames,
 		Script:      code,
@@ -110,20 +110,20 @@ func (c *Compiler) includeReplacer(r *regexp.Regexp, originCode []byte, dir stri
 // clear a directory of its contents
 func ClearCache(dir string) error {
 	d, err := os.Open(dir)
-    if err != nil {
-        return err
-    }
-    defer d.Close()
-    names, err := d.Readdirnames(-1)
-    if err != nil {
-        return err
-    }
-    for _, name := range names {
-        err = os.RemoveAll(filepath.Join(dir, name))
-        if err != nil {
-            return err
-        }
-    }
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -175,16 +175,21 @@ func createTemporaryFile(name string, code []byte) (*os.File, error) {
 	return file, nil
 }
 
-func PrintResponse(resp Response) {
+func PrintResponse(resp Response, cli bool) {
 	if resp.Error != "" {
 		log.Warn(resp.Error)
 	} else {
 		for _, r := range resp.Objects {
-			log.WithFields(log.Fields{
+			message := log.WithFields((log.Fields{
 				"name": r.Objectname,
 				"bin":  r.Bytecode,
 				"abi":  r.ABI,
-			}).Warn("Response")
+			}))
+			if cli {
+				message.Warn("Response")
+			} else {
+				message.Info("Response")
+			}
 		}
 	}
 }

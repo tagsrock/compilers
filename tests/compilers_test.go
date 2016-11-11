@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"os/exec"
 	"reflect"
 	"strings"
@@ -27,14 +26,16 @@ contract c {
         uint8[5] memory foo3 = [1, 1, 1, 1, 1];
     }
 }`
-	var testMap = map[string]*definitions.IncludedFiles{
-		"27fbf28c5dfb221f98526c587c5762cdf4025e85809c71ba871caa2ca42a9d85.sol": {
+
+	var testMap = map[string]*util.IncludedFiles{
+		"13db7b5ea4e589c03c4b09b692723247c4029ab59047957940b06e1611be66ba.sol": {
 			ObjectNames: []string{"c"},
 			Script:      []byte(contractCode),
 		},
 	}
 
 	req, err := perform.CreateRequest("simpleContract.sol", "", false)
+
 	if err != nil {
 		t.Fatal(err)
 	}

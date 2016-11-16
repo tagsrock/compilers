@@ -184,7 +184,7 @@ func PrintResponse(resp Response) {
 				"name": r.Objectname,
 				"bin":  r.Bytecode,
 				"abi":  r.ABI,
-			}).Warn("Response")
+			}).Debug("Response")
 		}
 	}
 }

@@ -27,7 +27,7 @@ contract c {
     }
 }`
 
-	var testMap = map[string]*util.IncludedFiles{
+	var testMap = map[string]*definitions.IncludedFiles{
 		"13db7b5ea4e589c03c4b09b692723247c4029ab59047957940b06e1611be66ba.sol": {
 			ObjectNames: []string{"c"},
 			Script:      []byte(contractCode),

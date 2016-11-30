@@ -2,7 +2,7 @@ FROM quay.io/eris/build
 MAINTAINER Monax <support@monax.io>
 
 # build customizations start here
-ENV SOLC_VERSION 0.3.6
+ENV SOLC_VERSION 0.4.4
 ENV JSONCPP_VERSION 1.7.7
 
 # install build depenedencies

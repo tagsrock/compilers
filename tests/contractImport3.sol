@@ -1,3 +1,4 @@
+pragma solidity ^0.4.0;
 import * as foo from "contractImport4.sol";
 
 contract map {

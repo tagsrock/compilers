@@ -18,13 +18,15 @@ import (
 
 func TestRequestCreation(t *testing.T) {
 	var err error
-	contractCode := `contract c {
+	contractCode := `pragma solidity ^0.4.0;
+
+contract c {
     function f() {
         uint8[5] memory foo3 = [1, 1, 1, 1, 1];
     }
 }`
 	var testMap = map[string]*definitions.IncludedFiles{
-		"13db7b5ea4e589c03c4b09b692723247c4029ab59047957940b06e1611be66ba.sol": {
+		"27fbf28c5dfb221f98526c587c5762cdf4025e85809c71ba871caa2ca42a9d85.sol": {
 			ObjectNames: []string{"c"},
 			Script:      []byte(contractCode),
 		},
@@ -44,7 +46,7 @@ func TestRequestCreation(t *testing.T) {
 		t.Errorf("Expected false optimize, got true")
 	}
 	if !reflect.DeepEqual(req.Includes, testMap) {
-		t.Errorf("Got incorrect Includes map")
+		t.Errorf("Got incorrect Includes map, expected %v, got %v", testMap, req.Includes)
 	}
 
 }

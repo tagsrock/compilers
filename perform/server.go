@@ -8,8 +8,8 @@ import (
 
 	"github.com/eris-ltd/eris-compilers/definitions"
 
-	"github.com/eris-ltd/eris-cli/config"
-	"github.com/eris-ltd/eris-cli/log"
+	"github.com/eris-ltd/eris/config"
+	"github.com/eris-ltd/eris/log"
 )
 
 // Start the compile server

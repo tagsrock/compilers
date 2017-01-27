@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/eris-ltd/eris-compilers/definitions"
-	"github.com/eris-ltd/eris-cli/log"
+	"github.com/eris-ltd/eris/log"
 )
 
 // send an http request and wait for the response

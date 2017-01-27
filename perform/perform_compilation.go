@@ -1,19 +1,19 @@
 package perform
 
 import (
-	"fmt"
 	"encoding/json"
-	"os/exec"
+	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
+	"os/exec"
 	"path"
+	"strings"
 
-	"github.com/eris-ltd/eris-compilers/util"
 	"github.com/eris-ltd/eris-compilers/definitions"
+	"github.com/eris-ltd/eris-compilers/util"
 
-	"github.com/eris-ltd/eris-cli/log"
-	"github.com/eris-ltd/eris-cli/config"
+	"github.com/eris-ltd/eris/config"
+	"github.com/eris-ltd/eris/log"
 )
 
 type Response struct {
@@ -131,7 +131,7 @@ func compile(req *definitions.Request) *Response {
 
 	var warning string
 	jsonBeginsCertainly := strings.Index(output, `{"contracts":`)
-	
+
 	if jsonBeginsCertainly > 0 {
 		warning = output[:jsonBeginsCertainly]
 		output = output[jsonBeginsCertainly:]
@@ -174,8 +174,8 @@ func compile(req *definitions.Request) *Response {
 	for _, re := range respItemArray {
 		log.WithFields(log.Fields{
 			"name": re.Objectname,
-			"bin":   re.Bytecode,
-			"abi":   re.ABI,
+			"bin":  re.Bytecode,
+			"abi":  re.ABI,
 		}).Debug("Response formulated")
 	}
 

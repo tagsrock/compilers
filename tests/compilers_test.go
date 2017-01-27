@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/eris-ltd/eris-compilers/perform"
 	"github.com/eris-ltd/eris-compilers/definitions"
+	"github.com/eris-ltd/eris-compilers/perform"
 	"github.com/eris-ltd/eris-compilers/util"
 
-	"github.com/eris-ltd/eris-cli/config"
+	"github.com/eris-ltd/eris/config"
 )
 
 func TestRequestCreation(t *testing.T) {

@@ -32,7 +32,7 @@ so you can start compiling smart contract language right out of the box with no 
 
 ## Installation
 
-`eris-compilers` is intended to run as a service in a docker container via [eris-cli](https://monax.io/docs/documentation/cli/). The server can be started with: `eris services start compilers`.
+`eris-compilers` is intended to run as a service in a docker container via [eris](https://monax.io/docs/documentation/cli/). The server can be started with: `eris services start compilers`.
 
 ### For Developers
 

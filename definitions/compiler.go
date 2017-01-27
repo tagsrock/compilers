@@ -1,15 +1,15 @@
 package definitions
 
 import (
-	"fmt"
-	"encoding/hex"
 	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"io/ioutil"
 	"path"
-	"strings"
 	"regexp"
+	"strings"
 
-	"github.com/eris-ltd/eris-cli/log"
+	"github.com/eris-ltd/eris/log"
 )
 
 type Compiler struct {
@@ -30,8 +30,6 @@ func (c *Compiler) CompilerRequest(file string, includes map[string]*IncludedFil
 		FileReplacement: hashFileReplacement,
 	}
 }
-
-
 
 // Find all matches to the include regex
 // Replace filenames with hashes

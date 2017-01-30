@@ -66,7 +66,7 @@ func linkBinaries(req *definitions.BinaryRequest) *BinaryResponse {
 	output, err := runCommand(command...)
 	return &BinaryResponse{
 		Binary: output,
-		Error:  err,
+		Error:  err.Error(),
 	}
 }
 
@@ -77,10 +77,10 @@ func RequestBinaryLinkage(url string, file string, libraries string) (*BinaryRes
 		return &BinaryResponse{}, err
 	}
 	request := &definitions.BinaryRequest{
-		BinaryFile: code,
+		BinaryFile: string(code),
 		Libraries:  libraries,
 	}
-
+	return requestBinaryResponse(request, url)
 }
 
 //todo: Might also need to add in a map of library names to addrs

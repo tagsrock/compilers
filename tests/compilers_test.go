@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"os/exec"
 	"reflect"
 	"strings"
@@ -259,7 +260,7 @@ func TestBinaryLinkage(t *testing.T) {
 	}
 	// create .bin file out of C
 	Cbin := []byte(expectedSolcResponse.Contracts["C"].Bin)
-	file, err := util.CreateTemporaryFile("C.bin", Cbin)
+	_, err = util.CreateTemporaryFile("C.bin", Cbin)
 	defer os.Remove("C.bin")
 	if err != nil {
 		t.Fatal(err)
@@ -285,7 +286,7 @@ func TestBinaryLinkage(t *testing.T) {
 		t.Fatal(err)
 	}
 	expectedOutput := []byte(expectedSolcResponse.Contracts["C"].Bin)
-	if !bytes.Equal(testOutput, expectedSolcResponse) {
+	if !bytes.Equal(testOutput, expectedOutput) {
 		t.Fatal("Byte output is not equal")
 	}
 }

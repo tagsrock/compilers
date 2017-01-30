@@ -62,7 +62,6 @@ func BinaryHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Errorln("err on read http request body", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return nil
 	}
 
 	// unmarshall body into req struct
@@ -71,7 +70,6 @@ func BinaryHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Errorln("err on json unmarshal of request", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return nil
 	}
 	resp := linkBinaries(req)
 	respJ, err := json.Marshal(resp)

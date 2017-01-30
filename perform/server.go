@@ -19,6 +19,7 @@ func StartServer(addrUnsecure, addrSecure, cert, key string) {
 	// Routes
 
 	http.HandleFunc("/", CompileHandler)
+	http.HandleFunc("/binaries", BinaryHandler)
 	// Use SSL ?
 	log.Debug(cert)
 	if addrSecure != "" {
@@ -46,6 +47,33 @@ func CompileHandler(w http.ResponseWriter, r *http.Request) {
 	if resp == nil {
 		return
 	}
+	respJ, err := json.Marshal(resp)
+	if err != nil {
+		log.Errorln("failed to marshal", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Write(respJ)
+}
+
+func BinaryHandler(w http.ResponseWriter, r *http.Request) {
+	// read the request body
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Errorln("err on read http request body", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return nil
+	}
+
+	// unmarshall body into req struct
+	req := new(definitions.BinaryRequest)
+	err = json.Unmarshal(body, req)
+	if err != nil {
+		log.Errorln("err on json unmarshal of request", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return nil
+	}
+	resp := linkBinaries(req)
 	respJ, err := json.Marshal(resp)
 	if err != nil {
 		log.Errorln("failed to marshal", err)

@@ -23,6 +23,11 @@ type Response struct {
 	Error   string         `json:"error"`
 }
 
+type BinaryResponse struct {
+	Binary string `json:"binary"`
+	Error  string `json:"error"`
+}
+
 // Compile response object
 type ResponseItem struct {
 	Objectname string `json:"objectname"`
@@ -53,6 +58,29 @@ func (resp Response) CacheNewResponse(req definitions.Request) {
 			}
 		}
 	}
+}
+
+func linkBinaries(req *definitions.BinaryRequest) *BinaryResponse {
+	// purely for solidity and solidity alone as this is soon to be deprecated.
+	command := []string{"cat", req.BinaryFile, "|", "solc", "--link", "--libraries", req.Libraries}
+	output, err := runCommand(command...)
+	return &BinaryResponse{
+		Binary: output,
+		Error:  err,
+	}
+}
+
+func RequestBinaryLinkage(url string, file string, libraries string) (*BinaryResponse, error) {
+	//Create Binary Request, send it off
+	code, err := ioutil.ReadFile(file)
+	if err != nil {
+		return &BinaryResponse{}, err
+	}
+	request := &definitions.BinaryRequest{
+		BinaryFile: code,
+		Libraries:  libraries,
+	}
+
 }
 
 //todo: Might also need to add in a map of library names to addrs

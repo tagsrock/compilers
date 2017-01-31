@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"os/exec"
 	"reflect"
 	"strings"
@@ -249,9 +250,13 @@ func TestBinaryLinkage(t *testing.T) {
 	util.ClearCache(config.SolcScratchPath)
 	libraries := "Set:0x692a70d2e424a56d2c6c27aa97d1a86395877b3a"
 	expectedSolcResponse := definitions.BlankSolcResponse()
-
+	_, err := exec.Command("solc", "-o", "binaries", "--bin", "libraryContract.sol").Output()
+	defer os.RemoveAll("binaries")
+	if err != nil {
+		t.Fatal(err)
+	}
 	// get back requested binary linkage
-	resp, err := perform.RequestBinaryLinkage(testServer.URL, "C.bin", libraries)
+	resp, err := perform.RequestBinaryLinkage(testServer.URL, "binaries/C.bin", libraries)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,7 +264,7 @@ func TestBinaryLinkage(t *testing.T) {
 	testOutput := []byte(resp.Binary)
 	t.Logf("Got error: %v", resp.Error)
 	// get output without placeholders
-	LibraryOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "libraryContract.sol", "--libraries", libraries).CombinedOutput()
+	LibraryOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "libraryContract.sol", "--libraries", libraries).Output()
 	if err != nil {
 		t.Fatal(err)
 	}

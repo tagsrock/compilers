@@ -2,7 +2,7 @@ package perform
 
 import (
 	"bytes"
-	"encoding/base64"
+	//"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -66,13 +66,18 @@ func linkBinaries(req *definitions.BinaryRequest) *BinaryResponse {
 	// purely for solidity and solidity alone as this is soon to be deprecated.
 	//create command
 	buf := bytes.NewBufferString(req.BinaryFile)
-	dec := base64.NewDecoder(base64.StdEncoding, buf)
+	var output bytes.Buffer
+	var stderr bytes.Buffer
 	linkCmd := exec.Command("solc", "--link", "--libraries", req.Libraries)
-	linkCmd.Stdin = dec
-	output, err := linkCmd.Output()
+	linkCmd.Stdin = buf
+	linkCmd.Stderr = &stderr
+	linkCmd.Stdout = &output
+	linkCmd.Start()
+	linkCmd.Wait()
+
 	return &BinaryResponse{
-		Binary: string(output),
-		Error:  err.Error(),
+		Binary: output.String(),
+		Error:  stderr.String(),
 	}
 }
 

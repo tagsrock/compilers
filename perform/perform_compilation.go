@@ -64,7 +64,13 @@ func (resp Response) CacheNewResponse(req definitions.Request) {
 
 func linkBinaries(req *definitions.BinaryRequest) *BinaryResponse {
 	// purely for solidity and solidity alone as this is soon to be deprecated.
-	//create command
+	if req.Libraries == "" {
+		return &BinaryResponse{
+			Binary: req.BinaryFile,
+			Error:  "",
+		}
+	}
+
 	buf := bytes.NewBufferString(req.BinaryFile)
 	var output bytes.Buffer
 	var stderr bytes.Buffer

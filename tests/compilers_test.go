@@ -1,7 +1,6 @@
 package compilersTest
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -261,7 +260,7 @@ func TestBinaryLinkage(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("Got binary: %v", resp.Binary)
-	testOutput := []byte(resp.Binary)
+	testOutput := resp.Binary
 	t.Logf("Got error: %v", resp.Error)
 	// get output without placeholders
 	LibraryOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "libraryContract.sol", "--libraries", libraries).Output()
@@ -276,10 +275,10 @@ func TestBinaryLinkage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedOutput := []byte(expectedSolcResponse.Contracts["C"].Bin)
+	expectedOutput := expectedSolcResponse.Contracts["C"].Bin
 	t.Logf("expected output: %v", expectedSolcResponse.Contracts["C"].Bin)
 	t.Logf("got output: %v", resp.Binary)
-	if !bytes.Equal(testOutput, expectedOutput) {
+	if !strings.EqualFold(testOutput, expectedOutput) {
 		t.Fatal("Byte output is not equal")
 	}
 }

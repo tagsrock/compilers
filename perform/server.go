@@ -16,6 +16,7 @@ import (
 func StartServer(addrUnsecure, addrSecure, cert, key string) {
 	log.Warn("Hello I'm the marmots' compilers server")
 	config.InitErisDir()
+	os.Mkdir("binaries", 0666)
 	// Routes
 
 	http.HandleFunc("/", CompileHandler)

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"os/exec"
 	"reflect"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"github.com/eris-ltd/eris-compilers/util"
 
 	"github.com/eris-ltd/eris/config"
+	"github.com/eris-ltd/eris/log"
 )
 
 func TestRequestCreation(t *testing.T) {
@@ -243,34 +243,21 @@ func TestFaultyContract(t *testing.T) {
 }
 
 func TestBinaryLinkage(t *testing.T) {
+	log.SetLevel(log.WarnLevel)
 	testServer := httptest.NewServer(http.HandlerFunc(perform.BinaryHandler))
 	defer testServer.Close()
 	util.ClearCache(config.SolcScratchPath)
 	libraries := "Set:0x692a70d2e424a56d2c6c27aa97d1a86395877b3a"
 	expectedSolcResponse := definitions.BlankSolcResponse()
-	// get output with placeholders
-	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "libraryContract.sol").CombinedOutput()
-	if err != nil {
-		t.Fatal(err)
-	}
-	output := strings.TrimSpace(string(actualOutput))
-	err = json.Unmarshal([]byte(output), expectedSolcResponse)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// create .bin file out of C
-	Cbin := []byte(expectedSolcResponse.Contracts["C"].Bin)
-	_, err = util.CreateTemporaryFile("C.bin", Cbin)
-	defer os.Remove("C.bin")
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	// get back requested binary linkage
 	resp, err := perform.RequestBinaryLinkage(testServer.URL, "C.bin", libraries)
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("Got binary: %v", resp.Binary)
 	testOutput := []byte(resp.Binary)
+	t.Logf("Got error: %v", resp.Error)
 	// get output without placeholders
 	LibraryOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "libraryContract.sol", "--libraries", libraries).CombinedOutput()
 	if err != nil {
@@ -280,14 +267,13 @@ func TestBinaryLinkage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedSolcResponse = definitions.BlankSolcResponse()
 	err = json.Unmarshal([]byte(libOutput), expectedSolcResponse)
 	if err != nil {
 		t.Fatal(err)
 	}
 	expectedOutput := []byte(expectedSolcResponse.Contracts["C"].Bin)
-	t.Logf("expected output: %v", expectedOutput)
-	t.Logf("got output: %v", testOutput)
+	t.Logf("expected output: %v", expectedSolcResponse.Contracts["C"].Bin)
+	t.Logf("got output: %v", resp.Binary)
 	if !bytes.Equal(testOutput, expectedOutput) {
 		t.Fatal("Byte output is not equal")
 	}

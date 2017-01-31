@@ -37,7 +37,7 @@ var compileCmd = &cobra.Command{
 			CompilersCmd.Help()
 			os.Exit(0)
 		}
-		url := createUrl()
+		url := createUrl(false)
 		output, err := perform.RequestCompile(url, args[0], optimizeSolc, libraries)
 		if err != nil {
 			log.Error(err)
@@ -49,16 +49,22 @@ var compileCmd = &cobra.Command{
 func addCompileFlags() {
 	compileCmd.Flags().StringVarP(&compilerPort, "port", "p", setDefaultPort(), "call listening port")
 	compileCmd.Flags().StringVarP(&compilerUrl, "url", "u", setDefaultURL(), "set the url for where to compile your contracts (no http(s) or port, please)")
-	compileCmd.Flags().StringVarP(&compilerDir, "dir", "D", setDefaultDirectoryRoute(), "directory location to search for on the remote server")
+	compileCmd.Flags().StringVarP(&compilerDir, "dir", "D", setDefaultDirectoryRoute(false), "directory location to search for on the remote server")
 	compileCmd.Flags().StringVarP(&libraries, "libs", "L", "", "libraries string (libName:Address[, or whitespace]...)")
 	compileCmd.Flags().BoolVarP(&compilerSSL, "ssl", "s", setCompilerSSL(), "call https")
 	compileCmd.Flags().BoolVarP(&compilerLocal, "local", "l", setCompilerLocal(), "use local compilers to compile message (good for debugging or if server goes down)")
 	compileCmd.Flags().BoolVarP(&optimizeSolc, "optimize", "o", setOptimizeSolc(), "optimize code (solidity only)")
 }
 
-func createUrl() string {
+func createUrl(binaries bool) string {
 	if compilerLocal {
 		return ""
+	} else if binaries {
+		if binarySSL {
+			return "https://" + binaryUrl + ":" + binaryPort + binaryDir
+		} else {
+			return "http://" + binaryUrl + ":" + binaryPort + binaryDir
+		}
 	} else {
 		if compilerSSL {
 			return "https://" + compilerUrl + ":" + compilerPort + compilerDir
@@ -80,7 +86,10 @@ func setCompilerSSL() bool {
 	return false
 }
 
-func setDefaultDirectoryRoute() string {
+func setDefaultDirectoryRoute(binaries bool) string {
+	if binaries {
+		return "/binaries"
+	}
 	return "/"
 }
 

@@ -2,7 +2,6 @@ package perform
 
 import (
 	"bytes"
-	//"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -82,7 +81,7 @@ func linkBinaries(req *definitions.BinaryRequest) *BinaryResponse {
 	linkCmd.Wait()
 
 	return &BinaryResponse{
-		Binary: output.String(),
+		Binary: strings.TrimSpace(output.String()),
 		Error:  stderr.String(),
 	}
 }

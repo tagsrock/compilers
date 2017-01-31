@@ -276,9 +276,9 @@ func TestBinaryLinkage(t *testing.T) {
 		t.Fatal(err)
 	}
 	expectedOutput := expectedSolcResponse.Contracts["C"].Bin
-	t.Logf("expected output: %v", expectedSolcResponse.Contracts["C"].Bin)
-	t.Logf("got output: %v", resp.Binary)
-	if !strings.EqualFold(testOutput, expectedOutput) {
+	t.Logf("expected output: %v", []byte(expectedSolcResponse.Contracts["C"].Bin))
+	t.Logf("got output: %v", []byte(resp.Binary))
+	if testOutput != expectedOutput {
 		t.Fatal("Byte output is not equal")
 	}
 }

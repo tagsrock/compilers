@@ -275,7 +275,7 @@ func TestBinaryLinkage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedOutput := expectedSolcResponse.Contracts["C"].Bin
+	expectedOutput := strings.TrimSpace(expectedSolcResponse.Contracts["C"].Bin)
 	t.Logf("expected output: %v", []byte(expectedSolcResponse.Contracts["C"].Bin))
 	t.Logf("got output: %v", []byte(resp.Binary))
 	if testOutput != expectedOutput {

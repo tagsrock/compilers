@@ -16,8 +16,7 @@ import (
 func StartServer(addrUnsecure, addrSecure, cert, key string) {
 	log.Warn("Hello I'm the marmots' compilers server")
 	config.InitErisDir()
-	err := os.Mkdir("binaries", 0666)
-	if err != nil {
+	if err := os.Mkdir("binaries", 0666); err != nil {
 		log.Error("problem starting binaries directory, exiting...")
 		os.Exit(1)
 	}

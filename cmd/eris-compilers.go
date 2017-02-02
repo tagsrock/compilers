@@ -44,6 +44,7 @@ func Execute() {
 func AddCommands() {
 	BuildServerCommand()
 	BuildCompileCommand()
+	BuildBinaryCommand()
 }
 
 func AddGlobalFlags() {

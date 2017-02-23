@@ -26,6 +26,14 @@ deployment:
       - "docker tag quay.io/eris/compilers:build throw:build && docker rmi quay.io/eris/compilers:build"
       - docker push quay.io/eris/compilers
       - docs/build.sh master
+  release-0.16:
+    branch: release-0.16
+    commands:
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS quay.io
+      - ./tests/build_tool.sh
+      - "docker rmi quay.io/eris/compilers:latest && docker tag quay.io/eris/compilers:build throw:build && docker rmi quay.io/eris/compilers:build"
+      - docker push quay.io/eris/compilers
+      - docs/build.sh
   develop:
     branch: develop
     commands:

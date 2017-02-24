@@ -120,7 +120,15 @@ func Compile(req *Request) *Response {
 		log.WithField("Filepath of include: ", file.Name()).Debug("To Cache")
 	}
 
-	command := lang.Cmd(includes, req.Libraries, req.Optimize)
+	// PATCH: [ben] this is patched to address an issue with too many libraries being
+	// passed as a flag into the compiler.
+	libsFile, err := createTemporaryFile("eris-libs", []byte(req.Libraries))
+	if err != nil {
+		return compilerResponse("", "", "", err)
+	}
+	defer os.Remove(libsFile.Name())
+	command := lang.Cmd(includes, libsFile.Name(), req.Optimize)
+	// END-OF-PATCH
 	log.WithField("Command: ", command).Debug("Command Input")
 	hexCode, err := RunCommand(command...)
 	//cleanup

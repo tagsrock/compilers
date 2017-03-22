@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/monax/eris-compilers/definitions"
+	"github.com/monax/compilers/definitions"
 )
 
 var (

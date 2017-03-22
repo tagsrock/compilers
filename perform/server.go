@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/monax/eris-compilers/definitions"
+	"github.com/monax/compilers/definitions"
 
 	"github.com/monax/eris/config"
 	"github.com/monax/eris/log"

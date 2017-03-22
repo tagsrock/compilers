@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/monax/eris-compilers/cmd"
+	"github.com/monax/compilers/cmd"
 )
 
 func main() {

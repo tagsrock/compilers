@@ -1,11 +1,11 @@
 # Eris Compilers
 
-|[![GoDoc](https://godoc.org/github.com/eris-compilers?status.png)](https://godoc.org/github.com/monax/eris-compilers) | Linux |
+|[![GoDoc](https://godoc.org/github.com/compilers?status.png)](https://godoc.org/github.com/monax/compilers) | Linux |
 |---|-------|
-| Master | [![Circle CI](https://circleci.com/gh/monax/eris-compilers/tree/master.svg?style=svg)](https://circleci.com/gh/monax/eris-compilers/tree/master) |
-| Develop | [![Circle CI (develop)](https://circleci.com/gh/monax/eris-compilers/tree/develop.svg?style=svg)](https://circleci.com/gh/monax/eris-compilers/tree/develop) |
+| Master | [![Circle CI](https://circleci.com/gh/monax/compilers/tree/master.svg?style=svg)](https://circleci.com/gh/monax/compilers/tree/master) |
+| Develop | [![Circle CI (develop)](https://circleci.com/gh/monax/compilers/tree/develop.svg?style=svg)](https://circleci.com/gh/monax/compilers/tree/develop) |
 
-The Eris Compilers Service is a helper tool to help in grabbing necessary data such as binaries and ABIs from your preferred language for smart contracts in a simple manner. Currently that language is Solidity, but the service is easily extensible to other languages in the future.
+The Compilers Service is a helper tool to help in grabbing necessary data such as binaries and ABIs from your preferred language for smart contracts in a simple manner. Currently that language is Solidity, but the service is easily extensible to other languages in the future.
 
 ## Table of Contents
 
@@ -32,12 +32,12 @@ so you can start compiling smart contract language right out of the box with no 
 
 ## Installation
 
-`eris-compilers` is intended to run as a service in a docker container via [eris](https://monax.io/docs/documentation/cli/). The server can be started with: `eris services start compilers`.
+`eris-compilers` is intended to run as a service in a docker container via the [Monax CLI](https://monax.io/docs). The server can be started with: `eris services start compilers`.
 
 ### For Developers
 
 1. [Install go](https://golang.org/doc/install)
-3. `go get github.com/monax/eris-compilers/cmd/eris-compilers`
+3. `go get github.com/monax/compilers/cmd/eris-compilers`
 2. (Optional) [Install Solidity](http://solidity.readthedocs.org/en/latest/installing-solidity.html)
 
 ## Usage
@@ -46,7 +46,7 @@ so you can start compiling smart contract language right out of the box with no 
 
 ```
 import (
-  client "github.com/monax/eris-compilers/network"
+  client "github.com/monax/compilers/network"
 )
 
 url := "https://compilers.monax.io:9099/compile"

@@ -1,4 +1,4 @@
-package: github.com/monax/eris-compilers
+package: github.com/monax/compilers
 import:
 - package: github.com/monax/eris
   version: develop

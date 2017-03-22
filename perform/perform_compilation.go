@@ -10,8 +10,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/monax/eris-compilers/definitions"
-	"github.com/monax/eris-compilers/util"
+	"github.com/monax/compilers/definitions"
+	"github.com/monax/compilers/util"
 
 	"github.com/monax/eris/config"
 	"github.com/monax/eris/log"

@@ -3,9 +3,10 @@ package cmd
 import (
 	"os"
 
-	"github.com/monax/eris-compilers/version"
+	"github.com/monax/compilers/version"
 
 	"github.com/monax/eris/log"
+
 	"github.com/spf13/cobra"
 )
 

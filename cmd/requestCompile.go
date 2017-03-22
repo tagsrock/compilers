@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/monax/eris-compilers/perform"
-	"github.com/monax/eris-compilers/version"
+	"github.com/monax/compilers/perform"
+	"github.com/monax/compilers/version"
 	"github.com/monax/eris/log"
 
 	"github.com/spf13/cobra"

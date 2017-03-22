@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/monax/eris-compilers/definitions"
-	"github.com/monax/eris-compilers/perform"
-	"github.com/monax/eris-compilers/util"
+	"github.com/monax/compilers/definitions"
+	"github.com/monax/compilers/perform"
+	"github.com/monax/compilers/util"
 
 	"github.com/monax/eris/config"
 	"github.com/monax/eris/log"

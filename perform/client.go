@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/monax/eris-compilers/definitions"
+	"github.com/monax/compilers/definitions"
 	"github.com/monax/eris/log"
 )
 

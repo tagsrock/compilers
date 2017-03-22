@@ -4,7 +4,7 @@
 # Set vars (change if used in another repo)
 
 base_name=eris-compilers
-user_name=eris-ltd
+user_name=monax
 docs_site=monax.io
 docs_name=./docs/documentation
 slim_name=compilers

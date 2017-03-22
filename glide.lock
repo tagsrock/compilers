@@ -9,12 +9,12 @@ imports:
   version: aa7703c9414b36d4e9b2e42e6c704d0bfae7db64
 - name: github.com/BurntSushi/toml
   version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
-- name: github.com/eris-ltd/eris
+- name: github.com/monax/eris
   version: 77f05ad6c05a5e2a4f96eccaf50039e44b8082ea
   subpackages:
   - config
   - log
-- name: github.com/eris-ltd/eris-cli
+- name: github.com/monax/eris-cli
   version: 002c63e2d0850b33c279c29fee52dd30853e100d
   subpackages:
   - version

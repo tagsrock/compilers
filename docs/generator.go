@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	commands "github.com/eris-ltd/eris-compilers/cmd"
-	"github.com/eris-ltd/eris-compilers/version"
+	commands "github.com/monax/eris-compilers/cmd"
+	"github.com/monax/eris-compilers/version"
 
 	"github.com/spf13/cobra"
 )

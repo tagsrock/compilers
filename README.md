@@ -1,9 +1,9 @@
 # Eris Compilers
 
-|[![GoDoc](https://godoc.org/github.com/eris-compilers?status.png)](https://godoc.org/github.com/eris-ltd/eris-compilers) | Linux |
+|[![GoDoc](https://godoc.org/github.com/eris-compilers?status.png)](https://godoc.org/github.com/monax/eris-compilers) | Linux |
 |---|-------|
-| Master | [![Circle CI](https://circleci.com/gh/eris-ltd/eris-compilers/tree/master.svg?style=svg)](https://circleci.com/gh/eris-ltd/eris-compilers/tree/master) |
-| Develop | [![Circle CI (develop)](https://circleci.com/gh/eris-ltd/eris-compilers/tree/develop.svg?style=svg)](https://circleci.com/gh/eris-ltd/eris-compilers/tree/develop) |
+| Master | [![Circle CI](https://circleci.com/gh/monax/eris-compilers/tree/master.svg?style=svg)](https://circleci.com/gh/monax/eris-compilers/tree/master) |
+| Develop | [![Circle CI (develop)](https://circleci.com/gh/monax/eris-compilers/tree/develop.svg?style=svg)](https://circleci.com/gh/monax/eris-compilers/tree/develop) |
 
 The Eris Compilers Service is a helper tool to help in grabbing necessary data such as binaries and ABIs from your preferred language for smart contracts in a simple manner. Currently that language is Solidity, but the service is easily extensible to other languages in the future.
 
@@ -37,7 +37,7 @@ so you can start compiling smart contract language right out of the box with no 
 ### For Developers
 
 1. [Install go](https://golang.org/doc/install)
-3. `go get github.com/eris-ltd/eris-compilers/cmd/eris-compilers`
+3. `go get github.com/monax/eris-compilers/cmd/eris-compilers`
 2. (Optional) [Install Solidity](http://solidity.readthedocs.org/en/latest/installing-solidity.html)
 
 ## Usage
@@ -46,7 +46,7 @@ so you can start compiling smart contract language right out of the box with no 
 
 ```
 import (
-  client "github.com/eris-ltd/eris-compilers/network"
+  client "github.com/monax/eris-compilers/network"
 )
 
 url := "https://compilers.monax.io:9099/compile"
@@ -93,7 +93,7 @@ If you are working on a language, and would like to have it supported, please cr
 
 ## Contribute
 
-See the [eris platform contributing file here](https://github.com/eris-ltd/coding/blob/master/github/CONTRIBUTING.md).
+See the [eris platform contributing file here](https://github.com/monax/coding/blob/master/github/CONTRIBUTING.md).
 
 ## License
 

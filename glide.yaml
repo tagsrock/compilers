@@ -1,6 +1,6 @@
-package: github.com/eris-ltd/eris-compilers
+package: github.com/monax/eris-compilers
 import:
-- package: github.com/eris-ltd/eris
+- package: github.com/monax/eris
   version: develop
   subpackages:
   - config

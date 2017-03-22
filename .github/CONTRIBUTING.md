@@ -15,7 +15,7 @@ Our [ISSUE_TEMPLATE.md](ISSUE_TEMPLATE.md) will autopopulate the new issue.
 
 ### Pull requests are always welcome (to `develop` rather than `master`).
 
-Not sure if that typo is worth a pull request? Found a bug and know how to fix it? Do it! We will appreciate it. Any significant improvement should be documented as a GitHub issue (or discussed on Slack) before anybody starts working on it. Be sure to read up on [How The Marmots Git](https://github.com/eris-ltd/coding/wiki/How-The-Marmots-Git) before beginning any work.
+Not sure if that typo is worth a pull request? Found a bug and know how to fix it? Do it! We will appreciate it. Any significant improvement should be documented as a GitHub issue (or discussed on Slack) before anybody starts working on it. Be sure to read up on [How The Marmots Git](https://github.com/monax/coding/wiki/How-The-Marmots-Git) before beginning any work.
 
 We are always thrilled to receive pull requests (and bug reports!) and we do our best to process them quickly. 
 

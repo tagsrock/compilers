@@ -14,8 +14,8 @@ imports:
   subpackages:
   - config
   - log
-- name: github.com/monax/eris-cli
-  version: 002c63e2d0850b33c279c29fee52dd30853e100d
+- name: github.com/monax/eris
+  version: rename-to-monax
   subpackages:
   - version
 - name: github.com/fsnotify/fsnotify

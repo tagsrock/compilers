@@ -1,9 +1,4 @@
-# Eris Compilers
-
-|[![GoDoc](https://godoc.org/github.com/compilers?status.png)](https://godoc.org/github.com/monax/compilers) | Linux |
-|---|-------|
-| Master | [![Circle CI](https://circleci.com/gh/monax/compilers/tree/master.svg?style=svg)](https://circleci.com/gh/monax/compilers/tree/master) |
-| Develop | [![Circle CI (develop)](https://circleci.com/gh/monax/compilers/tree/develop.svg?style=svg)](https://circleci.com/gh/monax/compilers/tree/develop) |
+# Compilers
 
 The Compilers Service is a helper tool to help in grabbing necessary data such as binaries and ABIs from your preferred language for smart contracts in a simple manner. Currently that language is Solidity, but the service is easily extensible to other languages in the future.
 

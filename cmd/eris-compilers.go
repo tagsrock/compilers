@@ -24,7 +24,7 @@ var CompilersCmd = &cobra.Command{
 
 Made with <3 by Monax Industries.
 
-Complete documentation is available at https://monax.io/docs/documentation/compilers`,
+Complete documentation is available at https://monax.io/docs`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		log.SetOutput(os.Stdout)
 		log.SetLevel(log.WarnLevel)

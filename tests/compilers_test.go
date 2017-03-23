@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/eris-ltd/eris-compilers/definitions"
-	"github.com/eris-ltd/eris-compilers/perform"
-	"github.com/eris-ltd/eris-compilers/util"
+	"github.com/monax/compilers/definitions"
+	"github.com/monax/compilers/perform"
+	"github.com/monax/compilers/util"
 
-	"github.com/eris-ltd/eris/config"
-	"github.com/eris-ltd/eris/log"
+	"github.com/monax/eris/config"
+	"github.com/monax/eris/log"
 )
 
 func TestRequestCreation(t *testing.T) {

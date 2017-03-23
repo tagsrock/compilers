@@ -37,7 +37,7 @@ RUN git checkout v$SOLC_VERSION \
 
 # Install eris-compilers, a go app that serves compilation results
 ENV TARGET eris-compilers
-ENV REPO $GOPATH/src/github.com/eris-ltd/$TARGET
+ENV REPO $GOPATH/src/github.com/monax/compilers
 
 ADD ./glide.yaml $REPO/
 ADD ./glide.lock $REPO/

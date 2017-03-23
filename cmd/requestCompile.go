@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/eris-ltd/eris-compilers/perform"
-	"github.com/eris-ltd/eris-compilers/version"
-	"github.com/eris-ltd/eris/log"
+	"github.com/monax/compilers/perform"
+	"github.com/monax/compilers/version"
+	"github.com/monax/eris/log"
 
 	"github.com/spf13/cobra"
 )

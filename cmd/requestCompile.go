@@ -8,7 +8,7 @@ import (
 
 	"github.com/monax/compilers/perform"
 	"github.com/monax/compilers/version"
-	"github.com/monax/eris/log"
+	"github.com/monax/cli/log"
 
 	"github.com/spf13/cobra"
 )

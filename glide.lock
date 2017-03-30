@@ -1,5 +1,5 @@
-hash: 5f28d5b83b600ce5b47222a668ae9a32e51ca52adff5fa853be9768bd4a6c04e
-updated: 2017-01-27T10:44:19.296900399-06:00
+hash: 31f40518b48716d20ef74e9f7a251c033a824cd144b3839c2eb68130bfa88689
+updated: 2017-03-30T18:12:13.95001621+01:00
 imports:
 - name: github.com/bugsnag/bugsnag-go
   version: 0e0aea7fe7d3fa47be41fc8a0e3a92d9668a9020
@@ -9,15 +9,6 @@ imports:
   version: aa7703c9414b36d4e9b2e42e6c704d0bfae7db64
 - name: github.com/BurntSushi/toml
   version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
-- name: github.com/monax/eris
-  version: 77f05ad6c05a5e2a4f96eccaf50039e44b8082ea
-  subpackages:
-  - config
-  - log
-- name: github.com/monax/eris
-  version: rename-to-monax
-  subpackages:
-  - version
 - name: github.com/fsnotify/fsnotify
   version: a904159b9206978bb6d53fcc7a769e5cd726c737
 - name: github.com/hashicorp/hcl
@@ -39,6 +30,12 @@ imports:
   version: b3b15ef068fd0b17ddf408a23669f20811d194d2
 - name: github.com/mitchellh/mapstructure
   version: db1efb556f84b25a0a13a04aad883943538ad2e0
+- name: github.com/monax/cli
+  version: 53bb3fd3d414f36d080d5b98741802117ff5cdf5
+  subpackages:
+  - config
+  - log
+  - version
 - name: github.com/pelletier/go-buffruneio
   version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
 - name: github.com/pelletier/go-toml
@@ -48,7 +45,7 @@ imports:
   subpackages:
   - mem
 - name: github.com/spf13/cast
-  version: 56a7ecbeb18dde53c6db4bd96b541fd9741b8d44
+  version: d1139bab1c07d5ad390a65e7305876b3c1a8370b
 - name: github.com/spf13/cobra
   version: c29ece4386f74084680e5e6d02d7b943ae630f63
 - name: github.com/spf13/jwalterweatherman
@@ -56,7 +53,7 @@ imports:
 - name: github.com/spf13/pflag
   version: a9a634f3de0a7529baded7ad6b0c7467d5c6eca7
 - name: github.com/spf13/viper
-  version: 5ed0fc31f7f453625df314d8e66b9791e8d13003
+  version: 7538d73b4eb9511d85a9f1dfef202eeb8ac260f4
 - name: github.com/tcnksm/go-gitconfig
   version: d154598bacbf4501c095a309753c5d4af66caa81
 - name: golang.org/x/sys

@@ -14,8 +14,8 @@ import (
 	"github.com/monax/compilers/perform"
 	"github.com/monax/compilers/util"
 
-	"github.com/monax/eris/config"
-	"github.com/monax/eris/log"
+	"github.com/monax/cli/config"
+	"github.com/monax/cli/log"
 )
 
 func TestRequestCreation(t *testing.T) {

@@ -1,7 +1,7 @@
 FROM quay.io/eris/base:alpine
 MAINTAINER Monax <support@monax.io>
 
-ENV TARGET eris-compilers
+ENV TARGET compilers
 
 # runtime customization start here
 USER root
@@ -24,4 +24,4 @@ USER $USER
 # Expose ports for 9099
 EXPOSE 9099
 
-CMD ["eris-compilers", "server", "--no-ssl", "--port", "9099"]
+CMD ["compilers", "server", "--no-ssl", "--port", "9099"]

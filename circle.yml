@@ -15,7 +15,7 @@ dependencies:
 test:
   override:
     - ./tests/build_tool.sh
-    - "docker run -w /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/ quay.io/eris/compilers:build go test ./ -test.v 2>/dev/null"
+    - "docker run -w /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/tests/ quay.io/monax/compilers:build go test ./... -v 2>/dev/null"
 
 deployment:
   master:

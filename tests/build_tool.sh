@@ -18,8 +18,8 @@
 
 # ----------------------------------------------------------
 
-TARGET=eris-compilers
-IMAGE=quay.io/eris/compilers
+TARGET=compilers
+IMAGE=quay.io/monax/compilers
 
 set -e
 

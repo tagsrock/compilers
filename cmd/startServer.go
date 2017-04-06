@@ -1,11 +1,14 @@
 package cmd
 
 import (
-	server "github.com/eris-ltd/eris-compilers/network"
-	log "github.com/eris-ltd/eris-logger"
-	"github.com/spf13/cobra"
 	"os"
 	"strconv"
+
+	server "github.com/monax/compilers/perform"
+
+	"github.com/monax/cli/log"
+
+	"github.com/spf13/cobra"
 )
 
 func BuildServerCommand() {

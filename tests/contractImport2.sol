@@ -1,3 +1,4 @@
+pragma solidity ^0.4.0;
 import "contractImport3.sol" as moarPoop;
 
 contract importedContract {

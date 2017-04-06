@@ -1,0 +1,5 @@
+.git
+Dockerfile
+circle.yml
+docker-compose.yml
+todo.md

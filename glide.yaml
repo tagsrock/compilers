@@ -1,9 +1,9 @@
-package: github.com/eris-ltd/eris-compilers
+package: github.com/monax/compilers
 import:
-- package: github.com/ebuchman/go-shell-pipes
-- package: github.com/eris-ltd/common
+- package: github.com/monax/cli
+  # resolve circular dependency by locking the version on release v0.16
+  version: 8d230e98b1eacdd6f75ce322016bb530985d9f4f
   subpackages:
-  - go/common
-  - go/docs
-- package: github.com/eris-ltd/eris-logger
+  - config
+  - log
 - package: github.com/spf13/cobra

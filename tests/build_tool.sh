@@ -18,8 +18,8 @@
 
 # ----------------------------------------------------------
 
-TARGET=eris-compilers
-IMAGE=quay.io/eris/compilers
+TARGET=compilers
+IMAGE=quay.io/monax/compilers
 
 set -e
 
@@ -28,30 +28,28 @@ then
   REPO=`pwd`
   CI="true"
 else
-  REPO=$GOPATH/src/github.com/monax/compilers
+  REPO=$GOPATH/src/github.com/monax/$TARGET
 fi
 
 release_min=$(cat $REPO/version/version.go | tail -n 1 | cut -d \  -f 4 | tr -d '"')
 release_maj=$(echo $release_min | cut -d . -f 1-2)
 
 # Build
+mkdir -p $REPO/target/docker
 docker build -t $IMAGE:build $REPO
-docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/$TARGET > $REPO/"$TARGET"_build_artifact
-docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/solc > $REPO/solc
+docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/$TARGET > $REPO/target/docker/"$TARGET"_build_artifact
+docker run --rm --entrypoint cat $IMAGE:build /usr/local/bin/solc > $REPO/target/docker/solc
 docker build -t $IMAGE:$release_min -f Dockerfile.deploy $REPO
 
+
+# If provided, tag the image with the label provided
+if [ "$1" ]
+then
+  docker tag $IMAGE:$release_min $IMAGE:$1
+  docker rmi $IMAGE:$release_min
+fi
+
 # Cleanup
-rm $REPO/"$TARGET"_build_artifact
-rm $REPO/solc
-
-# Extra Tags
-if [[ "$branch" = "master" ]]
-then
-  docker tag -f $IMAGE:$release_min $IMAGE:$release_maj
-  docker tag -f $IMAGE:$release_min $IMAGE:latest
-fi
-
-if [ "$CIRCLE_BRANCH" ]
-then
-  docker tag -f $IMAGE:$release_min $IMAGE:latest
-fi
+rm $REPO/target/docker/"$TARGET"_build_artifact
+rm $REPO/target/docker/solc
+docker rmi -f $IMAGE:build

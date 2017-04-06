@@ -1,17 +1,17 @@
 FROM quay.io/eris/base:alpine
 MAINTAINER Monax <support@monax.io>
 
-ENV TARGET eris-compilers
+ENV TARGET compilers
 
 # runtime customization start here
 USER root
 RUN apk add --no-cache --update ca-certificates curl && \
     update-ca-certificates
-COPY ./solc $INSTALL_BASE/solc
+COPY ./target/docker/solc $INSTALL_BASE/solc
 # runtime customization end here
 
 # Get the binary from the artifact in pwd
-COPY ./"$TARGET"_build_artifact $INSTALL_BASE/$TARGET
+COPY ./target/docker/"$TARGET"_build_artifact $INSTALL_BASE/$TARGET
 RUN chmod +x --recursive $INSTALL_BASE
 
 # Finalize
@@ -24,4 +24,4 @@ USER $USER
 # Expose ports for 9099
 EXPOSE 9099
 
-CMD ["eris-compilers", "server", "--no-ssl", "--port", "9099"]
+CMD ["compilers", "server", "--no-ssl", "--port", "9099"]

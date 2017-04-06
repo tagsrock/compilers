@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/monax/cli/log"
 	"github.com/monax/compilers/perform"
 	"github.com/monax/compilers/version"
-	"github.com/monax/cli/log"
 
 	"github.com/spf13/cobra"
 )
@@ -37,7 +37,9 @@ var compileCmd = &cobra.Command{
 			CompilersCmd.Help()
 			os.Exit(0)
 		}
+
 		url := createUrl(false)
+
 		output, err := perform.RequestCompile(url, args[0], optimizeSolc, libraries)
 		if err != nil {
 			log.Error(err)

@@ -15,7 +15,7 @@ dependencies:
 test:
   override:
     - ./tests/build_tool.sh
-    - "docker run -w /go/src/github.com/monax/compilers/tests/ quay.io/monax/compilers:build go test ./... -v 2>/dev/null"
+    - "docker run -w /go/src/github.com/monax/compilers/tests/ quay.io/monax/compilers:build go test ./... -v"
 
 deployment:
   master:

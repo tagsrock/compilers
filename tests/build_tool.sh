@@ -2,7 +2,7 @@
 # ----------------------------------------------------------
 # PURPOSE
 
-# This is the build script for the eris stack. It will
+# This is the build script for the Monax stack. It will
 # build the tool into docker containers in a reliable and
 # predicatable manner.
 
@@ -52,4 +52,5 @@ fi
 # Cleanup
 rm $REPO/target/docker/"$TARGET"_build_artifact
 rm $REPO/target/docker/solc
-docker rmi -f $IMAGE:build
+# docker rmi -f $IMAGE:build
+

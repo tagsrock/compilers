@@ -52,4 +52,5 @@ fi
 # Cleanup
 rm $REPO/target/docker/"$TARGET"_build_artifact
 rm $REPO/target/docker/solc
-docker rmi -f $IMAGE:build
+# docker rmi -f $IMAGE:build
+

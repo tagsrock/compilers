@@ -18,7 +18,7 @@ var (
 )
 
 var CompilersCmd = &cobra.Command{
-	Use:   "eris-compilers COMMAND [FLAG ...]",
+	Use:   "monax-compilers COMMAND [FLAG ...]",
 	Short: "A client/server set up for automatic compilation of smart contracts",
 	Long: `A client/server set up for automatic compilation of smart contracts
 

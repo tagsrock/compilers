@@ -1,5 +1,5 @@
-hash: 5f28d5b83b600ce5b47222a668ae9a32e51ca52adff5fa853be9768bd4a6c04e
-updated: 2017-01-27T10:44:19.296900399-06:00
+hash: 31f40518b48716d20ef74e9f7a251c033a824cd144b3839c2eb68130bfa88689
+updated: 2017-04-02T22:34:36.831002544-05:00
 imports:
 - name: github.com/bugsnag/bugsnag-go
   version: 0e0aea7fe7d3fa47be41fc8a0e3a92d9668a9020
@@ -9,15 +9,6 @@ imports:
   version: aa7703c9414b36d4e9b2e42e6c704d0bfae7db64
 - name: github.com/BurntSushi/toml
   version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
-- name: github.com/eris-ltd/eris
-  version: 77f05ad6c05a5e2a4f96eccaf50039e44b8082ea
-  subpackages:
-  - config
-  - log
-- name: github.com/eris-ltd/eris-cli
-  version: 002c63e2d0850b33c279c29fee52dd30853e100d
-  subpackages:
-  - version
 - name: github.com/fsnotify/fsnotify
   version: a904159b9206978bb6d53fcc7a769e5cd726c737
 - name: github.com/hashicorp/hcl
@@ -39,6 +30,12 @@ imports:
   version: b3b15ef068fd0b17ddf408a23669f20811d194d2
 - name: github.com/mitchellh/mapstructure
   version: db1efb556f84b25a0a13a04aad883943538ad2e0
+- name: github.com/monax/cli
+  version: 8d230e98b1eacdd6f75ce322016bb530985d9f4f
+  subpackages:
+  - config
+  - log
+  - version
 - name: github.com/pelletier/go-buffruneio
   version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
 - name: github.com/pelletier/go-toml

@@ -10,11 +10,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/eris-ltd/eris-compilers/definitions"
-	"github.com/eris-ltd/eris-compilers/util"
+	"github.com/monax/compilers/definitions"
+	"github.com/monax/compilers/util"
 
-	"github.com/eris-ltd/eris/config"
-	"github.com/eris-ltd/eris/log"
+	"github.com/monax/cli/config"
+	"github.com/monax/cli/log"
 )
 
 type Response struct {
@@ -101,7 +101,7 @@ func RequestBinaryLinkage(url string, file string, libraries string) (*BinaryRes
 
 //todo: Might also need to add in a map of library names to addrs
 func RequestCompile(url string, file string, optimize bool, libraries string) (*Response, error) {
-	config.InitErisDir()
+	config.InitMonaxDir()
 	request, err := CreateRequest(file, libraries, optimize)
 	if err != nil {
 		return nil, err
@@ -169,7 +169,7 @@ func compile(req *definitions.Request) *Response {
 		log.WithField("Filepath of include: ", file.Name()).Debug("To Cache")
 	}
 
-	libsFile, err := util.CreateTemporaryFile("eris-libs", []byte(req.Libraries))
+	libsFile, err := util.CreateTemporaryFile("monax-libs", []byte(req.Libraries))
 	if err != nil {
 		return compilerResponse("", "", "", "", "", err)
 	}

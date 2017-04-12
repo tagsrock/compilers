@@ -1,0 +1,43 @@
+{
+	"AppName": "eris",
+	"OutPath": "{{.Dest}}{{.PS}}{{.Version}}{{.PS}}{{.Os}}_{{.Arch}}{{.PS}}{{.ExeName}}{{.Ext}}",
+	"Tasks": [
+		"default",
+		"xc"
+	],
+	"TasksExclude": [
+		"go-test",
+		"codesign",
+		"downloads-page"
+	],
+	"Arch": "amd64,386,arm",
+	"Os": "linux,darwin,windows",
+	"TaskSettings": {
+		"deb": {
+			"armarch": "",
+			"bin-dir": "/usr/bin",
+			"go-sources-dir": ".",
+			"metadata": {
+				"maintainer": "Monax Industries",
+				"maintainerEmail": "support@monax.io"
+			},
+			"metadata-deb": {
+				"Build-Depends": "debhelper (\u003e=4.0.0), golang-go, gcc",
+				"Depends": "docker"
+			},
+			"other-mappped-files": {},
+			"rmtemp": true
+		},
+		"publish-github": {
+			"owner": "monax",
+			"repository": "cli"
+		},
+		"xc": {
+			"GOARM": "",
+			"autoRebuildToolchain": false,
+			"validateToolchain": false,
+			"verifyExe": true
+		}
+	},
+	"ConfigVersion": "0.9"
+}

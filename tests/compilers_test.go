@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/eris-ltd/eris-compilers/definitions"
-	"github.com/eris-ltd/eris-compilers/perform"
-	"github.com/eris-ltd/eris-compilers/util"
+	"github.com/monax/compilers/definitions"
+	"github.com/monax/compilers/perform"
+	"github.com/monax/compilers/util"
 
-	"github.com/eris-ltd/eris/config"
-	"github.com/eris-ltd/eris/log"
+	"github.com/monax/cli/config"
+	"github.com/monax/cli/log"
 )
 
 func TestRequestCreation(t *testing.T) {
@@ -27,6 +27,7 @@ contract c {
         uint8[5] memory foo3 = [1, 1, 1, 1, 1];
     }
 }`
+
 	var testMap = map[string]*definitions.IncludedFiles{
 		"27fbf28c5dfb221f98526c587c5762cdf4025e85809c71ba871caa2ca42a9d85.sol": {
 			ObjectNames: []string{"c"},
@@ -35,6 +36,7 @@ contract c {
 	}
 
 	req, err := perform.CreateRequest("simpleContract.sol", "", false)
+
 	if err != nil {
 		t.Fatal(err)
 	}

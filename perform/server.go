@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/eris-ltd/eris-compilers/definitions"
+	"github.com/monax/compilers/definitions"
 
-	"github.com/eris-ltd/eris/config"
-	"github.com/eris-ltd/eris/log"
+	"github.com/monax/cli/config"
+	"github.com/monax/cli/log"
 )
 
 // Start the compile server
 func StartServer(addrUnsecure, addrSecure, cert, key string) {
 	log.Warn("Hello I'm the marmots' compilers server")
-	config.InitErisDir()
+	config.InitMonaxDir()
 	if err := os.Mkdir("binaries", 0666); err != nil {
 		log.Error("problem starting binaries directory, exiting...")
 		os.Exit(1)
@@ -128,6 +128,6 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 		resp = compile(req)
 		resp.CacheNewResponse(*req)
 	}
-	PrintResponse(*resp, false)
+
 	return resp
 }

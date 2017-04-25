@@ -1,4 +1,4 @@
-**DEPRECATION WARNING:** As of the 0.17 release of the [Monax Platform](https://github.com/monax/cli) this repository will be deprecated and the functionality directly integrated into the platform.
+**DEPRECATION WARNING:** As of the 0.18 release of the [Monax Platform](https://github.com/monax/cli) this repository will be deprecated and the functionality directly integrated into the platform.
 
 # Compilers
 

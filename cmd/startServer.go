@@ -51,7 +51,11 @@ var serverCmd = &cobra.Command{
 			}
 		}
 
-		server.StartServer(addrUnsecure, addrSecure, serverCert, serverKey)
+		_, ch := server.StartServer(addrUnsecure, addrSecure, serverCert, serverKey)
+		if err := <-ch; err != nil {
+			log.Errorf("Compile server stopped: %s", err)
+			os.Exit(1)
+		}
 	},
 }
 

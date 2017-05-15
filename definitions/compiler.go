@@ -18,7 +18,9 @@ type Compiler struct {
 }
 
 // New Request object from script and map of include files
-func (c *Compiler) CompilerRequest(file string, includes map[string]*IncludedFiles, libs string, optimize bool, hashFileReplacement map[string]string) *Request {
+func (c *Compiler) CompilerRequest(file string,
+		includes map[string]*IncludedFiles, libs string, optimize bool,
+		hashFileReplacement map[string]string) *Request {
 	if includes == nil {
 		includes = make(map[string]*IncludedFiles)
 	}
@@ -33,7 +35,9 @@ func (c *Compiler) CompilerRequest(file string, includes map[string]*IncludedFil
 
 // Find all matches to the include regex
 // Replace filenames with hashes
-func (c *Compiler) ReplaceIncludes(code []byte, dir, file string, includes map[string]*IncludedFiles, hashFileReplacement map[string]string) ([]byte, error) {
+func (c *Compiler) ReplaceIncludes(code []byte, dir, file string,
+		includes map[string]*IncludedFiles,
+		hashFileReplacement map[string]string) ([]byte, error) {
 	// find includes, load those as well
 	regexPattern := c.IncludeRegex()
 	var regExpression *regexp.Regexp

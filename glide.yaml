@@ -7,3 +7,5 @@ import:
   - config
   - log
 - package: github.com/spf13/cobra
+- package: github.com/stretchr/testify
+  version: v1.1.3

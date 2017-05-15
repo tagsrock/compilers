@@ -8,40 +8,87 @@ import (
 
 	"github.com/monax/compilers/definitions"
 
+	"path/filepath"
+
+	"crypto/tls"
+	"io"
+	"net"
+
 	"github.com/monax/cli/config"
 	"github.com/monax/cli/log"
 )
 
-// Start the compile server
-func StartServer(addrUnsecure, addrSecure, cert, key string) {
+var BinariesPath = filepath.Join(config.MonaxRoot, "binaries")
+
+// Start the compile server. Takes either or both of addrInsecure or addrSecure
+// to run on HTTP or HTTPS respectively. If addrSecure is passed a certFile and
+// keyFile path must be passed for TLS support.
+//
+// Returns an io.Closer that can be used to close the underlying http(s)
+// listeners and a shutdown channel over which a value is sent if the server is
+// shutdown. That value will be
+func StartServer(addrInsecure, addrSecure, certFile, keyFile string) (io.Closer,
+	chan error) {
 	log.Warn("Hello I'm the marmots' compilers server")
-	config.InitMonaxDir()
-	if err := os.Mkdir("binaries", 0666); err != nil {
-		log.Error("problem starting binaries directory, exiting...")
+	err := config.InitMonaxDir()
+	if err != nil {
+		log.Errorf("Error making Monax CLI directories: %s", err)
 		os.Exit(1)
 	}
-	// Routes
+	err = config.InitDataDir(BinariesPath)
+	if err != nil {
+		log.Errorf("Error making Monax Keys directories: %s", err)
+		os.Exit(1)
+	}
 
-	http.HandleFunc("/", CompileHandler)
-	http.HandleFunc("/binaries", BinaryHandler)
+	// Routes on dedicated mux
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", CompileHandler)
+	mux.HandleFunc("/binaries", BinaryHandler)
+	srv := &http.Server{Handler: mux}
+
+	var listeners netListeners
+
 	// Use SSL ?
-	log.Debug(cert)
+	log.Debug(certFile)
+
+	// Returns any error from listeners, give it buffer the same size as the
+	// number of listeners to so listener goroutines don't block
+	shutdownChan := make(chan error, 2)
 	if addrSecure != "" {
 		log.Debug("Using HTTPS")
 		log.WithField("=>", addrSecure).Debug("Listening on...")
-		if err := http.ListenAndServeTLS(addrSecure, cert, key, nil); err != nil {
-			log.Error("Cannot serve on http port: ", err)
+
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			log.Errorf("Could not load TLS certificate: %s", err)
 			os.Exit(1)
 		}
+		httpsListener, err := tls.Listen("tcp", addrSecure,
+			&tls.Config{Certificates: []tls.Certificate{cert}})
+		if err != nil {
+			log.Errorf("Could not create HTTPS listener: %s", err)
+			os.Exit(1)
+		}
+		listeners = append(listeners, httpsListener)
+		go func() {
+			shutdownChan <- srv.Serve(httpsListener)
+		}()
 	}
-	if addrUnsecure != "" {
+	if addrInsecure != "" {
 		log.Debug("Using HTTP")
-		log.WithField("=>", addrUnsecure).Debug("Listening on...")
-		if err := http.ListenAndServe(addrUnsecure, nil); err != nil {
-			log.Error("Cannot serve on http port: ", err)
+		log.WithField("=>", addrInsecure).Debug("Listening on...")
+		httpListener, err := net.Listen("tcp", addrInsecure)
+		if err != nil {
+			log.Errorf("Could not create HTTP listener: %s", err)
 			os.Exit(1)
 		}
+		listeners = append(listeners, httpListener)
+		go func() {
+			shutdownChan <- srv.Serve(httpListener)
+		}()
 	}
+	return listeners, shutdownChan
 }
 
 // Main http request handler
@@ -130,4 +177,18 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 	}
 
 	return resp
+}
+
+type netListeners []net.Listener
+
+var _ io.Closer = netListeners(nil)
+
+func (listeners netListeners) Close() error {
+	for _, listener := range listeners {
+		err := listener.Close()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

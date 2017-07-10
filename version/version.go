@@ -1,5 +1,3 @@
 package version
 
-// patched for fixing solc error when passing too many libraries into the request
-// keep this line last
-const VERSION = "0.17.0"
+const VERSION = "0.18.0"
